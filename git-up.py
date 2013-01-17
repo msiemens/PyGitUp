@@ -1,19 +1,38 @@
+#!/usr/bin/env python
+
 ################################################################################
 # GIT-UP.py
+#
+# TODOS:
+# - Error handling
+# - Run from subdirectory
 ################################################################################
+
+################################################################################
+# IMPORTS and LIBRARIES SETUP
+################################################################################
+
 
 import sys
 import os
 import re
 
+import atexit
 import subprocess
-from itertools import groupby
 
-from colorama import init
+import colorama
 from termcolor import colored
-init(autoreset=True)
 
 from git import *
+
+
+colorama.init(autoreset=True)
+
+def exit_handler():
+    colorama.deinit()
+
+atexit.register(exit_handler)
+
 
 path = os.getcwd()
 repo = Repo(path)
@@ -25,19 +44,20 @@ git = repo.git
 ################################################################################
 
 def find(seq, f):
-    """Return first item in sequence where f(item) == True."""
+    """ Return first item in sequence where f(item) == True """
     for item in seq:
         if f(item):
             return item
 
 
 def uniq(seq):
+    """ Return a copy of seq without duplicates"""
     seen = set()
     return [x for x in seq if str(x) not in seen and not seen.add(str(x))]
 
 
 class memorize:
-    """ Memoize a function call return value """
+    """ Memorize a function call return value """
 
     def __init__(self, f):
         self.f = f
@@ -57,10 +77,12 @@ class memorize:
 
 def run():
     # Fetch remote information
+    fetch_args = {'multiple': True, 'all': True, 'output_stream': sys.stdout}
+
     if prune():
-        git.fetch(multiple=True, all=True, prune=True)
-    else:
-        git.fetch(multiple=True, all=True)
+        fetch_args['prune'] = True
+
+    git.fetch(**fetch_args)
 
     with stash():
         with returning_to_current_branch():
@@ -78,7 +100,7 @@ class stash(object):
 
     def __exit__(self, *ignored):
         if self.stashed:
-            print colored('unstashing'.format(change_count()), 'magenta')
+            print colored('unstashing', 'magenta')
             git.stash('pop')
 
 
@@ -101,7 +123,7 @@ def rebase_all_branches():
 
     for branch in branches():
         remote = remote_map()[branch.name]
-        print branch.name.ljust(col_width),
+        print colored(branch.name.ljust(col_width), attrs=['bold']),
 
         if remote.commit.hexsha == branch.commit.hexsha:
             print colored('up to date', 'green')
@@ -164,7 +186,7 @@ def remote_ref_for_branch(branch):
     except:
         remote_branch = branch.name
 
-    remote_branch = remote_branch.lstrip('refs/heads/')
+    remote_branch = remote_branch.split('refs/heads/').pop()
 
     remote = find(repo.remotes, lambda remote: remote.name == remote_name)
     return find(
@@ -210,8 +232,10 @@ def log(branch, remote):
 def rebase(target_branch):
     # current_branch = repo.active_branch
     arguments = config('rebase.arguments')
-
-    git.execute(['rebase', arguments, target_branch.name])
+    if arguments:
+        git.execute(['git', 'rebase', arguments, target_branch.name])
+    else:
+        git.execute(['git', 'rebase', target_branch.name])
 
 
 def on_branch(branch_name):
