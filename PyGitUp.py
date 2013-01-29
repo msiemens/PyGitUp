@@ -70,6 +70,45 @@ class memorize:
             self.mem[args, str(kwargs)] = tmp
             return tmp
 
+################################################################################
+# HELPER METHODS
+################################################################################
+
+
+@contextmanager
+def stash():
+    """
+    A stashing contextmanager.
+    It  stashes all changes inside and unstashed when done.
+    """
+    stashed = False
+
+    if repo.is_dirty():
+        print colored('stashing {} changes'.format(change_count), 'magenta')
+        git.stash()
+        stashed = True
+
+    yield
+
+    if stashed:
+        print colored('unstashing', 'magenta')
+        git.stash('pop')
+
+
+@contextmanager
+def returning_to_current_branch():
+    """ A contextmanager returning to the current branch. """
+    if repo.head.is_detached:
+        print colored("ou're not currently on a branch. "
+        "I'm exiting in case you're in the middle of something.", 'red')
+        sys.exit(1)
+
+    branch_name = repo.active_branch.name
+
+    yield
+
+    print colored('returning to {}'.format(branch_name), 'magenta')
+
 
 ################################################################################
 
@@ -86,34 +125,6 @@ def run():
     with stash():
         with returning_to_current_branch():
             rebase_all_branches()
-
-
-class stash(object):
-    stashed = False
-
-    def __enter__(self):
-        if repo.is_dirty():
-            print colored('stashing {} changes'.format(change_count()), 'magenta')
-            git.stash()
-            self.stashed = True
-
-    def __exit__(self, *ignored):
-        if self.stashed:
-            print colored('unstashing', 'magenta')
-            git.stash('pop')
-
-
-class returning_to_current_branch(object):
-    def __enter__(self):
-        if repo.head.is_detached:
-            print colored("ou're not currently on a branch. "
-            "I'm exiting in case you're in the middle of something.", 'red')
-            sys.exit(1)
-
-        self.branch_name = repo.active_branch.name
-
-    def __exit__(self, *ignored):
-        print colored('returning to {}'.format(self.branch_name), 'magenta')
 
 
 def rebase_all_branches():
