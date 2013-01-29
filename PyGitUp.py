@@ -17,7 +17,6 @@ import sys
 import os
 import re
 
-import atexit
 import subprocess
 
 import colorama
@@ -28,15 +27,15 @@ from git import *
 
 colorama.init(autoreset=True)
 
-def exit_handler():
-    colorama.deinit()
+try:
+    path = os.popen('git rev-parse --show-toplevel').readlines()[0].strip()
+except Exception, e:
+    # TODO: Better handling
+    print colored("We don't seem to be in a git repository.", 'red')
+    sys.exit(1)
 
-atexit.register(exit_handler)
 
-
-path = os.getcwd()
-repo = Repo(path)
-git = repo.git
+repo = Repo(path, odbt=GitCmdObjectDB)
 
 
 ################################################################################
