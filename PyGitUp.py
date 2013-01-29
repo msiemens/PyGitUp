@@ -54,22 +54,6 @@ def uniq(seq):
     seen = set()
     return [x for x in seq if str(x) not in seen and not seen.add(str(x))]
 
-
-class memorize:
-    """ Memorize a function call return value """
-
-    def __init__(self, f):
-        self.f = f
-        self.mem = {}
-
-    def __call__(self, *args, **kwargs):
-        if (args, str(kwargs)) in self.mem:
-            return self.mem[args, str(kwargs)]
-        else:
-            tmp = self.f(*args, **kwargs)
-            self.mem[args, str(kwargs)] = tmp
-            return tmp
-
 ################################################################################
 # HELPER METHODS
 ################################################################################
