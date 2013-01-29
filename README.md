@@ -1,7 +1,7 @@
-py-git-up
+PyGitUp
 =========
 
-Py-git-up is a Python implementation of the great aanand/git-up/.
+PyGitUp is a Python implementation of the great [aanand/git-up/](https://github.com/aanand/git-up/).
 *(more README will come soom)*
 
 Development state

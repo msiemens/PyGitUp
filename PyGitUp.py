@@ -2,10 +2,9 @@
 
 ################################################################################
 # GIT-UP.py
-#
-# TODOS:
-# - Error handling
-# - Run from subdirectory
+# TODO: description
+# AUTHOR: Markus Siemens <markus@m-siemens.de>
+# URL: https://github.com/msiemens/PyGitUp
 ################################################################################
 
 ################################################################################
