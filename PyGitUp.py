@@ -18,12 +18,12 @@ import os
 import re
 
 import subprocess
+from contextlib import contextmanager
 
 import colorama
 from termcolor import colored
 
 from git import *
-
 
 colorama.init(autoreset=True)
 
@@ -109,6 +109,31 @@ def returning_to_current_branch():
 
     print colored('returning to {}'.format(branch_name), 'magenta')
 
+################################################################################
+# SETUP VARIABLES
+################################################################################
+
+
+# remote_map: map local branch names to remote branches
+remote_map = dict()
+
+for branch in repo.branches:
+    remote = remote_ref_for_branch(branch)
+    if remote:
+        remote_map[branch.name] = remote
+
+# branches: list all local branches that has a corresponding remote branch
+branches = [
+    branch for branch in repo.branches
+        if branch.name in remote_map.keys()
+]
+branches.sort(key=lambda b: b.name)
+
+# remotes: list all remotes that are associated with local branches
+remotes = uniq([r.name.split('/', 2)[0] for r in remote_map.values()])
+
+# change_count
+change_count = len(git.status(porcelain=True, untracked_files='no').split('\n'))
 
 ################################################################################
 
@@ -158,51 +183,37 @@ def rebase_all_branches():
         rebase(remote)
 
 
-@memorize
-def branches():
-    branches = [
-        branch for branch in repo.branches
-            if branch.name in remote_map().keys()
-    ]
-    branches.sort(key=lambda b: b.name)
-    return branches
+################################################################################
+# GIT COMMANDS
+################################################################################
 
 
-@memorize
-def remotes():
-    return uniq([r.name.split('/', 2) for r in remote_map().values()])
+def fetch():
+    fetch_kwargs = {'multiple': True}
+    fetch_args = []
+
+    if prune():
+        fetch_kwargs['prune'] = True
+
+    if config('fetch.all'):
+        fetch_kwargs['all'] = True
+    else:
+        fetch_args.append(remotes)
+
+    git.fetch(tostdout=True, *fetch_args, **fetch_kwargs)
 
 
-@memorize
-def remote_map():
-    remote_map = dict()
-
-    for branch in repo.branches:
-        remote = remote_ref_for_branch(branch)
-        if remote:
-            remote_map[branch.name] = remote
-
-    return remote_map
+def checkout(branch_name):
+    find(repo.branches, lambda b: b.name == branch_name).checkout()
 
 
-def remote_ref_for_branch(branch):
-    try:
-        remote_name = git.config('branch.{}.remote'.format(branch.name))
-    except:
-        remote_name = 'origin'
-
-    try:
-        remote_branch = git.config('branch.{}.merge'.format(branch.name))
-    except:
-        remote_branch = branch.name
-
-    remote_branch = remote_branch.split('refs/heads/').pop()
-
-    remote = find(repo.remotes, lambda remote: remote.name == remote_name)
-    return find(
-        remote.refs,
-        lambda ref: ref.name == "{}/{}".format(remote_name, remote_branch)
-    )
+def rebase(target_branch):
+    # current_branch = repo.active_branch
+    arguments = config('rebase.arguments')
+    if arguments:
+        git.execute(['git', 'rebase', arguments, target_branch.name])
+    else:
+        git.execute(['git', 'rebase', target_branch.name])
 
 
 def prune():
@@ -218,16 +229,16 @@ def prune():
                 "'false'.".format(git_version(), required_version), 'yellow')
 
 
-def change_count():
-    return len(git.status(porcelain=True, untracked_files='no').split('\n'))
-
-
 def merge_base(a, b):
     return git.merge_base(a, b).strip()
 
 
-def checkout(branch_name):
-    find(repo.branches, lambda b: b.name == branch_name).checkout()
+def on_branch(branch_name):
+    return not repo.head.is_detached and repo.active_branch.name == branch_name
+
+################################################################################
+# MISC
+################################################################################
 
 
 def log(branch, remote):
@@ -237,19 +248,6 @@ def log(branch, remote):
             [log_hook, 'git-up', branch.name, remote.name],
             shell=True
         )
-
-
-def rebase(target_branch):
-    # current_branch = repo.active_branch
-    arguments = config('rebase.arguments')
-    if arguments:
-        git.execute(['git', 'rebase', arguments, target_branch.name])
-    else:
-        git.execute(['git', 'rebase', target_branch.name])
-
-
-def on_branch(branch_name):
-    return not repo.head.is_detached and repo.active_branch.name == branch_name
 
 
 def config(key):
@@ -266,4 +264,6 @@ def git_version_min(required_version):
 def git_version():
     return re.search(r'\d+(\.\d+)+', repo.git.version()).group(0)
 
-run()
+
+if __name__ == '__main__':
+    run()
