@@ -54,6 +54,51 @@ def uniq(seq):
     seen = set()
     return [x for x in seq if str(x) not in seen and not seen.add(str(x))]
 
+
+################################################################################
+# HELPER CLASSES
+################################################################################
+
+class git_wrapper():
+    """
+    A wrapper for repo.git, providing better stdout handling.
+
+    It is preferred to repo.git because it doesn't print to stdout
+    in real time. In addition, this wrapper provides better error
+    handling (it provides stdout messages inside the exception, too).
+    """
+
+    def run(self, name, *args, **kwargs):
+        tostdout = kwargs.pop('tostdout', False)
+        stdout = ''
+
+        # Execute command
+        cmd = getattr(repo.git, name)(as_process=True, *args, **kwargs)
+
+        # Capture output
+        while True:
+            output = cmd.stdout.read(4)
+
+            # Print to stdout
+            if tostdout:
+                sys.stdout.write(output)
+                sys.stdout.flush()
+
+            stdout += output
+
+            if output == "":
+                break
+
+        # Wait for the process to quit
+        cmd.wait()
+
+        return stdout.strip()
+
+    def __getattr__(self, name):
+        return lambda *args, **kwargs: self.run(name, *args, **kwargs)
+
+git = git_wrapper()
+
 ################################################################################
 # HELPER METHODS
 ################################################################################
@@ -93,10 +138,35 @@ def returning_to_current_branch():
 
     print colored('returning to {}'.format(branch_name), 'magenta')
 
+
+def remote_ref_for_branch(branch):
+    """ Get the remote reference for a local branch. """
+
+    # Get name of the remote containing the branch
+    try:
+        remote_name = git.config('branch.{}.remote'.format(branch.name))
+    except:
+        # TODO: Will it ever throw?
+        remote_name = 'origin'
+
+    # Get name of the remote branch
+    try:
+        remote_branch = git.config('branch.{}.merge'.format(branch.name))
+    except:
+        remote_branch = branch.name
+
+    remote_branch = remote_branch.split('refs/heads/').pop()
+
+    # Search the remote reference
+    remote = find(repo.remotes, lambda remote: remote.name == remote_name)
+    return find(
+        remote.refs,
+        lambda ref: ref.name == "{}/{}".format(remote_name, remote_branch)
+    )
+
 ################################################################################
 # SETUP VARIABLES
 ################################################################################
-
 
 # remote_map: map local branch names to remote branches
 remote_map = dict()
@@ -120,28 +190,27 @@ remotes = uniq([r.name.split('/', 2)[0] for r in remote_map.values()])
 change_count = len(git.status(porcelain=True, untracked_files='no').split('\n'))
 
 ################################################################################
+# THE MAIN CODE
+################################################################################
 
 
 def run():
-    # Fetch remote information
-    fetch_args = {'multiple': True, 'all': True, 'output_stream': sys.stdout}
+    try:
+        fetch()
 
-    if prune():
-        fetch_args['prune'] = True
+        with stash():
+            with returning_to_current_branch():
+                rebase_all_branches()
 
-    git.fetch(**fetch_args)
-
-    with stash():
-        with returning_to_current_branch():
-            rebase_all_branches()
+    except GitCommandError as error:
+        raise error  # TODO: error handling
 
 
 def rebase_all_branches():
-    repo.config_reader('repository').get('branch "master"', 'remote')
-    col_width = max([len(b.name) for b in branches()]) + 1
+    col_width = max([len(b.name) for b in branches]) + 1
 
-    for branch in branches():
-        remote = remote_map()[branch.name]
+    for branch in branches:
+        remote = remote_map[branch.name]
         print colored(branch.name.ljust(col_width), attrs=['bold']),
 
         if remote.commit.hexsha == branch.commit.hexsha:
@@ -165,7 +234,6 @@ def rebase_all_branches():
         log(branch, remote)
         checkout(branch.name)
         rebase(remote)
-
 
 ################################################################################
 # GIT COMMANDS
