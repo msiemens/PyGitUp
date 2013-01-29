@@ -3,7 +3,8 @@ from setuptools import setup, find_packages
 setup(
     name = "PyGitUp",
     version = "0.1dev",
-    scripts = ['PyGitUp.py'],
+    packages = find_packages(),
+    scripts = ['PyGitUp/gitup.py'],
 
     # Project uses reStructuredText, so ensure that the docutils get
     # installed or upgraded on the target machine
@@ -11,12 +12,12 @@ setup(
 
     entry_points = {
         'console_scripts': [
-            'git-up = PyGitUp:run'
+            'git-up = gitup:run'
         ]
     },
 
     package_data = {
-        # If any package contains *.txt or *.rst files, include them:
+        # If any package contains *.txt or *.md files, include them:
         '': ['*.txt', '*.md', 'LICENCE']
     },
 
@@ -29,8 +30,8 @@ setup(
     author_email = "markus@m-siemens.de",
     description = "TODO",
     license = "MIT",
-    keywords = "TODO",
-    url = "TODO",
+    keywords = "git git-up helper",
+    url = "https://github.com/msiemens/PyGitUp",
 
     # could also include long_description, download_url, classifiers, etc.
 )
