@@ -1,16 +1,16 @@
-###############################################################################
-# PyGitUp
-# -----------------------------------------------------------------------------
-# FILE: git_wrapper.py
-# DESCRIPTION: TODO
-# AUTHOR: Markus Siemens <markus@m-siemens.de>
-# URL: https://github.com/msiemens/PyGitUp
-###############################################################################
+"""
+A wrapper extending GitPython's repo.git.
 
-__all__ = ['git_wrapper']
+This wrapper class provides support for stdout messages in Git Exceptions
+and (nearly) realtime stdout output. In addition, some methods of the
+original repo.git are shadowed by custom methods providing functionality
+needed for `git up`.
+"""
+
+__all__ = ['GitWrapper', 'GitError']
 
 ###############################################################################
-# IMPORTS and LIBRARIES SETUP
+# IMPORTS
 ###############################################################################
 
 # Python libs
@@ -20,25 +20,23 @@ from contextlib import contextmanager
 
 # 3rd party libs
 from termcolor import colored  # Assume, colorama is already initialized
-from git import GitCommandError
+from git import GitCommandError, CheckoutError
 
 # PyGitUp libs
 from PyGitUp.utils import find
 
 
 ###############################################################################
-# git_wrapper
+# GitWrapper
 ###############################################################################
 
-class git_wrapper():
+class GitWrapper():
     """
-    A wrapper for repo.git, providing better stdout handling.
+    A wrapper for repo.git providing better stdout handling + better exeptions.
 
     It is preferred to repo.git because it doesn't print to stdout
     in real time. In addition, this wrapper provides better error
     handling (it provides stdout messages inside the exception, too).
-
-    TODO: Add stdout to exceptions
     """
 
     def __init__(self, repo):
@@ -46,7 +44,7 @@ class git_wrapper():
         self.git = self.repo.git
 
     def run(self, name, *args, **kwargs):
-        global repo
+        """ Run a git command specified by name and args/kwargs. """
 
         tostdout = kwargs.pop('tostdout', False)
         stdout = ''
@@ -69,7 +67,16 @@ class git_wrapper():
                 break
 
         # Wait for the process to quit
-        cmd.wait()
+        try:
+            cmd.wait()
+        except GitCommandError as error:
+            # Add more meta-information to errors
+            message = "'{}' returned exit status {}".format(
+                error.command,
+                error.status
+            )
+
+            raise GitError(error.stderr, stdout, message)
 
         return stdout.strip()
 
@@ -86,7 +93,6 @@ class git_wrapper():
         A stashing contextmanager.
         It  stashes all changes inside and unstashed when done.
         """
-        global repo
         stashed = False
 
         if self.repo.is_dirty():
@@ -108,11 +114,11 @@ class git_wrapper():
 
         # Get name of the remote containing the branch
         remote_name = (self.config('branch.{}.remote'.format(branch.name)) or
-            'origin')
+                       'origin')
 
         # Get name of the remote branch
         remote_branch = (self.config('branch.{}.merge'.format(branch.name)) or
-            branch.name)
+                         branch.name)
         remote_branch = remote_branch.split('refs/heads/').pop()
 
         # Search the remote reference
@@ -134,19 +140,30 @@ class git_wrapper():
 
     def checkout(self, branch_name):
         """ Checkout a branch by name. """
-        find(self.repo.branches, lambda b: b.name == branch_name).checkout()
+        try:
+            (find(self.repo.branches, lambda b: b.name == branch_name)
+                .checkout())
+        except CheckoutError as e:
+            error = GitError()
+            error.message = "Failed to checkout " + branch_name
+            error.details = e
+
+            raise error
 
     def rebase(self, target_branch):
         """ Rebase to target branch. """
-        # current_branch = repo.active_branch
+        current_branch = self.repo.active_branch
+
         arguments = (
             (self.config('rebase.arguments') or []) + [target_branch.name]
         )
-        self.git.rebase(*arguments)
-
-    def merge_base(self, a, b):
-        """ Return the merge_base between commit a and b. """
-        return self.git.merge_base(a, b).strip()
+        try:
+            self.git.rebase(*arguments)
+        except GitError as error:
+            error.message = "Failed to rebase {} onto {]".format(
+                current_branch.name, target_branch.name
+            )
+            raise error
 
     def config(self, key):
         """ Return `git config key` output or None. """
@@ -159,6 +176,9 @@ class git_wrapper():
         """
         Return git's version as a list of numbers.
 
+        The original repo.git.version_info has problems with tome types of
+        git version strings.
+
         Example:
         >>> git.version()
             [1, 7, 2]
@@ -168,3 +188,23 @@ class git_wrapper():
     def is_version_min(self, required_version):
         """ Does git's version match the requirements? """
         return self.version().split('.') >= required_version.split('.')
+
+
+###############################################################################
+# GitError
+###############################################################################
+
+class GitError(GitCommandError):
+    """
+    Extension of the GitCommandError class.
+
+    New:
+    - stdout
+    - details: a 'nested' exception with more details)
+    """
+
+    def __init__(self, stderr=None, stdout=None, details=None, message=None):
+        super(GitError, self).__init__(None, None, stderr)
+        self.stdout = stdout
+        self.details = details
+        self.message = message

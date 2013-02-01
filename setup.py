@@ -2,12 +2,9 @@ from setuptools import setup, find_packages
 
 setup(
     name = "PyGitUp",
-    version = "0.1dev",
+    version = "0.1",
     packages = find_packages(),
     scripts = ['PyGitUp/gitup.py'],
-
-    # Project uses reStructuredText, so ensure that the docutils get
-    # installed or upgraded on the target machine
     install_requires = ['GitPython', 'colorama', 'termcolor'],
 
     entry_points = {
@@ -28,10 +25,19 @@ setup(
     # metadata for upload to PyPI
     author = "Markus Siemens",
     author_email = "markus@m-siemens.de",
-    description = "TODO",
+    description = "A python implementation of 'git up'",
+    long_description = """ """,
     license = "MIT",
-    keywords = "git git-up helper",
+    keywords = "git git-up",
     url = "https://github.com/msiemens/PyGitUp",
+    classifiers  = [
+        "Development Status :: 3 - Alpha",
+        "Environment :: Console",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Topic :: Software Development :: Version Control",
+        "Topic :: Utilities"
+    ]
 
     # could also include long_description, download_url, classifiers, etc.
 )

@@ -1,19 +1,14 @@
-################################################################################
-# PyGitUp
-# ------------------------------------------------------------------------------
-# FILE: utils.py
-# DESCRIPTION: Some methods not associated with git
-# AUTHOR: Markus Siemens <markus@m-siemens.de>
-# URL: https://github.com/msiemens/PyGitUp
-################################################################################
+"""
+Some simple, generic usefull methods.
+"""
 
 import os
 
 
-def find(seq, f):
-    """ Return first item in sequence where f(item) == True """
+def find(seq, test):
+    """ Return first item in sequence where test(item) == True """
     for item in seq:
-        if f(item):
+        if test(item):
             return item
 
 

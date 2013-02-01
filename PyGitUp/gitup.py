@@ -1,10 +1,18 @@
-###############################################################################
-# PyGitUp
-# -----------------------------------------------------------------------------
-# DESCRIPION: TODO
-# AUTHOR: Markus Siemens <markus@m-siemens.de>
-# URL: https://github.com/msiemens/PyGitUp
-###############################################################################
+"""
+Python implementation of git-up.
+
+Why use git-up? ``git pull` has two problems:
+  - It merges upstream changes by default, when it's really more polite to
+    rebase over them, unless your collaborators enjoy a commit graph that
+    looks like bedhead.
+  - It only updates the branch you're currently on, which means git push
+    will shout at you for being behind on branches you don't particularly
+    care about right now.
+(from the orignial git-up https://github.com/aanand/git-up/)
+
+Project Author: Markus Siemens <markus@m-siemens.de>
+Project URL: https://github.com/msiemens/PyGitUp
+"""
 
 __all__ = ['GitUp']
 
@@ -21,11 +29,11 @@ import subprocess
 import colorama
 from termcolor import colored
 
-from git import *
+from git import Repo, GitCmdObjectDB
 
 # PyGitUp libs
-from PyGitUp.utils import *
-from PyGitUp.git_wrapper import git_wrapper
+from PyGitUp.utils import execute, uniq
+from PyGitUp.git_wrapper import GitWrapper, GitError
 
 ###############################################################################
 # Setup of 3rd party libs
@@ -34,21 +42,26 @@ from PyGitUp.git_wrapper import git_wrapper
 colorama.init(autoreset=True)
 
 ###############################################################################
-# GitUp
+# Setup global vars
 ###############################################################################
 
 # Initialize frequently used globals
 try:
     path = execute('git rev-parse --show-toplevel')
-except Exception as e:
+except IndexError:
     print colored("We don't seem to be in a git repository.", 'red')
     sys.exit(1)
 
 repo = Repo(path, odbt=GitCmdObjectDB)
-git = git_wrapper(repo)
+git = GitWrapper(repo)
 
+
+###############################################################################
+# GitUp
+###############################################################################
 
 class GitUp(object):
+    """ Conainter class for GitUp methods """
 
     def __init__(self):
         # remote_map: map local branch names to remote branches
@@ -62,7 +75,7 @@ class GitUp(object):
         # branches: all local branches that has a corresponding remote branch
         self.branches = [
             branch for branch in repo.branches
-                if branch.name in self.remote_map.keys()
+            if branch.name in self.remote_map.keys()
         ]
         self.branches.sort(key=lambda b: b.name)
 
@@ -85,9 +98,27 @@ class GitUp(object):
                 with self.returning_to_current_branch():
                     self.rebase_all_branches()
 
-        except GitCommandError as error:
-            print error
-            raise error  # TODO: error handling
+            # TODO: check for bundler and call script
+
+        except GitError as error:
+            print colored(error.message)
+
+            # Print more information about the error
+            if error.stdout or error.stderr:
+                print
+                print "Here's what git said:"
+                print
+
+                if error.stdout:
+                    print error.stdout
+                if error.stderr:
+                    print error.stderr
+
+            if error.details:
+                print
+                print "Here's what we know:"
+                print str(error.details)
+                print
 
     def rebase_all_branches(self):
         """ Rebase all branches, if possible. """
@@ -137,7 +168,11 @@ class GitUp(object):
         else:
             fetch_args.append(self.remotes)
 
-        git.fetch(tostdout=True, *fetch_args, **fetch_kwargs)
+        try:
+            git.fetch(tostdout=True, *fetch_args, **fetch_kwargs)
+        except GitError as error:
+            error.message = "`git fetch` failed"
+            raise error
 
     def log(self, branch, remote):
         """ Call a log-command, if set by git-up.fetch.all. """
@@ -156,8 +191,8 @@ class GitUp(object):
     def returning_to_current_branch(self):
         """ A contextmanager returning to the current branch. """
         if repo.head.is_detached:
-            print colored("ou're not currently on a branch. "
-            "I'm exiting in case you're in the middle of something.", 'red')
+            print colored("You're not currently on a branch. I'm exiting in"
+                          "case you're in the middle of something.", 'red')
             sys.exit(1)
 
         branch_name = repo.active_branch.name
@@ -190,6 +225,8 @@ class GitUp(object):
                     " to 'false'.".format(git.version(), required_version),
                     'yellow'
                 )
+
+###############################################################################
 
 
 def run():
