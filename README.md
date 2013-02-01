@@ -4,14 +4,21 @@ PyGitUp
 PyGitUp is a Python implementation of the great [aanand/git-up/](https://github.com/aanand/git-up/).
 *(more README will come soom)*
 
+Why using `git up`?
+-------------------
+> git pull has two problems:
+> * It merges upstream changes by default, when it's really more polite to rebase over them, unless your collaborators enjoy a commit graph that looks like bedhead.
+> * It only updates the branch you're currently on, which means git push will shout at you for being behind on branches you don't particularly care about right now.
+
+> (https://github.com/aanand/git-up/)
+
+
 Development state
 -----------------
 
-Pre-alpha. You can expect a lot of bugs.
+Alpha, not well tested. You can expect a lot of bugs.
 
 Credits
 -------
 
-The current state of the project is a nearly one-to-one port of aanand/git-up/.
-This project's code is inspired by his code, but I will work on it to make it ruby-ist
-and more pythonic.
+The original `git-up` has been written by aanand: [aanand/git-up/](https://github.com/aanand/git-up/).

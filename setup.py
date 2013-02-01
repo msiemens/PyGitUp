@@ -26,7 +26,6 @@ setup(
     author = "Markus Siemens",
     author_email = "markus@m-siemens.de",
     description = "A python implementation of 'git up'",
-    long_description = """ """,
     license = "MIT",
     keywords = "git git-up",
     url = "https://github.com/msiemens/PyGitUp",
