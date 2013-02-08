@@ -199,11 +199,11 @@ class GitUp(object):
 
         yield
 
-        print colored('returning to {}'.format(branch_name), 'magenta')
+        print colored('returning to {0}'.format(branch_name), 'magenta')
 
     def config(self, key):
         """ Get a git-up-specific config value. """
-        return git.config('git-up.{}'.format(key))
+        return git.config('git-up.{0}'.format(key))
 
     def is_prune(self):
         """
@@ -221,7 +221,7 @@ class GitUp(object):
             if config_value == 'true':
                 print colored(
                     "Warning: fetch.prune is set to 'true' but your git "
-                    "version doesn't seem to support it ({} < {}). Defaulting"
+                    "version doesn't seem to support it ({0} < {1}). Defaulting"
                     " to 'false'.".format(git.version(), required_version),
                     'yellow'
                 )

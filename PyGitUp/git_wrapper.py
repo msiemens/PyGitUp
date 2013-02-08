@@ -71,7 +71,7 @@ class GitWrapper():
             cmd.wait()
         except GitCommandError as error:
             # Add more meta-information to errors
-            message = "'{}' returned exit status {}".format(
+            message = "'{0}' returned exit status {1}".format(
                 error.command,
                 error.status
             )
@@ -97,7 +97,7 @@ class GitWrapper():
 
         if self.repo.is_dirty():
             print colored(
-                'stashing {} changes'.format(self.change_count),
+                'stashing {0} changes'.format(self.change_count),
                 'magenta'
             )
             self.git.stash()
@@ -113,11 +113,11 @@ class GitWrapper():
         """ Get the remote reference for a local branch. """
 
         # Get name of the remote containing the branch
-        remote_name = (self.config('branch.{}.remote'.format(branch.name)) or
+        remote_name = (self.config('branch.{0}.remote'.format(branch.name)) or
                        'origin')
 
         # Get name of the remote branch
-        remote_branch = (self.config('branch.{}.merge'.format(branch.name)) or
+        remote_branch = (self.config('branch.{0}.merge'.format(branch.name)) or
                          branch.name)
         remote_branch = remote_branch.split('refs/heads/').pop()
 
@@ -128,7 +128,7 @@ class GitWrapper():
         )
         return find(
             remote.refs,
-            lambda ref: ref.name == "{}/{}".format(remote_name, remote_branch)
+            lambda ref: ref.name == "{0}/{1}".format(remote_name, remote_branch)
         )
 
     @property
@@ -160,7 +160,7 @@ class GitWrapper():
         try:
             self.git.rebase(*arguments)
         except GitError as error:
-            error.message = "Failed to rebase {} onto {]".format(
+            error.message = "Failed to rebase {0} onto {1]".format(
                 current_branch.name, target_branch.name
             )
             raise error
