@@ -107,7 +107,15 @@ class GitWrapper():
 
         if stashed:
             print colored('unstashing', 'magenta')
-            self.git.stash('pop')
+            try:
+                self.git.stash('pop')
+            except GitCommandError as e:
+                error = GitError()
+                error.message = "Failed unstash"
+                error.stdout = e.stdout
+                error.stderr = e.stderr
+
+                raise error
 
     def remote_ref_for_branch(self, branch):
         """ Get the remote reference for a local branch. """

@@ -101,7 +101,7 @@ class GitUp(object):
             # TODO: check for bundler and call script
 
         except GitError as error:
-            print colored(error.message)
+            print colored(error.message, 'red')
 
             # Print more information about the error
             if error.stdout or error.stderr:
@@ -119,6 +119,9 @@ class GitUp(object):
                 print "Here's what we know:"
                 print str(error.details)
                 print
+
+            if not __name__ == '__main__':
+                raise error
 
     def rebase_all_branches(self):
         """ Rebase all branches, if possible. """
