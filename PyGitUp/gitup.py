@@ -23,6 +23,7 @@ __all__ = ['GitUp']
 
 # Python libs
 import sys
+import os
 from contextlib import contextmanager
 import subprocess
 
@@ -99,7 +100,8 @@ class GitUp(object):
                 with self.returning_to_current_branch():
                     self.rebase_all_branches()
 
-            # TODO: check for bundler and call script
+            if self.with_bundler():
+                self.check_bundler()
 
         except GitError as error:
             print colored(error.message, 'red')
@@ -121,8 +123,6 @@ class GitUp(object):
                 print str(error.details)
                 print
 
-            if not __name__ == '__main__':
-                raise error
 
     def rebase_all_branches(self):
         """ Rebase all branches, if possible. """
@@ -229,6 +229,60 @@ class GitUp(object):
                     " to 'false'.".format(git.version(), required_version),
                     'yellow'
                 )
+
+    ###########################################################################
+    # Gemfile Checking
+    ###########################################################################
+
+    def with_bundler(self):
+        """
+        Check, if bundler check is requested.
+
+        Check, if the user wants us to check for new gems and return True in
+        this case.
+        :rtype : bool
+        """
+        def gemfile_exists():
+            """
+            Check, if a Gemfile exists in the current repo.
+            """
+            return os.path.exists('Gemfile')
+
+        if 'GIT_UP_BUNDLER_CHECK' in os.environ:
+            print colored(
+                '''The GIT_UP_BUNDLER_CHECK environment variable is deprecated.
+You can now tell git-up to check (or not check) for missing
+gems on a per-project basis using git's config system. To
+set it globally, run this command anywhere:
+
+git config --global git-up.bundler.check true
+
+To set it within a project, run this command inside that
+project's directory:
+
+git config git-up.bundler.check true
+
+Replace 'true' with 'false' to disable checking.''', 'yellow')
+
+        if self.config('bundler.check') == 'true':
+            return gemfile_exists()
+
+        if ('GIT_UP_BUNDLER_CHECK' in os.environ
+                and os.environ['GIT_UP_BUNDLER_CHECK'] == 'true'):
+            return gemfile_exists()
+
+        return False
+
+    def check_bundler(self):
+        """
+        Run the bundler check.
+        """
+        from pkg_resources import Requirement, resource_filename
+        bundler_script = resource_filename(Requirement.parse("git-up"),
+                                           'check-bundler.rb')
+        autoinstall = 'autoinstall' if self.config('bundler.autoinstall') \
+            else None
+        subprocess.call(['ruby', bundler_script, autoinstall])
 
 ###############################################################################
 

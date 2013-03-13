@@ -16,7 +16,7 @@ setup(
 
     package_data = {
         # If any package contains *.txt or *.md files, include them:
-        '': ['*.txt', '*.md', 'LICENCE']
+        '': ['*.txt', '*.md', 'LICENCE', 'check-bundler.rb']
     },
 
     # development metadata
