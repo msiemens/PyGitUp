@@ -50,6 +50,12 @@ information. And don't forget to either make your ``Python/Scripts`` and
 ``Python/Lib/site-packages`` writable for you or run ``pip`` with admin
 privileges.
 
+Compatibility note:
+~~~~~~~~~~~~~~~~~~~
+
+``PyGitUp`` is not compatible with Python 3 because some essential 3rd party
+libs don't support it. Sorry.
+
 How to configure it?
 --------------------
 

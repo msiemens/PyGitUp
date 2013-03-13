@@ -8,6 +8,8 @@ original repo.git are shadowed by custom methods providing functionality
 needed for `git up`.
 """
 
+from __future__ import print_function
+
 __all__ = ['GitWrapper', 'GitError']
 
 ###############################################################################
@@ -97,17 +99,17 @@ class GitWrapper():
         stashed = False
 
         if self.repo.is_dirty():
-            print colored(
+            print(colored(
                 'stashing {0} changes'.format(self.change_count),
                 'magenta'
-            )
+            ))
             self.git.stash()
             stashed = True
 
         yield
 
         if stashed:
-            print colored('unstashing', 'magenta')
+            print(colored('unstashing', 'magenta'))
             try:
                 self.git.stash('pop')
             except GitCommandError as e:

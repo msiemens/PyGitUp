@@ -15,6 +15,8 @@ Project Author: Markus Siemens <markus@m-siemens.de>
 Project URL: https://github.com/msiemens/PyGitUp
 """
 
+from __future__ import print_function
+
 __all__ = ['GitUp']
 
 ###############################################################################
@@ -51,7 +53,6 @@ colorama.init(autoreset=True)
 try:
     path = execute('git rev-parse --show-toplevel')
 except IndexError:
-    print colored("We don't seem to be in a git repository.", 'red')
     sys.exit(1)
 
 repo = Repo(path, odbt=GitCmdObjectDB)
@@ -77,13 +78,13 @@ class GitUp(object):
         # branches: all local branches that has a corresponding remote branch
         self.branches = [
             branch for branch in repo.branches
-            if branch.name in self.remote_map.keys()
+            if branch.name in list(self.remote_map.keys())
         ]
         self.branches.sort(key=lambda b: b.name)
 
         # remotes: all remotes that are associated with local branches
         self.remotes = uniq(
-            [r.name.split('/', 2)[0] for r in self.remote_map.values()]
+            [r.name.split('/', 2)[0] for r in list(self.remote_map.values())]
         )
 
         # change_count
@@ -104,24 +105,24 @@ class GitUp(object):
                 self.check_bundler()
 
         except GitError as error:
-            print colored(error.message, 'red')
+            print(colored(error.message, 'red'))
 
             # Print more information about the error
             if error.stdout or error.stderr:
-                print
-                print "Here's what git said:"
-                print
+                print()
+                print("Here's what git said:")
+                print()
 
                 if error.stdout:
-                    print error.stdout
+                    print(error.stdout)
                 if error.stderr:
-                    print error.stderr
+                    print(error.stderr)
 
             if error.details:
-                print
-                print "Here's what we know:"
-                print str(error.details)
-                print
+                print()
+                print("Here's what we know:")
+                print(str(error.details))
+                print()
 
 
     def rebase_all_branches(self):
@@ -130,25 +131,26 @@ class GitUp(object):
 
         for branch in self.branches:
             remote = self.remote_map[branch.name]
-            print colored(branch.name.ljust(col_width), attrs=['bold']),
+            print(colored(branch.name.ljust(col_width), attrs=['bold']),
+                  end=' ')
 
             if remote.commit.hexsha == branch.commit.hexsha:
-                print colored('up to date', 'green')
+                print(colored('up to date', 'green'))
                 continue
 
             base = git.merge_base(branch.name, remote.name)
 
             if base == remote.commit.hexsha:
-                print colored('ahead of upstream', 'green')
+                print(colored('ahead of upstream', 'green'))
                 continue
 
             if base == branch.commit.hexsha:
-                print colored('fast-forwarding...', 'yellow')
+                print(colored('fast-forwarding...', 'yellow'))
             elif self.config('rebase.auto') == 'false':
-                print colored('diverged', 'red')
+                print(colored('diverged', 'red'))
                 continue
             else:
-                print colored('rebasing', 'yellow')
+                print(colored('rebasing', 'yellow'))
 
             self.log(branch, remote)
             git.checkout(branch.name)
@@ -195,15 +197,15 @@ class GitUp(object):
     def returning_to_current_branch(self):
         """ A contextmanager returning to the current branch. """
         if repo.head.is_detached:
-            print colored("You're not currently on a branch. I'm exiting in"
-                          "case you're in the middle of something.", 'red')
+            print(colored("You're not currently on a branch. I'm exiting in"
+                          "case you're in the middle of something.", 'red'))
             sys.exit(1)
 
         branch_name = repo.active_branch.name
 
         yield
 
-        print colored('returning to {0}'.format(branch_name), 'magenta')
+        print(colored('returning to {0}'.format(branch_name), 'magenta'))
 
     def config(self, key):
         """ Get a git-up-specific config value. """
@@ -223,12 +225,12 @@ class GitUp(object):
             return config_value != 'false'
         else:
             if config_value == 'true':
-                print colored(
+                print(colored(
                     "Warning: fetch.prune is set to 'true' but your git "
                     "version doesn't seem to support it ({0} < {1}). Defaulting"
                     " to 'false'.".format(git.version(), required_version),
                     'yellow'
-                )
+                ))
 
     ###########################################################################
     # Gemfile Checking
@@ -249,7 +251,7 @@ class GitUp(object):
             return os.path.exists('Gemfile')
 
         if 'GIT_UP_BUNDLER_CHECK' in os.environ:
-            print colored(
+            print(colored(
                 '''The GIT_UP_BUNDLER_CHECK environment variable is deprecated.
 You can now tell git-up to check (or not check) for missing
 gems on a per-project basis using git's config system. To
@@ -262,7 +264,7 @@ project's directory:
 
 git config git-up.bundler.check true
 
-Replace 'true' with 'false' to disable checking.''', 'yellow')
+Replace 'true' with 'false' to disable checking.''', 'yellow'))
 
         if self.config('bundler.check') == 'true':
             return gemfile_exists()
