@@ -1,3 +1,3 @@
-GitPython
-colorama
-termcolor
+GitPython==0.3.2.RC1
+colorama==0.2.5
+termcolor==1.1.0
