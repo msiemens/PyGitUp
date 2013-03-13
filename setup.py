@@ -1,7 +1,8 @@
+# coding=utf-8
 from setuptools import setup, find_packages
 
 setup(
-    name = "PyGitUp",
+    name = "git-up",
     version = "0.1",
     packages = find_packages(),
     scripts = ['PyGitUp/gitup.py'],

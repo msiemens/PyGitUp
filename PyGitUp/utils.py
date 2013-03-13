@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Some simple, generic usefull methods.
 """

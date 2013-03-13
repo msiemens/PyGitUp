@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 A wrapper extending GitPython's repo.git.
 
@@ -186,10 +187,6 @@ class GitWrapper():
 
         The original repo.git.version_info has problems with tome types of
         git version strings.
-
-        Example:
-        >>> git.version()
-            [1, 7, 2]
         """
         return re.search(r'\d+(\.\d+)+', self.git.version()).group(0)
 
