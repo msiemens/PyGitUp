@@ -1,6 +1,10 @@
 # coding=utf-8
 from setuptools import setup, find_packages
 
+README = None
+with open('README.rst', 'r') as f:
+    README = f.read()
+
 setup(
     name = "git-up",
     version = "0.1",
@@ -37,7 +41,9 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Topic :: Software Development :: Version Control",
         "Topic :: Utilities"
-    ]
+    ],
+    bugtrack_url = 'https://github.com/msiemens/PyGitUp/issues',
 
-    # could also include long_description, download_url, classifiers, etc.
+    long_description = README
+    # could also include download_url etc.
 )
