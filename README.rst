@@ -1,6 +1,8 @@
 PyGitUp
 =======
 
+|Build Status|
+
 ``PyGitUp`` is a Python implementation of the great
 `aanand/git-up/ <https://github.com/aanand/git-up/>`__. Right now it
 fully covers the abilities of git-up and should be a drop-in
@@ -105,3 +107,7 @@ Credits
 
 The original ``git-up`` has been written by aanand:
 `aanand/git-up/ <https://github.com/aanand/git-up/>`__.
+
+
+.. |Build Status| image:: https://travis-ci.org/msiemens/PyGitUp.png?branch=dev
+   :target: https://travis-ci.org/msiemens/PyGitUp
