@@ -1,7 +1,5 @@
-PyGitUp
-=======
-
-|Build Status|
+PyGitUp |Build Status|
+======================
 
 ``PyGitUp`` is a Python implementation of the great
 `aanand/git-up/ <https://github.com/aanand/git-up/>`__. Right now it
@@ -13,7 +11,7 @@ Why using ``git up``?
 
     git pull has two problems:
 
-    * It merges upstream changes by default, when it's really more polite to rebase over them, unless your collaborators enjoy a commit graph that looks like bedhead. 
+    * It merges upstream changes by default, when it's really more polite to rebase over them, unless your collaborators enjoy a commit graph that looks like bedhead.
 
     * It only updates the branch you're currently on, which means git push will shout at you for being behind on branches you don't particularly care about right now.
 
@@ -73,6 +71,19 @@ options:
    ``true``,\ ``PyGitUp`` will run ``bundle install`` automatically.
    Requires ``git-up.bundler.check`` to be true.
 
+-  ``git-up.bundler.local [true|*false*]:`` If you've ``bundle package``-ed
+   your  project gems, you can tell ``PyGitUp`` to run ``bundle install
+   --local`` for you if it finds missing gems. Much faster than just a plain
+   old ``bundle install``. Don't worry if you're missing gems, it will
+   backtrack to ``bundle install`` if anything goes wrong. Make sure
+   ``git-up.bundler.autoinstall`` is also set to ``true`` or it won't do
+   anything.
+
+- ``git-up.bundler.rbenv [true|false]:`` If you have rbenv installed,
+  you can tell ``PyGitUp`` to run ``rbenv rehash`` for you after it installs
+  your gems so any binaries will be available right away. Make sure ``git-up
+  .bundler.autoinstall`` is also set to ``true`` or it won't do anything.
+
 -  ``git-up.fetch.prune [*true*|false]:`` If set to ``true``,
    ``PyGitUp`` will append the ``--prune``\ option to ``git fetch`` and
    thus removing any remote tracking branches which no longer exist on
@@ -108,6 +119,19 @@ Credits
 The original ``git-up`` has been written by aanand:
 `aanand/git-up/ <https://github.com/aanand/git-up/>`__.
 
+
+Changelog
+---------
+
+v0.2 (*2013-03-XX*)
+~~~~~~~~~~~~~~~~~~~
+
+- Incorporated `aanand/git-up#41 <https://github.com/aanand/git-up/pull/41>`__
+
+v0.1 (*2013-03-14*)
+~~~~~~~~~~~~~~~~~~
+
+- Initial Release
 
 .. |Build Status| image:: https://travis-ci.org/msiemens/PyGitUp.png?branch=dev
    :target: https://travis-ci.org/msiemens/PyGitUp
