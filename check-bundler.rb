@@ -1,4 +1,6 @@
 # Code adapted from: https://github.com/aanand/git-up/blob/master/lib/git-up.rb#L162-L181
+require 'colored'
+
 def check_bundler
   begin
     require 'bundler'

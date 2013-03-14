@@ -283,7 +283,7 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
         bundler_script = resource_filename(Requirement.parse("git-up"),
                                            'check-bundler.rb')
         autoinstall = 'autoinstall' if self.config('bundler.autoinstall') \
-            else None
+            else ''
         subprocess.call(['ruby', bundler_script, autoinstall])
 
 ###############################################################################
