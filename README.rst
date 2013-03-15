@@ -11,7 +11,7 @@ Why using ``git up``?
 
     git pull has two problems:
 
-    * It merges upstream changes by default, when it's really more polite to rebase over them, unless your collaborators enjoy a commit graph that looks like bedhead.
+    * It merges upstream changes by default, when it's really more polite to `rebase over them <http://gitready.com/advanced/2009/02/11/pull-with-rebase.html>`__, unless your collaborators enjoy a commit graph that looks like bedhead.
 
     * It only updates the branch you're currently on, which means git push will shout at you for being behind on branches you don't particularly care about right now.
 
