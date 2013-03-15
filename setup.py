@@ -42,7 +42,6 @@ setup(
         "Topic :: Software Development :: Version Control",
         "Topic :: Utilities"
     ],
-    bugtrack_url = 'https://github.com/msiemens/PyGitUp/issues',
 
     long_description = README
     # could also include download_url etc.
