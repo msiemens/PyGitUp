@@ -112,7 +112,6 @@ class GitWrapper():
             print(colored('unstashing', 'magenta'))
             try:
                 self.run('stash', 'pop')
-                pass
             except GitError as e:
                 raise UnstashError(stderr=e.stderr, stdout=e.stdout)
 
@@ -151,8 +150,6 @@ class GitWrapper():
             find(self.repo.branches, lambda b: b.name == branch_name).checkout()
         except OrigCheckoutError as e:
             raise CheckoutError(branch_name, details=e)
-        except GitCommandError as e:
-            raise CheckoutError(branch_name, stderr=e.stderr)
 
     def rebase(self, target_branch):
         """ Rebase to target branch. """
@@ -163,7 +160,7 @@ class GitWrapper():
         )
         try:
             self.run('rebase', *arguments)
-        except GitCommandError as e:
+        except GitError as e:
             raise RebaseError(current_branch.name, target_branch.name,
                               **e.__dict__)
 
@@ -216,28 +213,28 @@ class UnstashError(GitError):
     Error while unstashing
     """
     def __init__(self, **kwargs):
-    # Remove kwargs we won't pass to GitError
-        kwargs.pop('message', None)
-        kwargs.pop('command', None)
-        kwargs.pop('status', None)
-
+        kwargs.pop('message')
         GitError.__init__(self, message='Unstash failed!', **kwargs)
-
 
 class CheckoutError(GitError):
     """
     Error during checkout
     """
     def __init__(self, branch_name, **kwargs):
-        # Remove kwargs we won't pass to GitError
-        kwargs.pop('message', None)
-        kwargs.pop('command', None)
-        kwargs.pop('status', None)
-
+        kwargs.pop('message')
         GitError.__init__(self, message='Failed to checkout ' + branch_name,
                           **kwargs)
 
-
+class RebaseError(GitError):
+    """
+    Error during rebase command
+    """
+    def __init__(self, current_branch, target_branch, **kwargs):
+        kwargs.pop('message')
+        message = "Failed to rebase {0} onto {1]".format(
+            current_branch.name, target_branch.name
+        )
+        GitError.__init__(self, message, **kwargs)
 class RebaseError(GitError):
     """
     Error during rebase command
