@@ -1,21 +1,29 @@
-"""
-
-"""
-from nose.tools import *
-
+# System imports
 import os
-from os.path import dirname, join, abspath
+from os.path import join
+
+# 3rd party libs
+from nose.tools import *
 from git import *
+
+# PyGitup imports
 from PyGitUp.git_wrapper import GitError
+from tests import basepath
 
-repo_path = join(dirname(abspath(__file__)), 'test-3')
-master_path = join(dirname(abspath(__file__)), 'master')
+repo_path = join(basepath, 'test-3' + os.sep)
+master_path = join(basepath, 'master' + os.sep)
 
-repo = Repo(repo_path)
-master = Repo(master_path)
+repo = None
+master = None
 
 
 def setup():
+    global repo, master
+
+    # Initialize repos
+    repo = Repo(repo_path)
+    master = Repo(master_path)
+
     # Setup repositories
     master_branch = [b for b in master.branches if b.name == 'test-3']
 
@@ -28,10 +36,17 @@ def setup():
     repo.git.stash('pop')
 
 
+def teardown():
+    global repo, master
+
+    del repo
+    del master
+
+
 @raises(GitError)
 def test_unstash_error():
     """ Run 'git up' with an unclean unstash """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import run
-    run()
+    run(testing=True)

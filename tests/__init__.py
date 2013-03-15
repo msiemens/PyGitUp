@@ -2,25 +2,40 @@
 
 """
 Set up the GIT test environment.
-Master: the master repo.
+master: the master repo.
 test-*: clone for a specific test
 """
 
-import sys
 import os
-from os.path import dirname, abspath, relpath, join
-import shutil
+import sys
+
+from contextlib import contextmanager
+from os.path import join
+from tempfile import mkdtemp
 
 from git import *
 
-basepath = dirname(abspath(__file__))
+basepath = mkdtemp(prefix='PyGitUp.')
 testfile_name = 'file.txt'
 
 
-def _clear_folder(path):
-    if os.path.exists(path):
-        shutil.rmtree(path)
-    os.makedirs(path)
+def teardown():
+    """
+     Cleanup created files
+    """
+    import shutil
+    import stat
+
+    def onerror(func, path, exc_info):
+
+        if not os.access(path, os.W_OK):
+            os.chmod(path, stat.S_IWUSR)
+            func(path)
+        else:
+            raise
+
+    os.chdir(join(basepath, '..'))
+    shutil.rmtree(basepath, onerror=onerror)
 
 
 def _write_file(path, contents):
@@ -29,19 +44,20 @@ def _write_file(path, contents):
 
 
 def _init_git(path):
-    cwd = os.getcwd()
     os.chdir(path)
-    os.system('git init')
-    os.chdir(cwd)
+    os.popen('git init').read()
 
 
-def setup_master():
-    # Initialize repo
-    path = join(basepath, 'master')
-    _clear_folder(path)
-
+def _mkrepo(path):
+    if not os.path.exists(path):
+        os.makedirs(path, 0700)
     _init_git(path)
 
+
+def _setup_master():
+    # Create repo
+    path = join(basepath, 'master')
+    _mkrepo(path)
     repo = Repo(path)
 
     assert repo.working_dir == path
@@ -54,19 +70,18 @@ def setup_master():
     repo.index.commit('Initial commit')
 
 
-def setup_test3():
+def _setup_test3():
     master_path = join(basepath, 'master')
-    master = Repo(master_path, odbt=GitCmdObjectDB)
+    master = Repo(master_path)
 
     # Prepare master repo
     master.git.checkout('head', b='test-3')
 
     # Clone to test-3 repo
     path = join(basepath, 'test-3')
-    _clear_folder(path)
 
-    master.clone(path)
-    repo = Repo(path)
+    master.clone(path, b='test-3')
+    repo = Repo(path, odbt=GitCmdObjectDB)
 
     assert repo.working_dir == path
 
@@ -76,16 +91,23 @@ def setup_test3():
     # Modify file in master
     master_path_file = join(master_path, testfile_name)
     _write_file(master_path_file , 'line 1\nline 2\ncounter: 2')
+    master.index.add([master_path_file])
     master.index.commit('Test 3')
+
+    # Modify file in test-3 and commit
+    path_file = join(path, testfile_name)
+    _write_file(path_file , 'line 1\nline 2\ncounter: 3')
+    repo.index.add([path_file])
+    repo.index.commit('Test 3')
 
     # Modify file in test-3 and stash
     path_file = join(path, testfile_name)
-    _write_file(path_file, 'line 1\nline 2\ncounter: 2')
+    _write_file(path_file, 'conflict!')
 
     repo.git.stash()
 
 
 def setup():
-    print >> sys.stderr, 'HERE!!!'
-    setup_master()
-    setup_test3()
+    _setup_master()
+    _setup_test3()
+    pass

@@ -4,13 +4,8 @@ python:
   - "2.6"
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
+  - pip install -r dev-requirements.txt --use-mirrors
   - pip install -r requirements.txt --use-mirrors
   - python setup.py develop
 # command to run tests, e.g. python setup.py test
-script:
-  - TMPDIR=$(mktemp -d PyGitUp.XXXXXX)
-  - cd $TMPDIR
-  - git clone https://github.com/msiemens/PyGitUp
-  - cd PyGitUp
-  - git reset --hard HEAD~~
-  - git up
+script: nosetests

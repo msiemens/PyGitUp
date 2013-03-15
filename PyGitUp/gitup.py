@@ -55,6 +55,7 @@ try:
 except IndexError:
     sys.exit(1)
 
+# TODO: Move repo and git to GitUp?
 repo = Repo(path, odbt=GitCmdObjectDB)
 git = GitWrapper(repo)
 
@@ -92,7 +93,12 @@ class GitUp(object):
             git.status(porcelain=True, untracked_files='no').split('\n')
         )
 
-    def run(self):
+    def __del__(self):
+        global repo, git
+        del repo
+        del git
+
+    def run(self, testing=False):
         """ Run all the git-up stuff. """
         try:
             self.fetch()
@@ -105,6 +111,10 @@ class GitUp(object):
                 self.check_bundler()
 
         except GitError as error:
+            # Used for test cases
+            if testing:
+                raise
+
             print(colored(error.message, 'red'))
 
             # Print more information about the error
@@ -123,7 +133,6 @@ class GitUp(object):
                 print("Here's what we know:")
                 print(str(error.details))
                 print()
-
 
     def rebase_all_branches(self):
         """ Rebase all branches, if possible. """
@@ -300,8 +309,8 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
 ###############################################################################
 
 
-def run():
-    GitUp().run()
+def run(*args, **kwargs):
+    GitUp().run(*args, **kwargs)
 
 if __name__ == '__main__':
     run()
