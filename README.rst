@@ -46,9 +46,15 @@ Note for Windows users:
 
 You need ``pip`` installed and working. Check out
 `SO#4750806 <http://stackoverflow.com/q/4750806/997063>`__ for more
-information. And don't forget to either make your ``Python/Scripts`` and
-``Python/Lib/site-packages`` writable for you or run ``pip`` with admin
-privileges.
+information. And don't forget to either:
+
+- make your ``Python/Scripts`` and ``Python/Lib/site-packages`` writable for
+  you,
+- run ``pip`` with admin privileges
+- or use ``pip install --user git-up`` and add ``%APPDATA%/Python/Scripts``
+  to %PATH%
+
+otherwise ``pip`` won't install due to ``Access denied`` errors.
 
 Compatibility note:
 ~~~~~~~~~~~~~~~~~~~
@@ -126,7 +132,12 @@ Changelog
 v0.2 (*2013-03-XX*)
 ~~~~~~~~~~~~~~~~~~~
 
-- Incorporated `aanand/git-up#41 <https://github.com/aanand/git-up/pull/41>`__
+- Incorporated `aanand/git-up#41 <https://github
+  .com/aanand/git-up/pull/41>`__: Support for ``bundle install --local`` and
+  ``rbenv rehash``.
+- Fixed issue `#1 <https://github.com/msiemens/PyGitUp/issues/1>`__ (strange
+  output buffering when having multiple remotes to fetch from).
+- Some under-the-hood improvements.
 
 v0.1 (*2013-03-14*)
 ~~~~~~~~~~~~~~~~~~
