@@ -57,7 +57,7 @@ class GitWrapper():
 
         # Capture output
         while True:
-            output = cmd.stdout.read(4)
+            output = cmd.stdout.read(1)
 
             # Print to stdout
             if tostdout:
