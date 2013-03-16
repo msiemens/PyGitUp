@@ -3,8 +3,6 @@
 Some simple, generic usefull methods.
 """
 
-__version__ = 0.1
-
 import os
 
 
