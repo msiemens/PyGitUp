@@ -1,14 +1,9 @@
 # coding=utf-8
-import sys
 from setuptools import setup, find_packages
-
-README = None
-with open('README.rst', 'r') as f:
-    README = f.read()
 
 setup(
     name = "git-up",
-    version = "0.2",
+    version = "0.2.1",
     packages = find_packages(),
     scripts = ['PyGitUp/gitup.py'],
     install_requires = ['GitPython', 'colorama', 'termcolor'],
@@ -42,6 +37,6 @@ setup(
         "Topic :: Utilities"
     ],
 
-    long_description = README
+    long_description = open('README.rst', 'r').read()
     # could also include download_url etc.
 )
