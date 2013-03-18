@@ -20,8 +20,7 @@ setup(
     },
 
     package_data = {
-        # If any package contains *.txt or *.md files, include them:
-        '': ['*.txt', '*.md', 'LICENCE', 'check-bundler.rb']
+        'PyGitUp': ['check-bundler.rb']
     },
 
     # development metadata
@@ -35,7 +34,7 @@ setup(
     keywords = "git git-up",
     url = "https://github.com/msiemens/PyGitUp",
     classifiers  = [
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Environment :: Console",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
