@@ -140,7 +140,7 @@ v0.2 (*2013-03-18*)
 - Some under-the-hood improvements.
 
 v0.1 (*2013-03-14*)
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 - Initial Release
 
