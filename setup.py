@@ -1,4 +1,5 @@
 # coding=utf-8
+import sys
 from setuptools import setup, find_packages
 
 README = None
@@ -24,7 +25,6 @@ setup(
     },
 
     # development metadata
-    use_2to3 = True,
     zip_safe = True,
 
     # metadata for upload to PyPI
