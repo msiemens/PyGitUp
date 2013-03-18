@@ -1,4 +1,5 @@
 # coding=utf-8
+import sys
 from setuptools import setup, find_packages
 
 README = None
@@ -7,7 +8,7 @@ with open('README.rst', 'r') as f:
 
 setup(
     name = "git-up",
-    version = "0.1",
+    version = "0.2",
     packages = find_packages(),
     scripts = ['PyGitUp/gitup.py'],
     install_requires = ['GitPython', 'colorama', 'termcolor'],
@@ -24,7 +25,6 @@ setup(
     },
 
     # development metadata
-    use_2to3 = True,
     zip_safe = True,
 
     # metadata for upload to PyPI
@@ -42,7 +42,6 @@ setup(
         "Topic :: Software Development :: Version Control",
         "Topic :: Utilities"
     ],
-    bugtrack_url = 'https://github.com/msiemens/PyGitUp/issues',
 
     long_description = README
     # could also include download_url etc.

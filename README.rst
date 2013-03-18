@@ -1,7 +1,5 @@
-PyGitUp
-=======
-
-|Build Status|
+PyGitUp |Build Status|
+======================
 
 ``PyGitUp`` is a Python implementation of the great
 `aanand/git-up/ <https://github.com/aanand/git-up/>`__. Right now it
@@ -13,7 +11,7 @@ Why using ``git up``?
 
     git pull has two problems:
 
-    * It merges upstream changes by default, when it's really more polite to rebase over them, unless your collaborators enjoy a commit graph that looks like bedhead. 
+    * It merges upstream changes by default, when it's really more polite to `rebase over them <http://gitready.com/advanced/2009/02/11/pull-with-rebase.html>`__, unless your collaborators enjoy a commit graph that looks like bedhead.
 
     * It only updates the branch you're currently on, which means git push will shout at you for being behind on branches you don't particularly care about right now.
 
@@ -48,9 +46,15 @@ Note for Windows users:
 
 You need ``pip`` installed and working. Check out
 `SO#4750806 <http://stackoverflow.com/q/4750806/997063>`__ for more
-information. And don't forget to either make your ``Python/Scripts`` and
-``Python/Lib/site-packages`` writable for you or run ``pip`` with admin
-privileges.
+information. And don't forget to either:
+
+- make your ``Python/Scripts`` and ``Python/Lib/site-packages`` writable for
+  you,
+- run ``pip`` with admin privileges
+- or use ``pip install --user git-up`` and add ``%APPDATA%/Python/Scripts``
+  to %PATH%
+
+otherwise ``pip`` won't install due to ``Access denied`` errors.
 
 Compatibility note:
 ~~~~~~~~~~~~~~~~~~~
@@ -72,6 +76,19 @@ options:
 -  ``git-up.bundler.autoinstall [true|*false*]:`` If set to
    ``true``,\ ``PyGitUp`` will run ``bundle install`` automatically.
    Requires ``git-up.bundler.check`` to be true.
+
+-  ``git-up.bundler.local [true|*false*]:`` If you've ``bundle package``-ed
+   your  project gems, you can tell ``PyGitUp`` to run ``bundle install
+   --local`` for you if it finds missing gems. Much faster than just a plain
+   old ``bundle install``. Don't worry if you're missing gems, it will
+   backtrack to ``bundle install`` if anything goes wrong. Make sure
+   ``git-up.bundler.autoinstall`` is also set to ``true`` or it won't do
+   anything.
+
+- ``git-up.bundler.rbenv [true|false]:`` If you have rbenv installed,
+  you can tell ``PyGitUp`` to run ``rbenv rehash`` for you after it installs
+  your gems so any binaries will be available right away. Make sure ``git-up
+  .bundler.autoinstall`` is also set to ``true`` or it won't do anything.
 
 -  ``git-up.fetch.prune [*true*|false]:`` If set to ``true``,
    ``PyGitUp`` will append the ``--prune``\ option to ``git fetch`` and
@@ -108,6 +125,24 @@ Credits
 The original ``git-up`` has been written by aanand:
 `aanand/git-up/ <https://github.com/aanand/git-up/>`__.
 
+
+Changelog
+---------
+
+v0.2 (*2013-03-18*)
+~~~~~~~~~~~~~~~~~~~
+
+- Incorporated `aanand/git-up#41 <https://github
+  .com/aanand/git-up/pull/41>`__: Support for ``bundle install --local`` and
+  ``rbenv rehash``.
+- Fixed issue `#1 <https://github.com/msiemens/PyGitUp/issues/1>`__ (strange
+  output buffering when having multiple remotes to fetch from).
+- Some under-the-hood improvements.
+
+v0.1 (*2013-03-14*)
+~~~~~~~~~~~~~~~~~~
+
+- Initial Release
 
 .. |Build Status| image:: https://travis-ci.org/msiemens/PyGitUp.png?branch=dev
    :target: https://travis-ci.org/msiemens/PyGitUp

@@ -279,12 +279,14 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
         """
         Run the bundler check.
         """
+        def get_config(name):
+            return name if self.config('bundler.' + name) else ''
+
         from pkg_resources import Requirement, resource_filename
-        bundler_script = resource_filename(Requirement.parse("git-up"),
+        bundler_script = resource_filename(Requirement.parse('git-up'),
                                            'check-bundler.rb')
-        autoinstall = 'autoinstall' if self.config('bundler.autoinstall') \
-            else ''
-        subprocess.call(['ruby', bundler_script, autoinstall])
+        subprocess.call(['ruby', bundler_script, get_config('autoinstall'),
+                         get_config('local'), get_config('rbenv')])
 
 ###############################################################################
 

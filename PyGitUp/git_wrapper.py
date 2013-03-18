@@ -23,7 +23,7 @@ from contextlib import contextmanager
 
 # 3rd party libs
 from termcolor import colored  # Assume, colorama is already initialized
-from git import GitCommandError, CheckoutError
+from git import GitCommandError, CheckoutError as OrigCheckoutError
 
 # PyGitUp libs
 from PyGitUp.utils import find
@@ -57,7 +57,7 @@ class GitWrapper():
 
         # Capture output
         while True:
-            output = cmd.stdout.read(4)
+            output = cmd.stdout.read(1)
 
             # Print to stdout
             if tostdout:
@@ -75,11 +75,11 @@ class GitWrapper():
         except GitCommandError as error:
             # Add more meta-information to errors
             message = "'{0}' returned exit status {1}".format(
-                error.command,
+                ' '.join(str(c) for c in error.command),
                 error.status
             )
 
-            raise GitError(error.stderr, stdout, message)
+            raise GitError(error.stderr, stdout)
 
         return stdout.strip()
 
@@ -111,14 +111,10 @@ class GitWrapper():
         if stashed:
             print(colored('unstashing', 'magenta'))
             try:
-                self.git.stash('pop')
-            except GitCommandError as e:
-                error = GitError()
-                error.message = "Failed unstash"
-                error.stdout = e.stdout
-                error.stderr = e.stderr
-
-                raise error
+                self.run('stash', 'pop')
+                pass
+            except GitError as e:
+                raise UnstashError(stderr=e.stderr, stdout=e.stdout)
 
     def remote_ref_for_branch(self, branch):
         """ Get the remote reference for a local branch. """
@@ -152,14 +148,11 @@ class GitWrapper():
     def checkout(self, branch_name):
         """ Checkout a branch by name. """
         try:
-            (find(self.repo.branches, lambda b: b.name == branch_name)
-                .checkout())
-        except CheckoutError as e:
-            error = GitError()
-            error.message = "Failed to checkout " + branch_name
-            error.details = e
-
-            raise error
+            find(self.repo.branches, lambda b: b.name == branch_name).checkout()
+        except OrigCheckoutError as e:
+            raise CheckoutError(branch_name, details=e)
+        except GitCommandError as e:
+            raise CheckoutError(branch_name, stderr=e.stderr)
 
     def rebase(self, target_branch):
         """ Rebase to target branch. """
@@ -170,11 +163,9 @@ class GitWrapper():
         )
         try:
             self.git.rebase(*arguments)
-        except GitError as error:
-            error.message = "Failed to rebase {0} onto {1]".format(
-                current_branch.name, target_branch.name
-            )
-            raise error
+        except GitCommandError as e:
+            raise RebaseError(current_branch.name, target_branch.name,
+                              **e.__dict__)
 
     def config(self, key):
         """ Return `git config key` output or None. """
@@ -215,3 +206,46 @@ class GitError(GitCommandError):
         self.stdout = stdout
         self.details = details
         self.message = message
+
+
+class UnstashError(GitError):
+    """
+    Error while unstashing
+    """
+    def __init__(self, **kwargs):
+    # Remove kwargs we won't pass to GitError
+        kwargs.pop('message', None)
+        kwargs.pop('command', None)
+        kwargs.pop('status', None)
+
+        GitError.__init__(self, message='Unstash failed!', **kwargs)
+
+
+class CheckoutError(GitError):
+    """
+    Error during checkout
+    """
+    def __init__(self, branch_name, **kwargs):
+        # Remove kwargs we won't pass to GitError
+        kwargs.pop('message', None)
+        kwargs.pop('command', None)
+        kwargs.pop('status', None)
+
+        GitError.__init__(self, message='Failed to checkout ' + branch_name,
+                          **kwargs)
+
+
+class RebaseError(GitError):
+    """
+    Error during rebase command
+    """
+    def __init__(self, current_branch, target_branch, **kwargs):
+        # Remove kwargs we won't pass to GitError
+        kwargs.pop('message', None)
+        kwargs.pop('command', None)
+        kwargs.pop('status', None)
+
+        message = "Failed to rebase {0} onto {1}".format(
+            current_branch, target_branch
+        )
+        GitError.__init__(self, message=message, **kwargs)
