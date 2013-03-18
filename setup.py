@@ -1,14 +1,9 @@
 # coding=utf-8
-import sys
 from setuptools import setup, find_packages
-
-README = None
-with open('README.rst', 'r') as f:
-    README = f.read()
 
 setup(
     name = "git-up",
-    version = "0.2",
+    version = "0.2.1",
     packages = find_packages(),
     scripts = ['PyGitUp/gitup.py'],
     install_requires = ['GitPython', 'colorama', 'termcolor'],
@@ -20,8 +15,7 @@ setup(
     },
 
     package_data = {
-        # If any package contains *.txt or *.md files, include them:
-        '': ['*.txt', '*.md', 'LICENCE', 'check-bundler.rb']
+        'PyGitUp': ['check-bundler.rb']
     },
 
     # development metadata
@@ -35,7 +29,7 @@ setup(
     keywords = "git git-up",
     url = "https://github.com/msiemens/PyGitUp",
     classifiers  = [
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Environment :: Console",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
@@ -43,6 +37,6 @@ setup(
         "Topic :: Utilities"
     ],
 
-    long_description = README
+    long_description = open('README.rst', 'r').read()
     # could also include download_url etc.
 )

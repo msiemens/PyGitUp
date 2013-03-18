@@ -129,6 +129,12 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v0.2.1 (*2013-03-18*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Fixed problem: check-bundler.rb has not been installed when installing via
+  PyPI (problems with setup.py).
+
 v0.2 (*2013-03-18*)
 ~~~~~~~~~~~~~~~~~~~
 
@@ -140,7 +146,7 @@ v0.2 (*2013-03-18*)
 - Some under-the-hood improvements.
 
 v0.1 (*2013-03-14*)
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 - Initial Release
 
