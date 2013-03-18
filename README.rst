@@ -129,7 +129,7 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
-v0.2 (*2013-03-XX*)
+v0.2 (*2013-03-18*)
 ~~~~~~~~~~~~~~~~~~~
 
 - Incorporated `aanand/git-up#41 <https://github

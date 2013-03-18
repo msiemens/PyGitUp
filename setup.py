@@ -7,7 +7,7 @@ with open('README.rst', 'r') as f:
 
 setup(
     name = "git-up",
-    version = "0.1",
+    version = "0.2",
     packages = find_packages(),
     scripts = ['PyGitUp/gitup.py'],
     install_requires = ['GitPython', 'colorama', 'termcolor'],
