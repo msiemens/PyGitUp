@@ -1,5 +1,5 @@
-1. git up --> diverged
-2. git rebase origin/master --> conflict
-3. git stash && git pull && git stash pop --> conflict
-4. git up --> rebasing
-5. git up --> fast-forwarding
+[ ] git up --> diverged
+[ ] git rebase origin/master --> conflict
+[x] git stash && git pull && git stash pop --> conflict
+[ ] git up --> rebasing
+[ ] git up --> fast-forwarding
