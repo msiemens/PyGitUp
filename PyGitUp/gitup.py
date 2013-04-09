@@ -67,6 +67,8 @@ git = GitWrapper(repo)
 class GitUp(object):
     """ Conainter class for GitUp methods """
 
+    states = []
+
     def __init__(self):
         # remote_map: map local branch names to remote branches
         self.remote_map = dict()
@@ -152,21 +154,30 @@ class GitUp(object):
 
             if remote.commit.hexsha == branch.commit.hexsha:
                 print(colored('up to date', 'green'))
-                continue
+                self.state.append('up to date')
+
+                continue  # Do not do anything
 
             base = git.merge_base(branch.name, remote.name)
 
             if base == remote.commit.hexsha:
                 print(colored('ahead of upstream', 'green'))
-                continue
+                self.state.append('ahead')
+
+                continue  # Do not do anything
 
             if base == branch.commit.hexsha:
                 print(colored('fast-forwarding...', 'yellow'))
+                self.state.append('fast-forwarding')
+
             elif self.config('rebase.auto') == 'false':
                 print(colored('diverged', 'red'))
-                continue
+                self.state.append('diverged')
+
+                continue  # Do not do anything
             else:
                 print(colored('rebasing', 'yellow'))
+                self.state.append('rebasing')
 
             self.log(branch, remote)
             git.checkout(branch.name)
