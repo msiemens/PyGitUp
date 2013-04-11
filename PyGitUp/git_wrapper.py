@@ -219,6 +219,7 @@ class UnstashError(GitError):
             kwargs.pop('message')
         GitError.__init__(self, message='Unstash failed!', **kwargs)
 
+
 class CheckoutError(GitError):
     """
     Error during checkout
@@ -228,6 +229,7 @@ class CheckoutError(GitError):
             kwargs.pop('message')
         GitError.__init__(self, message='Failed to checkout ' + branch_name,
                           **kwargs)
+
 
 class RebaseError(GitError):
     """
@@ -240,6 +242,7 @@ class RebaseError(GitError):
             current_branch.name, target_branch.name
         )
         GitError.__init__(self, message, **kwargs)
+
 class RebaseError(GitError):
     """
     Error during rebase command

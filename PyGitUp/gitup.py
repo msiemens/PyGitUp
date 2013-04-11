@@ -31,6 +31,8 @@ import subprocess
 
 # 3rd party libs
 from git import Repo, GitCmdObjectDB
+import colorama
+from termcolor import colored
 
 # PyGitUp libs
 from PyGitUp.utils import execute, uniq
@@ -40,15 +42,8 @@ from PyGitUp.git_wrapper import GitWrapper, GitError
 # Setup of 3rd party libs
 ###############################################################################
 
-if __name__ == '__main__':
-    # 3rd party libs
-    import colorama
-    from termcolor import colored
+colorama.init(autoreset=True)
 
-    colorama.init(autoreset=True)
-else:
-    def colored(line, *args, **kwargs):
-        return line
 
 ###############################################################################
 # GitUp
@@ -60,9 +55,8 @@ class GitUp(object):
 
     def __init__(self):
         self.repo = Repo(execute('git rev-parse --show-toplevel'),
-                    odbt=GitCmdObjectDB)
+                         odbt=GitCmdObjectDB)
         self.git = GitWrapper(self.repo)
-
 
         # remote_map: map local branch names to remote branches
         self.remote_map = dict()
@@ -106,9 +100,6 @@ class GitUp(object):
 
         except GitError as error:
             # Used for test cases
-            if testing:
-                raise
-
             print(colored(error.message, 'red'))
 
             # Print more information about the error
@@ -127,6 +118,9 @@ class GitUp(object):
                 print("Here's what we know:")
                 print(str(error.details))
                 print()
+
+            if testing:
+                raise
 
     def rebase_all_branches(self):
         """ Rebase all branches, if possible. """
