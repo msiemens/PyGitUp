@@ -20,7 +20,7 @@ def setup():
     master_path, master = init_master(test_name)
 
     # Prepare master repo
-    master.git.checkout('head', b=test_name)
+    master.git.checkout(b=test_name)
 
     # Clone to test repo
     path = join(basepath, test_name)
@@ -31,7 +31,7 @@ def setup():
     assert repo.working_dir == path
 
     # Create checkpoint
-    repo.git.checkout('head', b='checkpoint')
+    repo.git.checkout(b='checkpoint')
 
     # Modify file in master
     master_path_file = join(master_path, testfile_name)

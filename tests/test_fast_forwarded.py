@@ -20,7 +20,7 @@ def setup():
     master_path, master = init_master(test_name)
 
     # Prepare master repo
-    master.git.checkout('head', b=test_name)
+    master.git.checkout(b=test_name)
 
     # Clone to test repo
     path = join(basepath, test_name)
@@ -45,4 +45,11 @@ def test_fast_forwarded():
     gitup = GitUp()
     gitup.run(testing=True)
 
-    assert_true(gitup.states[0] == 'fast-forwarding')
+    assert_equal(len(gitup.states), 1)
+    assert_equal(gitup.states[0], 'fast-forwarding')
+
+class OldStyle():
+    pass
+
+class NewStyle(object):
+    pass

@@ -65,7 +65,7 @@ def init_master(test_name):
 
     repo.index.add([path_file])
     repo.index.commit('Initial commit')
-    repo.git.checkout('head', b='initial')
+    repo.git.checkout(b='initial')
 
     return path, repo
 
