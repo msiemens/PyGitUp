@@ -43,7 +43,9 @@ class GitWrapper():
     """
 
     def __init__(self, repo):
+        #: :type: git.Repo
         self.repo = repo
+        #: :type: git.Git
         self.git = self.repo.git
 
     def run(self, name, *args, **kwargs):

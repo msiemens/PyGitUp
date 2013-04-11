@@ -30,9 +30,6 @@ from contextlib import contextmanager
 import subprocess
 
 # 3rd party libs
-import colorama
-from termcolor import colored
-
 from git import Repo, GitCmdObjectDB
 
 # PyGitUp libs
@@ -43,22 +40,15 @@ from PyGitUp.git_wrapper import GitWrapper, GitError
 # Setup of 3rd party libs
 ###############################################################################
 
-colorama.init(autoreset=True)
+if __name__ == '__main__':
+    # 3rd party libs
+    import colorama
+    from termcolor import colored
 
-###############################################################################
-# Setup global vars
-###############################################################################
-
-# Initialize frequently used globals
-try:
-    path = execute('git rev-parse --show-toplevel')
-except IndexError:
-    sys.exit(1)
-
-# TODO: Move repo and git to GitUp?
-repo = Repo(path, odbt=GitCmdObjectDB)
-git = GitWrapper(repo)
-
+    colorama.init(autoreset=True)
+else:
+    def colored(line, *args, **kwargs):
+        return line
 
 ###############################################################################
 # GitUp
@@ -66,21 +56,25 @@ git = GitWrapper(repo)
 
 class GitUp(object):
     """ Conainter class for GitUp methods """
-
     states = []
 
     def __init__(self):
+        self.repo = Repo(execute('git rev-parse --show-toplevel'),
+                    odbt=GitCmdObjectDB)
+        self.git = GitWrapper(self.repo)
+
+
         # remote_map: map local branch names to remote branches
         self.remote_map = dict()
 
-        for branch in repo.branches:
-            remote = git.remote_ref_for_branch(branch)
+        for branch in self.repo.branches:
+            remote = self.git.remote_ref_for_branch(branch)
             if remote:
                 self.remote_map[branch.name] = remote
 
         # branches: all local branches that has a corresponding remote branch
         self.branches = [
-            branch for branch in repo.branches
+            branch for branch in self.repo.branches
             if branch.name in list(self.remote_map.keys())
         ]
         self.branches.sort(key=lambda b: b.name)
@@ -92,20 +86,18 @@ class GitUp(object):
 
         # change_count
         self.change_count = len(
-            git.status(porcelain=True, untracked_files='no').split('\n')
+            self.git.status(porcelain=True, untracked_files='no').split('\n')
         )
 
     def __del__(self):
-        global repo, git
-        del repo
-        del git
+        self.repo.git.clear_cache()
 
     def run(self, testing=False):
         """ Run all the git-up stuff. """
         try:
             self.fetch()
 
-            with git.stash():
+            with self.git.stash():
                 with self.returning_to_current_branch():
                     self.rebase_all_branches()
 
@@ -154,34 +146,34 @@ class GitUp(object):
 
             if remote.commit.hexsha == branch.commit.hexsha:
                 print(colored('up to date', 'green'))
-                self.state.append('up to date')
+                self.states.append('up to date')
 
                 continue  # Do not do anything
 
-            base = git.merge_base(branch.name, remote.name)
+            base = self.git.merge_base(branch.name, remote.name)
 
             if base == remote.commit.hexsha:
                 print(colored('ahead of upstream', 'green'))
-                self.state.append('ahead')
+                self.states.append('ahead')
 
                 continue  # Do not do anything
 
             if base == branch.commit.hexsha:
                 print(colored('fast-forwarding...', 'yellow'))
-                self.state.append('fast-forwarding')
+                self.states.append('fast-forwarding')
 
             elif self.config('rebase.auto') == 'false':
                 print(colored('diverged', 'red'))
-                self.state.append('diverged')
+                self.states.append('diverged')
 
                 continue  # Do not do anything
             else:
                 print(colored('rebasing', 'yellow'))
-                self.state.append('rebasing')
+                self.states.append('rebasing')
 
             self.log(branch, remote)
-            git.checkout(branch.name)
-            git.rebase(remote)
+            self.git.checkout(branch.name)
+            self.git.rebase(remote)
 
     def fetch(self):
         """
@@ -202,7 +194,7 @@ class GitUp(object):
             fetch_args.append(self.remotes)
 
         try:
-            git.fetch(tostdout=True, *fetch_args, **fetch_kwargs)
+            self.git.fetch(tostdout=True, *fetch_args, **fetch_kwargs)
         except GitError as error:
             error.message = "`git fetch` failed"
             raise error
@@ -223,12 +215,12 @@ class GitUp(object):
     @contextmanager
     def returning_to_current_branch(self):
         """ A contextmanager returning to the current branch. """
-        if repo.head.is_detached:
+        if self.repo.head.is_detached:
             print(colored("You're not currently on a branch. I'm exiting in"
                           "case you're in the middle of something.", 'red'))
             sys.exit(1)
 
-        branch_name = repo.active_branch.name
+        branch_name = self.repo.active_branch.name
 
         yield
 
@@ -238,7 +230,7 @@ class GitUp(object):
 
     def config(self, key):
         """ Get a git-up-specific config value. """
-        return git.config('git-up.{0}'.format(key))
+        return self.git.config('git-up.{0}'.format(key))
 
     def is_prune(self):
         """
@@ -250,14 +242,14 @@ class GitUp(object):
         required_version = "1.6.6"
         config_value = self.config("fetch.prune")
 
-        if git.is_version_min(required_version):
+        if self.git.is_version_min(required_version):
             return config_value != 'false'
         else:
             if config_value == 'true':
                 print(colored(
                     "Warning: fetch.prune is set to 'true' but your git "
                     "version doesn't seem to support it ({0} < {1}). Defaulting"
-                    " to 'false'.".format(git.version(), required_version),
+                    " to 'false'.".format(self.git.version(), required_version),
                     'yellow'
                 ))
 

@@ -7,9 +7,6 @@ test-*: clone for a specific test
 """
 
 import os
-import sys
-
-from contextlib import contextmanager
 from os.path import join
 from tempfile import mkdtemp
 
@@ -38,37 +35,37 @@ def teardown():
     shutil.rmtree(basepath, onerror=onerror)
 
 
-def _write_file(path, contents):
+def write_file(path, contents):
     with open(path, 'w+') as f:
         f.write(contents)
 
 
-def _init_git(path):
+def init_git(path):
     os.chdir(path)
     os.popen('git init').read()
 
 
-def _mkrepo(path):
+def mkrepo(path):
     if not os.path.exists(path):
         os.makedirs(path, 0700)
-    _init_git(path)
+    init_git(path)
 
 
-def _setup_master():
+def init_master(test_name):
     # Create repo
-    path = join(basepath, 'master')
-    _mkrepo(path)
+    path = join(basepath, 'master.' + test_name)
+    mkrepo(path)
     repo = Repo(path)
 
     assert repo.working_dir == path
 
     # Add file
     path_file = join(path, testfile_name)
-    _write_file(path_file, 'line 1\nline 2\ncounter: 1')
+    write_file(path_file, 'line 1\nline 2\ncounter: 1')
 
     repo.index.add([path_file])
     repo.index.commit('Initial commit')
+    repo.git.checkout('head', b='initial')
 
+    return path, repo
 
-def setup():
-    _setup_master()
