@@ -51,9 +51,10 @@ colorama.init(autoreset=True)
 
 class GitUp(object):
     """ Conainter class for GitUp methods """
-    states = []
 
     def __init__(self):
+        self.states = []
+
         try:
             self.repo = Repo(execute('git rev-parse --show-toplevel'),
                              odbt=GitCmdObjectDB)
