@@ -54,8 +54,13 @@ class GitUp(object):
     states = []
 
     def __init__(self):
-        self.repo = Repo(execute('git rev-parse --show-toplevel'),
-                         odbt=GitCmdObjectDB)
+        try:
+            self.repo = Repo(execute('git rev-parse --show-toplevel'),
+                             odbt=GitCmdObjectDB)
+        except IndexError:
+            print(colored("We don't seem to be in a git repository.", 'red'))
+            raise GitError(message="We don't seem to be in a git repository.")
+
         self.git = GitWrapper(self.repo)
 
         # remote_map: map local branch names to remote branches
@@ -84,7 +89,11 @@ class GitUp(object):
         )
 
     def __del__(self):
-        self.repo.git.clear_cache()
+        try:
+            self.repo.git.clear_cache()
+        except AttributeError:
+            # If __init__ fails, self.repo may be not defined
+            pass
 
     def run(self, testing=False):
         """ Run all the git-up stuff. """
@@ -307,7 +316,12 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
 
 
 def run(*args, **kwargs):
-    GitUp().run(*args, **kwargs)
+    try:
+        gitup = GitUp()
+    except GitError:
+        pass  # Error in constructor
+    else:
+        gitup.run(*args, **kwargs)
 
 if __name__ == '__main__':
     run()
