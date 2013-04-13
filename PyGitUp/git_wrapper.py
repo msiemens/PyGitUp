@@ -162,7 +162,7 @@ class GitWrapper():
             (self.config('rebase.arguments') or []) + [target_branch.name]
         )
         try:
-            self.git.rebase(*arguments)
+            self.run('rebase', *arguments)
         except GitCommandError as e:
             raise RebaseError(current_branch.name, target_branch.name,
                               **e.__dict__)
@@ -206,6 +206,9 @@ class GitError(GitCommandError):
         self.stdout = stdout
         self.details = details
         self.message = message
+
+    def __str__(self):
+        return self.message
 
 
 class UnstashError(GitError):
