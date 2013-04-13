@@ -8,7 +8,7 @@ from git import *
 
 # PyGitup imports
 from PyGitUp.git_wrapper import GitError
-from tests import basepath, write_file, init_master, testfile_name, update_file
+from tests import basepath, write_file, init_master, update_file
 
 test_name = 'diverged'
 
@@ -33,16 +33,10 @@ def setup():
     repo.git.config('git-up.rebase.auto', 'false')
 
     # Modify file in master
-    master_path_file = join(master_path, testfile_name)
-    write_file(master_path_file, 'line 1\nline 2\ncounter: 2')
-    master.index.add([master_path_file])
-    master.index.commit(test_name)
+    update_file(master, test_name)
 
     # Modify file in our repo
-    repo_path_file = join(path, testfile_name)
-    write_file(repo_path_file, 'line 1\nline 2\ncounter: 3')
-    repo.index.add([repo_path_file])
-    repo.index.commit(test_name)
+    update_file(repo, test_name)
 
 
 def test_ahead_of_upstream():

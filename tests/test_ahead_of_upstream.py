@@ -47,9 +47,3 @@ def test_ahead_of_upstream():
 
     assert_equal(len(gitup.states), 1)
     assert_equal(gitup.states[0], 'ahead')
-
-class OldStyle():
-    pass
-
-class NewStyle(object):
-    pass

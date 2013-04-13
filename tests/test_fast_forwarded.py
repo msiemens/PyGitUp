@@ -8,10 +8,9 @@ from git import *
 
 # PyGitup imports
 from PyGitUp.git_wrapper import GitError
-from tests import basepath, write_file, init_master
+from tests import basepath, write_file, init_master, update_file
 
 test_name = 'fast-forwarded'
-testfile_name = 'file'
 
 repo_path = join(basepath, test_name + os.sep)
 
@@ -31,10 +30,7 @@ def setup():
     assert repo.working_dir == path
 
     # Modify file in master
-    master_path_file = join(master_path, testfile_name)
-    write_file(master_path_file, 'line 1\nline 2\ncounter: 2')
-    master.index.add([master_path_file])
-    master.index.commit(test_name)
+    update_file(master, test_name)
 
 
 def test_fast_forwarded():

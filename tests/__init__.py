@@ -40,6 +40,16 @@ def write_file(path, contents):
         f.write(contents)
 
 
+def update_file(repo, commit_message='', counter=[0]):
+    counter[0] += 1  # See: http://stackoverflow.com/a/279592/997063
+
+    path_file = join(repo.working_dir, testfile_name)
+    contents = 'line 1\nline 2\ncounter: {}'.format(counter[0])
+    write_file(path_file, contents)
+
+    repo.index.add([path_file])
+    repo.index.commit(commit_message)
+
 def init_git(path):
     os.chdir(path)
     os.popen('git init').read()
@@ -60,11 +70,7 @@ def init_master(test_name):
     assert repo.working_dir == path
 
     # Add file
-    path_file = join(path, testfile_name)
-    write_file(path_file, 'line 1\nline 2\ncounter: 1')
-
-    repo.index.add([path_file])
-    repo.index.commit('Initial commit')
+    update_file(repo, 'Initial commit')
     repo.git.checkout(b='initial')
 
     return path, repo
