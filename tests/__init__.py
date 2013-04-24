@@ -44,11 +44,13 @@ def update_file(repo, commit_message='', counter=[0]):
     counter[0] += 1  # See: http://stackoverflow.com/a/279592/997063
 
     path_file = join(repo.working_dir, testfile_name)
-    contents = 'line 1\nline 2\ncounter: {}'.format(counter[0])
+    contents = 'line 1\nline 2\ncounter: {0}'.format(counter[0])
     write_file(path_file, contents)
 
     repo.index.add([path_file])
     repo.index.commit(commit_message)
+
+    return '{0}:\n{1}'.format(path_file, contents)
 
 def init_git(path):
     os.chdir(path)
