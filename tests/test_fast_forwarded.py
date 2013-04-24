@@ -34,7 +34,7 @@ def setup():
 
 
 def test_fast_forwarded():
-    """ Run 'git up' with result: fast-forwarded """
+    """ Run 'git up' with result: up to date """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
@@ -43,9 +43,3 @@ def test_fast_forwarded():
 
     assert_equal(len(gitup.states), 1)
     assert_equal(gitup.states[0], 'fast-forwarding')
-
-class OldStyle():
-    pass
-
-class NewStyle(object):
-    pass
