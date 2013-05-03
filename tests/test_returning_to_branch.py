@@ -1,0 +1,54 @@
+# System imports
+import os
+from os.path import join
+
+# 3rd party libs
+from nose.tools import *
+from git import *
+
+# PyGitup imports
+from PyGitUp.git_wrapper import GitError
+from tests import basepath, write_file, init_master, update_file, testfile_name
+
+test_name = 'returning-to-branch'
+new_branch_name = test_name + '.2'
+
+repo_path = join(basepath, test_name + os.sep)
+
+def _read_file(path):
+    with open(path) as f:
+        return f.read()
+
+
+def setup():
+    master_path, master = init_master(test_name)
+
+    # Prepare master repo
+    master.git.checkout(b=test_name)
+
+    # Clone to test repo
+    path = join(basepath, test_name)
+
+    master.clone(path, b=test_name)
+    repo = Repo(path, odbt=GitCmdObjectDB)
+
+    assert repo.working_dir == path
+
+    # Create a new branch in repo
+    repo.git.checkout(b=new_branch_name)
+
+    # Modify file in master
+    master_file = update_file(master, test_name)
+
+
+def test_ahead_of_upstream():
+    """ Run 'git up': return to branch """
+    os.chdir(repo_path)
+
+    from PyGitUp.gitup import GitUp
+    gitup = GitUp()
+    gitup.run(testing=True)
+
+    assert_equal(len(gitup.states), 1)
+    assert_equal(gitup.states[0], 'fast-forwarding')
+    assert_equal(gitup.repo.head.ref.name, new_branch_name)
