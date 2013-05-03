@@ -205,7 +205,9 @@ class GitUp(object):
 
         yield
 
-        print(colored('returning to {0}'.format(branch_name), 'magenta'))
+        if not self.repo.head.ref.name == branch_name:
+            print(colored('returning to {0}'.format(branch_name), 'magenta'))
+            self.git.checkout(branch_name)
 
     def config(self, key):
         """ Get a git-up-specific config value. """
