@@ -129,6 +129,13 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v0.2.2 (*2013-05-04*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Fixed issue `#3 <https://github.com/msiemens/PyGitUp/issues/3>`__ (didn't
+  return to previous branch).
+
+
 v0.2.1 (*2013-03-18*)
 ~~~~~~~~~~~~~~~~~~~~~
 

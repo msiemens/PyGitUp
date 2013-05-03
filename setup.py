@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "git-up",
-    version = "0.2.1",
+    version = "0.2.2",
     packages = find_packages(),
     scripts = ['PyGitUp/gitup.py'],
     install_requires = ['GitPython', 'colorama', 'termcolor'],
