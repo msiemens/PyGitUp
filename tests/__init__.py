@@ -50,7 +50,7 @@ def update_file(repo, commit_message='', counter=[0]):
     repo.index.add([path_file])
     repo.index.commit(commit_message)
 
-    return '{0}:\n{1}'.format(path_file, contents)
+    return path_file
 
 def init_git(path):
     os.chdir(path)
