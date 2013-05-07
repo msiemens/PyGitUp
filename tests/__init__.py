@@ -9,12 +9,28 @@ test-*: clone for a specific test
 import os
 from os.path import join
 from tempfile import mkdtemp
+from functools import wraps
 
+from nose.plugins.attrib import attr
+from nose.plugins.skip import SkipTest
 from git import *
 
 basepath = mkdtemp(prefix='PyGitUp.')
 testfile_name = 'file.txt'
 
+
+def fail(message):
+    raise AssertionError(message)
+
+def wip(f):
+    @wraps(f)
+    def run_test(*args, **kwargs):
+        try:
+            f(*args, **kwargs)
+        except Exception as e:
+            raise SkipTest("WIP test failed: " + str(e))
+        fail("Passing test marked as WIP")
+    return attr('wip')(run_test)
 
 def teardown():
     """

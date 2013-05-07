@@ -8,7 +8,7 @@ from git import *
 
 # PyGitup imports
 from PyGitUp.git_wrapper import GitError
-from tests import basepath, write_file, init_master
+from tests import basepath, write_file, init_master, wip
 
 test_name = 'unstash_error'
 testfile_name = 'file'
@@ -55,6 +55,7 @@ def setup():
     repo.head.reset('checkpoint', True, True)
     repo.git.stash('pop')
 
+@wip
 @raises(GitError)
 def test_unstash_error():
     """ Run 'git up' with an unclean unstash """
