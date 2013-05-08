@@ -26,8 +26,11 @@ __all__ = ['GitUp']
 # Python libs
 import sys
 import os
-from contextlib import contextmanager
+import re
+import platform
 import subprocess
+from contextlib import contextmanager
+from tempfile import NamedTemporaryFile
 
 # 3rd party libs
 from git import Repo, GitCmdObjectDB
@@ -206,11 +209,33 @@ class GitUp(object):
     def log(self, branch, remote):
         """ Call a log-command, if set by git-up.fetch.all. """
         log_hook = self.config('rebase.log-hook')
+
         if log_hook:
-            subprocess.call(
-                [log_hook, 'git-up', branch.name, remote.name],
-                shell=True
-            )
+            if platform.system() == 'Windows':
+                # Running a string in CMD from Python is not that easy on
+                # Windows. Running 'cmd /C log_hook' produces problems when
+                # using multiple statements or things like 'echo'. Therefore,
+                # we write the string to a bat file and execute it. In addition,
+                # we replace occurences of $1 with %1 and so forth in case the
+                # user is used to Bash or sh.
+
+                # replace $(\d+) in log_hook with %\1
+                log_hook = re.sub(r'\$(\d+)', r'%\1', log_hook)
+
+                # write log_hook to an temp file and get it's path
+                bat_file = NamedTemporaryFile(prefix='PyGitUp.', suffix='.bat')
+                bat_file.file.write(log_hook)
+
+                # run bat_file
+                subprocess.call(
+                    [bat_file, branch.name, remote.name]
+                )
+            else:
+                # Run log_hook via 'shell -c'
+                subprocess.call(
+                    [log_hook, 'git-up', branch.name, remote.name],
+                    shell=True
+                )
 
     ###########################################################################
     # Helpers
