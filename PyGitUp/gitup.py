@@ -101,6 +101,8 @@ class GitUp(object):
 
     def run(self, testing=False):
         """ Run all the git-up stuff. """
+        self.testing = testing
+
         try:
             self.fetch()
 
@@ -215,27 +217,42 @@ class GitUp(object):
                 # Running a string in CMD from Python is not that easy on
                 # Windows. Running 'cmd /C log_hook' produces problems when
                 # using multiple statements or things like 'echo'. Therefore,
-                # we write the string to a bat file and execute it. In addition,
-                # we replace occurences of $1 with %1 and so forth in case the
-                # user is used to Bash or sh.
+                # we write the string to a bat file and execute it.
 
-                # replace $(\d+) in log_hook with %\1
+                # In addition, we replace occurences of $1 with %1 and so forth
+                # in case the user is used to Bash or sh.
+                # Also, we replace a semicolon with a newline, because if you
+                # start with 'echo' on Windows, it will simply echo the
+                # semicolon and the commands behind instead of echoing and then
+                # running other commands
+
+                # Prepare log_hook
                 log_hook = re.sub(r'\$(\d+)', r'%\1', log_hook)
+                log_hook = re.sub(r'; ?', r'\n', log_hook)
 
-                # write log_hook to an temp file and get it's path
-                bat_file = NamedTemporaryFile(prefix='PyGitUp.', suffix='.bat')
-                bat_file.file.write(log_hook)
-
-                # run bat_file
-                subprocess.call(
-                    [bat_file, branch.name, remote.name]
+                # Write log_hook to an temporary file and get it's path
+                bat_file = NamedTemporaryFile(
+                    prefix='PyGitUp.', suffix='.bat', delete=False
                 )
+                bat_file.file.write('@echo off\n')  # Do not echo all commands
+                bat_file.file.write(log_hook)
+                bat_file.file.close()
+
+                # Run bat_file
+                state = subprocess.call(
+                    [bat_file.name, branch.name, remote.name]
+                )
+
+                # Clean up file
+                os.remove(bat_file.name)
             else:
                 # Run log_hook via 'shell -c'
-                subprocess.call(
+                state = subprocess.call(
                     [log_hook, 'git-up', branch.name, remote.name],
                     shell=True
                 )
+            if self.testing:
+                assert state == 0, 'log_hook returned != 0'
 
     ###########################################################################
     # Helpers

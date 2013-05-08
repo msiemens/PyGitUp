@@ -8,28 +8,12 @@ from git import *
 
 # PyGitup imports
 from PyGitUp.git_wrapper import GitError
-from tests import basepath, write_file, init_master
+from tests import basepath, write_file, init_master, capture
 
 test_name = 'fetch-all'
 testfile_name = 'file'
 
 repo_path = join(basepath, test_name + os.sep)
-
-
-import contextlib
-@contextlib.contextmanager
-def capture():
-    import sys
-    from cStringIO import StringIO
-    oldout, olderr = sys.stdout, sys.stderr
-    try:
-        out = [StringIO(), StringIO()]
-        sys.stdout, sys.stderr = out
-        yield out
-    finally:
-        sys.stdout,sys.stderr = oldout, olderr
-        out[0] = out[0].getvalue()
-        out[1] = out[1].getvalue()
 
 
 def setup():
