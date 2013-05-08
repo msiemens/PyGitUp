@@ -42,7 +42,7 @@ def setup():
     else:
         repo.git.config(
             'git-up.rebase.log-hook',
-            'if [[ -z "$1" && -z "$2" ]]; then exit 1; fi;'
+            'if [ -z "$1" -a -z "$2" ]; then exit 1; fi;'
             'git show $1 > /dev/null;'
             'git show $2 > /dev/null;'
         )
