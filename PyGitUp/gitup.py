@@ -270,9 +270,15 @@ class GitUp(object):
 
         yield
 
-        if not repo.head.ref.name == branch_name:
+        if (
+                self.repo.head.is_detached  # Only on Travis CI,
+                # we get a detached head after doing our rebase *confused*.
+                # Running self.repo.active_branch would fail.
+            or
+                not self.repo.active_branch.name == branch_name
+        ):
             print(colored('returning to {0}'.format(branch_name), 'magenta'))
-            git.checkout(branch_name)
+            self.git.checkout(branch_name)
 
     def config(self, key):
         """ Get a git-up-specific config value. """
