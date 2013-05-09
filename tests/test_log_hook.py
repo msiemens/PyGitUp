@@ -36,15 +36,15 @@ def setup():
             'git-up.rebase.log-hook',
             'IF [%1]==[] exit 1; '  # Note: this whole string is one line
             'IF [%2]==[] exit 1; '  # and will be split by 'git up' to
-            'git show $1 > nul; '   # multiple lines.
-            'git show $2 > nul;'
+            'git log -n 1 $1 > nul; '   # multiple lines.
+            'git log -n 1 $2 > nul;'
         )
     else:
         repo.git.config(
             'git-up.rebase.log-hook',
             'if [ -z "$1" -a -z "$2" ]; then exit 1; fi;'
-            # 'git show "$1" > /dev/null; '  # Fails hard with dash as shell
-            # 'git show "$2" > /dev/null;'   # (used e.g. on Travis CI)
+            'git log -n 1 "$1" &> /dev/null; '
+            'git log -n 1 "$2" &> /dev/null;'
         )
 
     # Modify file in master
