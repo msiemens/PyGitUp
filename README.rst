@@ -129,6 +129,12 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v0.2.3 (*2013-06-05*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Fixed issue `#4 <https://github.com/msiemens/PyGitUp/issues/4>`__ (ugly
+  exception if remote branch has been deleted).
+
 v0.2.2 (*2013-05-04*)
 ~~~~~~~~~~~~~~~~~~~~~
 
