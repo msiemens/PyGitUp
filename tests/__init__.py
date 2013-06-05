@@ -16,6 +16,8 @@ from nose.plugins.attrib import attr
 from nose.plugins.skip import SkipTest
 from git import *
 
+from PyGitUp.git_wrapper import GitWrapper
+
 basepath = mkdtemp(prefix='PyGitUp.')
 testfile_name = 'file.txt'
 

@@ -92,13 +92,6 @@ class GitUp(object):
             self.git.status(porcelain=True, untracked_files='no').split('\n')
         )
 
-    def __del__(self):
-        try:
-            self.repo.git.clear_cache()
-        except AttributeError:
-            # If __init__ fails, self.repo may be not defined
-            pass
-
     def run(self, testing=False):
         """ Run all the git-up stuff. """
         self.testing = testing

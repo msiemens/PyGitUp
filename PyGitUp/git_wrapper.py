@@ -19,6 +19,8 @@ __all__ = ['GitWrapper', 'GitError']
 # Python libs
 import sys
 import re
+import subprocess
+import platform
 from contextlib import contextmanager
 
 # 3rd party libs
@@ -47,6 +49,32 @@ class GitWrapper():
         self.repo = repo
         #: :type: git.Git
         self.git = self.repo.git
+
+    def __del__(self):
+        # Is the following true?
+
+        # GitPython runs persistent git processes in  the working directory.
+        # Therefore, when we use 'git up' in something like a test environment,
+        # this might cause troubles because of the open file handlers (like
+        # trying to remove the directory right after the test has finished).
+        # 'clear_cache' kills the processes...
+
+        if (platform.system() == 'Windows'):
+            pass
+            # ... or rather "should kill", because but somehow it recently
+            # started to not kill cat_file_header out of the blue (I even
+            # tried running old code, but the once working code failed).
+            # Thus, we kill it  manually here.
+            if self.git.cat_file_header is not None:
+                subprocess.call(("TASKKILL /F /T /PID {0} 2>nul 1>nul".format(
+                    str(self.git.cat_file_header.proc.pid)
+                )), shell=True)
+            if self.git.cat_file_all is not None:
+                subprocess.call(("TASKKILL /F /T /PID {0} 2>nul 1>nul".format(
+                    str(self.git.cat_file_all.proc.pid)
+                )), shell=True)
+
+        self.git.clear_cache()
 
     def run(self, name, *args, **kwargs):
         """ Run a git command specified by name and args/kwargs. """
