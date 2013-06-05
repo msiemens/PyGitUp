@@ -144,6 +144,8 @@ class GitUp(object):
             except ValueError:
                 # Remote branch doesn't exist!
                 print(colored('error: remote branch doesn\'t exist', 'red'))
+                self.states.append('remote branch doesn\'t exist')
+
                 continue
 
             if remote.commit.hexsha == branch.commit.hexsha:
