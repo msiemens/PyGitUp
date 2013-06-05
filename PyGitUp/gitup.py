@@ -134,6 +134,13 @@ class GitUp(object):
             print(colored(branch.name.ljust(col_width), attrs=['bold']),
                   end=' ')
 
+            try:
+                remote.commit
+            except ValueError:
+                # Remote branch doesn't exist!
+                print(colored('error: remote branch doesn\'t exist', 'red'))
+                continue
+
             if remote.commit.hexsha == branch.commit.hexsha:
                 print(colored('up to date', 'green'))
                 continue
