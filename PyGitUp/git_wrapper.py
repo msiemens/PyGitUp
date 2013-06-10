@@ -263,17 +263,6 @@ class RebaseError(GitError):
     Error during rebase command
     """
     def __init__(self, current_branch, target_branch, **kwargs):
-        kwargs.pop('message', None)
-        message = "Failed to rebase {0} onto {1]".format(
-            current_branch.name, target_branch.name
-        )
-        GitError.__init__(self, message, **kwargs)
-
-class RebaseError(GitError):
-    """
-    Error during rebase command
-    """
-    def __init__(self, current_branch, target_branch, **kwargs):
         # Remove kwargs we won't pass to GitError
         kwargs.pop('message', None)
         kwargs.pop('command', None)
