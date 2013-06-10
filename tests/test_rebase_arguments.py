@@ -9,9 +9,9 @@ from git import *
 
 # PyGitup imports
 from tests import basepath, write_file, init_master, update_file, testfile_name
-from PyGitUp.git_wrapper import GitWrapper
+from PyGitUp.git_wrapper import GitWrapper, RebaseError
 
-test_name = 'rebasing'
+test_name = 'rebase-arguments'
 
 repo_path = join(basepath, test_name + os.sep)
 
@@ -46,9 +46,14 @@ def setup():
     repo.index.add([repo_file])
     repo.index.commit(test_name)
 
+    # Set git-up.rebase.arguments to '--abort', what results in an
+    # invalid cmd and thus git returning an error, that we look for.
+    repo.git.config('git-up.rebase.arguments', '--abort')
 
+
+@raises(RebaseError)
 def test_ahead_of_upstream():
-    """ Run 'git up' with result: rebasing """
+    """ Run 'git up' with rebasing.arguments """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp

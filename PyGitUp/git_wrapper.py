@@ -186,7 +186,7 @@ class GitWrapper():
         current_branch = self.repo.active_branch
 
         arguments = (
-            (self.config('git-up.rebase.arguments') or []) +
+            ([self.config('git-up.rebase.arguments')] or []) +
             [target_branch.name]
         )
         try:
