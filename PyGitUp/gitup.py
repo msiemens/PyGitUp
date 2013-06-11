@@ -257,9 +257,14 @@ class GitUp(object):
     def returning_to_current_branch(self):
         """ A contextmanager returning to the current branch. """
         if self.repo.head.is_detached:
-            print(colored("You're not currently on a branch. I'm exiting in"
+            print(colored("You're not currently on a branch. I'm exiting in "
                           "case you're in the middle of something.", 'red'))
-            sys.exit(1)
+            if self.testing:
+                raise GitError(message="You're not currently on a branch."
+                                       "I'm exiting in case you're in the "
+                                       "middle of something.")
+            else:
+                sys.exit(1)
 
         branch_name = self.repo.active_branch.name
 
