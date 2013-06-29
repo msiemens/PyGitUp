@@ -109,7 +109,7 @@ class GitWrapper():
                 error.status
             )
 
-            raise GitError(error.stderr, stdout)
+            raise GitError(stderr=error.stderr, stdout=stdout)
 
         return stdout.strip()
 
@@ -162,6 +162,7 @@ class GitWrapper():
             self.repo.remotes,
             lambda remote: remote.name == remote_name
         )
+
         return find(
             remote.refs,
             lambda ref: ref.name == "{0}/{1}".format(remote_name, remote_branch)
@@ -229,7 +230,7 @@ class GitError(GitCommandError):
     - details: a 'nested' exception with more details)
     """
 
-    def __init__(self, stderr=None, stdout=None, details=None, message=None):
+    def __init__(self, message=None, stderr=None, stdout=None, details=None):
         super(GitError, self).__init__(None, None, stderr)
         self.stdout = stdout
         self.details = details
@@ -245,7 +246,7 @@ class UnstashError(GitError):
     """
     def __init__(self, **kwargs):
         kwargs.pop('message', None)
-        GitError.__init__(self, message='Unstash failed!', **kwargs)
+        GitError.__init__(self, 'Unstash failed!', **kwargs)
 
 
 class CheckoutError(GitError):
@@ -254,7 +255,7 @@ class CheckoutError(GitError):
     """
     def __init__(self, branch_name, **kwargs):
         kwargs.pop('message', None)
-        GitError.__init__(self, message='Failed to checkout ' + branch_name,
+        GitError.__init__(self, 'Failed to checkout ' + branch_name,
                           **kwargs)
 
 
@@ -271,4 +272,4 @@ class RebaseError(GitError):
         message = "Failed to rebase {0} onto {1}".format(
             current_branch, target_branch
         )
-        GitError.__init__(self, message=message, **kwargs)
+        GitError.__init__(self, message, **kwargs)

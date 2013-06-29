@@ -62,8 +62,17 @@ class GitUp(object):
             self.repo = Repo(execute('git rev-parse --show-toplevel'),
                              odbt=GitCmdObjectDB)
         except IndexError:
-            print(colored("We don't seem to be in a git repository.", 'red'))
-            raise GitError(message="We don't seem to be in a git repository.")
+            exc = GitError("We don't seem to be in a git repository.")
+            self.print_error(exc)
+
+            raise exc
+
+        if len(self.repo.remotes) == 0:
+            exc = GitError("Can\'t update your repo because it doesn\'t has "
+                           "any remotes.")
+            self.print_error(exc)
+
+            raise exc
 
         self.git = GitWrapper(self.repo)
 
@@ -107,26 +116,9 @@ class GitUp(object):
                 self.check_bundler()
 
         except GitError as error:
+            self.print_error(error)
+
             # Used for test cases
-            print(colored(error.message, 'red'))
-
-            # Print more information about the error
-            if error.stdout or error.stderr:
-                print()
-                print("Here's what git said:")
-                print()
-
-                if error.stdout:
-                    print(error.stdout)
-                if error.stderr:
-                    print(error.stderr)
-
-            if error.details:
-                print()
-                print("Here's what we know:")
-                print(str(error.details))
-                print()
-
             if testing:
                 raise
 
@@ -257,14 +249,8 @@ class GitUp(object):
     def returning_to_current_branch(self):
         """ A contextmanager returning to the current branch. """
         if self.repo.head.is_detached:
-            print(colored("You're not currently on a branch. I'm exiting in "
-                          "case you're in the middle of something.", 'red'))
-            if self.testing:
-                raise GitError(message="You're not currently on a branch."
-                                       "I'm exiting in case you're in the "
-                                       "middle of something.")
-            else:
-                sys.exit(1)
+            raise GitError("You're not currently on a branch. I'm exiting"
+                           " in case you're in the middle of something.")
 
         branch_name = self.repo.active_branch.name
 
@@ -360,6 +346,30 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
                                            'check-bundler.rb')
         subprocess.call(['ruby', bundler_script, get_config('autoinstall'),
                          get_config('local'), get_config('rbenv')])
+
+    def print_error(self, error):
+        """
+        Print more information about an error.
+
+        :type error: GitError
+        """
+        print(colored(error.message, 'red'))
+
+        if error.stdout or error.stderr:
+            print()
+            print("Here's what git said:")
+            print()
+
+            if error.stdout:
+                print(error.stdout)
+            if error.stderr:
+                print(error.stderr)
+
+        if error.details:
+            print()
+            print("Here's what we know:")
+            print(str(error.details))
+            print()
 
 ###############################################################################
 
