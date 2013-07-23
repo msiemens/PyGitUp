@@ -131,7 +131,11 @@ class GitUp(object):
 
         for branch in self.branches:
             remote = self.remote_map[branch.name]
-            print(colored(branch.name.ljust(col_width), attrs=['bold']),
+            if branch.name == self.repo.active_branch.name:
+                attrs = ['bold']
+            else:
+                attrs = []
+            print(colored(branch.name.ljust(col_width), attrs=attrs),
                   end=' ')
 
             try:
