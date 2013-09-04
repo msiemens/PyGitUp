@@ -23,4 +23,4 @@ def test_not_a_git_repo():
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
-    GitUp()
+    GitUp(testing=True)

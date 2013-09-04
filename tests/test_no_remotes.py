@@ -25,4 +25,4 @@ def test_no_remotes():
     os.chdir(master_path)
 
     from PyGitUp.gitup import GitUp
-    GitUp()
+    GitUp(testing=True)

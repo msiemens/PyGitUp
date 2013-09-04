@@ -42,8 +42,8 @@ def test_diverged():
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
-    gitup = GitUp()
-    gitup.run(testing=True)
+    gitup = GitUp(testing=True)
+    gitup.run()
 
     assert_equal(len(gitup.states), 1)
     assert_equal(gitup.states[0], 'diverged')

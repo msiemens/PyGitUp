@@ -51,6 +51,6 @@ def test_bundler():
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
-    gitup = GitUp()
-    gitup.run(testing=True)
+    gitup = GitUp(testing=True)
+    gitup.run()
 

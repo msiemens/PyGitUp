@@ -29,6 +29,7 @@ def capture():
     import sys
     from cStringIO import StringIO
     oldout, olderr = sys.stdout, sys.stderr
+    out = None
     try:
         out = [StringIO(), StringIO()]
         sys.stdout, sys.stderr = out
@@ -64,6 +65,7 @@ def write_file(path, contents):
         f.write(contents)
 
 
+#noinspection PyDefaultArgument
 def update_file(repo, commit_message='', counter=[0]):
     """
     Update 'testfile_name' using an increasing counter and commit the changes.

@@ -48,5 +48,6 @@ def test_rebase_error():
     """ Run 'git up' with a failing rebase """
     os.chdir(repo_path)
 
-    from PyGitUp.gitup import run
-    run(testing=True)
+    from PyGitUp.gitup import GitUp
+    gitup = GitUp(testing=True)
+    gitup.run()

@@ -44,8 +44,8 @@ def test_remote_branch_deleted():
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
-    gitup = GitUp()
-    gitup.run(testing=True)
+    gitup = GitUp(testing=True)
+    gitup.run()
 
     assert_equal(len(gitup.states), 2)
     assert_equal(gitup.states[1], 'remote branch doesn\'t exist')

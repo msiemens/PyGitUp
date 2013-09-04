@@ -35,7 +35,7 @@ from PyGitUp.utils import find
 # GitWrapper
 ###############################################################################
 
-class GitWrapper():
+class GitWrapper(object):
     """
     A wrapper for repo.git providing better stdout handling + better exeptions.
 
@@ -59,7 +59,7 @@ class GitWrapper():
         # trying to remove the directory right after the test has finished).
         # 'clear_cache' kills the processes...
 
-        if (platform.system() == 'Windows'):
+        if platform.system() == 'Windows':
             pass
             # ... or rather "should kill", because but somehow it recently
             # started to not kill cat_file_header out of the blue (I even
@@ -109,7 +109,7 @@ class GitWrapper():
                 error.status
             )
 
-            raise GitError(stderr=error.stderr, stdout=stdout)
+            raise GitError(message, stderr=error.stderr, stdout=stdout)
 
         return stdout.strip()
 

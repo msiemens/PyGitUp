@@ -40,10 +40,10 @@ def test_fetchall():
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
-    gitup = GitUp()
+    gitup = GitUp(testing=True)
 
     with capture() as [stdout, _]:
-        gitup.run(testing=True)
+        gitup.run()
 
     stdout = stdout.getvalue()
 

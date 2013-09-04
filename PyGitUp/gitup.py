@@ -37,6 +37,7 @@ from tempfile import NamedTemporaryFile
 
 # 3rd party libs
 try:
+    #noinspection PyUnresolvedReferences
     import pkg_resources as pkg
 except ImportError:
     NO_DISTRIBUTE = True
@@ -72,7 +73,11 @@ PYPI_URL = 'https://pypi.python.org/pypi/git-up/json'
 class GitUp(object):
     """ Conainter class for GitUp methods """
 
-    def __init__(self):
+    def __init__(self, testing=False):
+        self.testing = testing
+        if testing:
+            self.stderr = sys.stdout  # Quiet testing
+
         self.states = []
 
         try:
@@ -118,10 +123,8 @@ class GitUp(object):
             self.git.status(porcelain=True, untracked_files='no').split('\n')
         )
 
-    def run(self, testing=False):
+    def run(self):
         """ Run all the git-up stuff. """
-        self.testing = testing
-
         try:
             self.fetch()
 
@@ -136,7 +139,7 @@ class GitUp(object):
             self.print_error(error)
 
             # Used for test cases
-            if testing:
+            if self.testing:
                 raise
             else:
                 sys.exit(1)
@@ -290,6 +293,7 @@ class GitUp(object):
             recent = local_version >= pkg.parse_version(online_version)
 
         if not recent:
+            #noinspection PyUnboundLocalVariable
             print(
                 '\rRecent version is: '
                 + colored('v' + online_version, color='yellow', attrs=['bold'])
@@ -422,28 +426,28 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
 
         :type error: GitError
         """
-        print(colored(error.message, 'red'), file=sys.stderr)
+        print(colored(error.message, 'red'), file=self.stderr)
 
         if error.stdout or error.stderr:
-            print(file=sys.stderr)
-            print("Here's what git said:", file=sys.stderr)
-            print(file=sys.stderr)
+            print(file=self.stderr)
+            print("Here's what git said:", file=self.stderr)
+            print(file=self.stderr)
 
             if error.stdout:
-                print(error.stdout, file=sys.stderr)
+                print(error.stdout, file=self.stderr)
             if error.stderr:
-                print(error.stderr, file=sys.stderr)
+                print(error.stderr, file=self.stderr)
 
         if error.details:
-            print(file=sys.stderr)
-            print("Here's what we know:", file=sys.stderr)
-            print(str(error.details), file=sys.stderr)
-            print(file=sys.stderr)
+            print(file=self.stderr)
+            print("Here's what we know:", file=self.stderr)
+            print(str(error.details), file=self.stderr)
+            print(file=self.stderr)
 
 ###############################################################################
 
 
-def run(*args, **kwargs):
+def run():
     if '--version' in sys.argv:
         if NO_DISTRIBUTE:
             print(colored('Please install \'git-up\' via pip in order to '
@@ -459,7 +463,7 @@ def run(*args, **kwargs):
         except GitError:
             sys.exit(1)  # Error in constructor
         else:
-            gitup.run(*args, **kwargs)
+            gitup.run()
 
 if __name__ == '__main__':
     run()
