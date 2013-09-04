@@ -38,9 +38,12 @@ def setup():
 
 def test_bundler():
     """ Run bundler integration """
+    if os.environ.get('TRAVIS', False):
+        raise SkipTest('Skip this test on Travis CI :(')
+
     def is_installed(prog):
         dev_null = open(os.devnull, 'wb')
-        return_value = subprocess.call([prog, '-v'], shell=True,
+        return_value = subprocess.call([prog, '--version'], shell=True,
                                        stdout=dev_null, stderr=dev_null)
         return return_value == 0
 
