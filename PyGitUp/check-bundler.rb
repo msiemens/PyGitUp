@@ -1,5 +1,13 @@
 # Code adapted from: https://github.com/aanand/git-up/blob/master/lib/git-up.rb#L162-L194
-require 'colored'
+begin
+  require 'colored'
+rescue LoadError
+  class String
+    def yellow
+      self
+    end
+  end
+end
 
 def check_bundler
   begin

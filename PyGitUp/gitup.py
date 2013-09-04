@@ -26,14 +26,16 @@ __all__ = ['GitUp']
 # Python libs
 import sys
 import os
-from contextlib import contextmanager
+import re
+import platform
 import subprocess
+from contextlib import contextmanager
+from tempfile import NamedTemporaryFile
 
 # 3rd party libs
+from git import Repo, GitCmdObjectDB
 import colorama
 from termcolor import colored
-
-from git import Repo, GitCmdObjectDB
 
 # PyGitUp libs
 from PyGitUp.utils import execute, uniq
@@ -45,19 +47,6 @@ from PyGitUp.git_wrapper import GitWrapper, GitError
 
 colorama.init(autoreset=True)
 
-###############################################################################
-# Setup global vars
-###############################################################################
-
-# Initialize frequently used globals
-try:
-    path = execute('git rev-parse --show-toplevel')
-except IndexError:
-    sys.exit(1)
-
-repo = Repo(path, odbt=GitCmdObjectDB)
-git = GitWrapper(repo)
-
 
 ###############################################################################
 # GitUp
@@ -67,17 +56,37 @@ class GitUp(object):
     """ Conainter class for GitUp methods """
 
     def __init__(self):
+        self.states = []
+
+        try:
+            self.repo = Repo(execute('git rev-parse --show-toplevel'),
+                             odbt=GitCmdObjectDB)
+        except IndexError:
+            exc = GitError("We don't seem to be in a git repository.")
+            self.print_error(exc)
+
+            raise exc
+
+        if len(self.repo.remotes) == 0:
+            exc = GitError("Can\'t update your repo because it doesn\'t has "
+                           "any remotes.")
+            self.print_error(exc)
+
+            raise exc
+
+        self.git = GitWrapper(self.repo)
+
         # remote_map: map local branch names to remote branches
         self.remote_map = dict()
 
-        for branch in repo.branches:
-            remote = git.remote_ref_for_branch(branch)
+        for branch in self.repo.branches:
+            remote = self.git.remote_ref_for_branch(branch)
             if remote:
                 self.remote_map[branch.name] = remote
 
         # branches: all local branches that has a corresponding remote branch
         self.branches = [
-            branch for branch in repo.branches
+            branch for branch in self.repo.branches
             if branch.name in list(self.remote_map.keys())
         ]
         self.branches.sort(key=lambda b: b.name)
@@ -89,15 +98,17 @@ class GitUp(object):
 
         # change_count
         self.change_count = len(
-            git.status(porcelain=True, untracked_files='no').split('\n')
+            self.git.status(porcelain=True, untracked_files='no').split('\n')
         )
 
-    def run(self):
+    def run(self, testing=False):
         """ Run all the git-up stuff. """
+        self.testing = testing
+
         try:
             self.fetch()
 
-            with git.stash():
+            with self.git.stash():
                 with self.returning_to_current_branch():
                     self.rebase_all_branches()
 
@@ -105,25 +116,11 @@ class GitUp(object):
                 self.check_bundler()
 
         except GitError as error:
-            print(colored(error.message, 'red'))
+            self.print_error(error)
 
-            # Print more information about the error
-            if error.stdout or error.stderr:
-                print()
-                print("Here's what git said:")
-                print()
-
-                if error.stdout:
-                    print(error.stdout)
-                if error.stderr:
-                    print(error.stderr)
-
-            if error.details:
-                print()
-                print("Here's what we know:")
-                print(str(error.details))
-                print()
-
+            # Used for test cases
+            if testing:
+                raise
 
     def rebase_all_branches(self):
         """ Rebase all branches, if possible. """
@@ -143,29 +140,40 @@ class GitUp(object):
             except ValueError:
                 # Remote branch doesn't exist!
                 print(colored('error: remote branch doesn\'t exist', 'red'))
+                self.states.append('remote branch doesn\'t exist')
+
                 continue
 
             if remote.commit.hexsha == branch.commit.hexsha:
                 print(colored('up to date', 'green'))
-                continue
+                self.states.append('up to date')
 
-            base = git.merge_base(branch.name, remote.name)
+                continue  # Do not do anything
+
+            base = self.git.merge_base(branch.name, remote.name)
 
             if base == remote.commit.hexsha:
                 print(colored('ahead of upstream', 'green'))
-                continue
+                self.states.append('ahead')
+
+                continue  # Do not do anything
 
             if base == branch.commit.hexsha:
                 print(colored('fast-forwarding...', 'yellow'))
+                self.states.append('fast-forwarding')
+
             elif self.config('rebase.auto') == 'false':
                 print(colored('diverged', 'red'))
-                continue
+                self.states.append('diverged')
+
+                continue  # Do not do anything
             else:
                 print(colored('rebasing', 'yellow'))
+                self.states.append('rebasing')
 
             self.log(branch, remote)
-            git.checkout(branch.name)
-            git.rebase(remote)
+            self.git.checkout(branch.name)
+            self.git.rebase(remote)
 
     def fetch(self):
         """
@@ -186,7 +194,7 @@ class GitUp(object):
             fetch_args.append(self.remotes)
 
         try:
-            git.fetch(tostdout=True, *fetch_args, **fetch_kwargs)
+            self.git.fetch(tostdout=True, *fetch_args, **fetch_kwargs)
         except GitError as error:
             error.message = "`git fetch` failed"
             raise error
@@ -194,11 +202,48 @@ class GitUp(object):
     def log(self, branch, remote):
         """ Call a log-command, if set by git-up.fetch.all. """
         log_hook = self.config('rebase.log-hook')
+
         if log_hook:
-            subprocess.call(
-                [log_hook, 'git-up', branch.name, remote.name],
-                shell=True
-            )
+            if platform.system() == 'Windows':
+                # Running a string in CMD from Python is not that easy on
+                # Windows. Running 'cmd /C log_hook' produces problems when
+                # using multiple statements or things like 'echo'. Therefore,
+                # we write the string to a bat file and execute it.
+
+                # In addition, we replace occurences of $1 with %1 and so forth
+                # in case the user is used to Bash or sh.
+                # Also, we replace a semicolon with a newline, because if you
+                # start with 'echo' on Windows, it will simply echo the
+                # semicolon and the commands behind instead of echoing and then
+                # running other commands
+
+                # Prepare log_hook
+                log_hook = re.sub(r'\$(\d+)', r'%\1', log_hook)
+                log_hook = re.sub(r'; ?', r'\n', log_hook)
+
+                # Write log_hook to an temporary file and get it's path
+                bat_file = NamedTemporaryFile(
+                    prefix='PyGitUp.', suffix='.bat', delete=False
+                )
+                bat_file.file.write('@echo off\n')  # Do not echo all commands
+                bat_file.file.write(log_hook)
+                bat_file.file.close()
+
+                # Run bat_file
+                state = subprocess.call(
+                    [bat_file.name, branch.name, remote.name]
+                )
+
+                # Clean up file
+                os.remove(bat_file.name)
+            else:
+                # Run log_hook via 'shell -c'
+                state = subprocess.call(
+                    [log_hook, 'git-up', branch.name, remote.name],
+                    shell=True
+                )
+            if self.testing:
+                assert state == 0, 'log_hook returned != 0'
 
     ###########################################################################
     # Helpers
@@ -207,22 +252,27 @@ class GitUp(object):
     @contextmanager
     def returning_to_current_branch(self):
         """ A contextmanager returning to the current branch. """
-        if repo.head.is_detached:
-            print(colored("You're not currently on a branch. I'm exiting in"
-                          "case you're in the middle of something.", 'red'))
-            sys.exit(1)
+        if self.repo.head.is_detached:
+            raise GitError("You're not currently on a branch. I'm exiting"
+                           " in case you're in the middle of something.")
 
-        branch_name = repo.active_branch.name
+        branch_name = self.repo.active_branch.name
 
         yield
 
-        if not repo.head.ref.name == branch_name:
+        if (
+                self.repo.head.is_detached  # Only on Travis CI,
+                # we get a detached head after doing our rebase *confused*.
+                # Running self.repo.active_branch would fail.
+            or
+                not self.repo.active_branch.name == branch_name
+        ):
             print(colored('returning to {0}'.format(branch_name), 'magenta'))
-            git.checkout(branch_name)
+            self.git.checkout(branch_name)
 
     def config(self, key):
         """ Get a git-up-specific config value. """
-        return git.config('git-up.{0}'.format(key))
+        return self.git.config('git-up.{0}'.format(key))
 
     def is_prune(self):
         """
@@ -234,14 +284,14 @@ class GitUp(object):
         required_version = "1.6.6"
         config_value = self.config("fetch.prune")
 
-        if git.is_version_min(required_version):
+        if self.git.is_version_min(required_version):
             return config_value != 'false'
         else:
             if config_value == 'true':
                 print(colored(
                     "Warning: fetch.prune is set to 'true' but your git "
                     "version doesn't seem to support it ({0} < {1}). Defaulting"
-                    " to 'false'.".format(git.version(), required_version),
+                    " to 'false'.".format(self.git.version(), required_version),
                     'yellow'
                 ))
 
@@ -296,16 +346,54 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
             return name if self.config('bundler.' + name) else ''
 
         from pkg_resources import Requirement, resource_filename
+        relative_path = os.path.join('PyGitUp', 'check-bundler.rb')
         bundler_script = resource_filename(Requirement.parse('git-up'),
-                                           'check-bundler.rb')
-        subprocess.call(['ruby', bundler_script, get_config('autoinstall'),
-                         get_config('local'), get_config('rbenv')])
+                                           relative_path)
+        assert os.path.exists(bundler_script), 'check-bundler.rb doesn\'t ' \
+                                               'exist!'
+
+        return_value = subprocess.call(
+            ['ruby', bundler_script, get_config('autoinstall'),
+             get_config('local'), get_config('rbenv')]
+        )
+
+        if self.testing:
+            assert return_value == 0, 'Errors while executing check-bundler.rb'
+
+    def print_error(self, error):
+        """
+        Print more information about an error.
+
+        :type error: GitError
+        """
+        print(colored(error.message, 'red'))
+
+        if error.stdout or error.stderr:
+            print()
+            print("Here's what git said:")
+            print()
+
+            if error.stdout:
+                print(error.stdout)
+            if error.stderr:
+                print(error.stderr)
+
+        if error.details:
+            print()
+            print("Here's what we know:")
+            print(str(error.details))
+            print()
 
 ###############################################################################
 
 
-def run():
-    GitUp().run()
+def run(*args, **kwargs):
+    try:
+        gitup = GitUp()
+    except GitError:
+        pass  # Error in constructor
+    else:
+        gitup.run(*args, **kwargs)
 
 if __name__ == '__main__':
     run()
