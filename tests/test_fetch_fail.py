@@ -1,6 +1,5 @@
 # System imports
 import os
-import platform
 from os.path import join
 
 # 3rd party libs
@@ -9,10 +8,9 @@ from git import *
 
 # PyGitup imports
 from PyGitUp.git_wrapper import GitError
-from tests import basepath, write_file, init_master, update_file
+from tests import basepath, init_master, update_file
 
 test_name = 'test-fail'
-
 repo_path = join(basepath, test_name + os.sep)
 
 

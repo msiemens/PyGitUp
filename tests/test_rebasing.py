@@ -1,6 +1,5 @@
 # System imports
 import os
-import subprocess
 from os.path import join
 
 # 3rd party libs
@@ -9,11 +8,10 @@ from git import *
 
 # PyGitup imports
 from tests import basepath, write_file, init_master, update_file, testfile_name
-from PyGitUp.git_wrapper import GitWrapper
 
 test_name = 'rebasing'
-
 repo_path = join(basepath, test_name + os.sep)
+
 
 def _read_file(path):
     with open(path) as f:

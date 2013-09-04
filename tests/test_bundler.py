@@ -11,7 +11,6 @@ from git import *
 from tests import basepath, write_file, init_master
 
 test_name = 'bundler'
-
 repo_path = join(basepath, test_name + os.sep)
 
 
@@ -40,7 +39,10 @@ def setup():
 def test_ahead_of_upstream():
     """ Run 'git up' with result: rebasing """
     def is_installed(prog):
-        return subprocess.call([prog, '-v'], shell=True, stdout=None) == 0
+        dev_null = open(os.devnull, 'wb')
+        return_value = subprocess.call([prog, '-v'], shell=True,
+                                       stdout=dev_null, stderr=dev_null)
+        return return_value == 0
 
     if not (is_installed('ruby') and is_installed('gem')):
         # Ruby not installed, skip test

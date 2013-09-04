@@ -7,17 +7,11 @@ from nose.tools import *
 from git import *
 
 # PyGitup imports
-from PyGitUp.git_wrapper import GitError
-from tests import basepath, write_file, init_master, update_file, testfile_name
+from tests import basepath, init_master, update_file
 
 test_name = 'returning-to-branch'
 new_branch_name = test_name + '.2'
-
 repo_path = join(basepath, test_name + os.sep)
-
-def _read_file(path):
-    with open(path) as f:
-        return f.read()
 
 
 def setup():
@@ -38,7 +32,7 @@ def setup():
     repo.git.checkout(b=new_branch_name)
 
     # Modify file in master
-    master_file = update_file(master, test_name)
+    update_file(master, test_name)
 
 
 def test_ahead_of_upstream():

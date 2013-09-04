@@ -7,12 +7,9 @@ from nose.tools import *
 from git import *
 
 # PyGitup imports
-from PyGitUp.git_wrapper import GitError
-from tests import basepath, write_file, init_master, capture
+from tests import basepath, init_master, capture
 
 test_name = 'fetch-all'
-testfile_name = 'file'
-
 repo_path = join(basepath, test_name + os.sep)
 
 
@@ -45,7 +42,7 @@ def test_ahead_of_upstream():
     from PyGitUp.gitup import GitUp
     gitup = GitUp()
 
-    with capture() as [stdout, stderr]:
+    with capture() as [stdout, _]:
         gitup.run(testing=True)
 
     stdout = stdout.getvalue()

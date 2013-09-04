@@ -12,7 +12,6 @@ from tests import basepath, write_file, init_master, wip
 
 test_name = 'unstash_error'
 testfile_name = 'file'
-
 repo_path = join(basepath, test_name + os.sep)
 
 

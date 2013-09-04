@@ -7,11 +7,9 @@ from nose.tools import *
 from git import *
 
 # PyGitup imports
-from PyGitUp.git_wrapper import GitError
-from tests import basepath, write_file, init_master, update_file
+from tests import basepath, init_master, update_file
 
 test_name = 'up-to-date'
-
 repo_path = join(basepath, test_name + os.sep)
 
 

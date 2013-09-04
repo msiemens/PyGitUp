@@ -7,17 +7,11 @@ from nose.tools import *
 from git import *
 
 # PyGitup imports
-from PyGitUp.git_wrapper import GitError
-from tests import basepath, write_file, init_master, update_file, testfile_name
+from tests import basepath, init_master
 
 test_name = 'remote-branch-deleted'
 new_branch_name = test_name + '.2'
-
 repo_path = join(basepath, test_name + os.sep)
-
-def _read_file(path):
-    with open(path) as f:
-        return f.read()
 
 
 def setup():

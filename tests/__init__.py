@@ -16,8 +16,6 @@ from nose.plugins.attrib import attr
 from nose.plugins.skip import SkipTest
 from git import *
 
-from PyGitUp.git_wrapper import GitWrapper
-
 basepath = mkdtemp(prefix='PyGitUp.')
 testfile_name = 'file.txt'
 
@@ -45,9 +43,10 @@ def capture():
         sys.stdout, sys.stderr = out
         yield out
     finally:
-        sys.stdout,sys.stderr = oldout, olderr
-        out[0] = out[0].getvalue()
-        out[1] = out[1].getvalue()
+        sys.stdout, sys.stderr = oldout, olderr
+        if out:
+            out[0] = out[0].getvalue()
+            out[1] = out[1].getvalue()
 
 def teardown():
     """
@@ -56,7 +55,7 @@ def teardown():
     import shutil
     import stat
 
-    def onerror(func, path, exc_info):
+    def onerror(func, path, _):
 
         if not os.access(path, os.W_OK):
             os.chmod(path, stat.S_IWUSR)

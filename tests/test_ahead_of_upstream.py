@@ -7,7 +7,6 @@ from nose.tools import *
 from git import *
 
 # PyGitup imports
-from PyGitUp.git_wrapper import GitError
 from tests import basepath, write_file, init_master
 
 test_name = 'ahead-of-upstream'

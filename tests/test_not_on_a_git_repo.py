@@ -1,6 +1,5 @@
 # System imports
 import os
-import subprocess
 from os.path import join
 
 # 3rd party libs
@@ -11,12 +10,7 @@ from tests import basepath
 from PyGitUp.git_wrapper import GitError
 
 test_name = 'not-on-a-repo'
-
 repo_path = join(basepath, test_name + os.sep)
-
-def _read_file(path):
-    with open(path) as f:
-        return f.read()
 
 
 def setup():
@@ -29,5 +23,4 @@ def test_ahead_of_upstream():
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
-    gitup = GitUp()
-    gitup.run(testing=True)
+    GitUp()

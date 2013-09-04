@@ -1,6 +1,5 @@
 # System imports
 import os
-import subprocess
 from os.path import join
 
 # 3rd party libs
@@ -8,16 +7,11 @@ from nose.tools import *
 from git import *
 
 # PyGitup imports
-from tests import basepath, write_file, init_master, update_file, testfile_name
-from PyGitUp.git_wrapper import GitWrapper, GitError
+from tests import basepath, init_master, update_file
+from PyGitUp.git_wrapper import GitError
 
 test_name = 'detached'
-
 repo_path = join(basepath, test_name + os.sep)
-
-def _read_file(path):
-    with open(path) as f:
-        return f.read()
 
 
 def setup():

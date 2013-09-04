@@ -8,11 +8,9 @@ from git import *
 
 # PyGitup imports
 from PyGitUp.git_wrapper import GitError
-from tests import basepath, write_file, init_master, update_file, wip, \
-    testfile_name
+from tests import basepath, write_file, init_master, update_file, testfile_name
 
 test_name = 'rebase_error'
-
 repo_path = join(basepath, test_name + os.sep)
 
 
@@ -31,7 +29,7 @@ def setup():
     assert repo.working_dir == path
 
     # Modify file in master
-    master_file = update_file(master, test_name)
+    update_file(master, test_name)
 
     # Modify file in our repo
     contents = 'completely changed!'
@@ -42,7 +40,7 @@ def setup():
     repo.index.commit(test_name)
 
     # Modify file in master
-    master_file = update_file(master, test_name)
+    update_file(master, test_name)
 
 
 @raises(GitError)
