@@ -31,6 +31,7 @@ import platform
 import json
 import urllib2
 import subprocess
+from cStringIO import StringIO
 from contextlib import contextmanager
 from tempfile import NamedTemporaryFile
 
@@ -137,6 +138,8 @@ class GitUp(object):
             # Used for test cases
             if testing:
                 raise
+            else:
+                sys.exit(1)
 
     def rebase_all_branches(self):
         """ Rebase all branches, if possible. """
@@ -419,23 +422,23 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
 
         :type error: GitError
         """
-        print(colored(error.message, 'red'))
+        print(colored(error.message, 'red'), file=sys.stderr)
 
         if error.stdout or error.stderr:
-            print()
-            print("Here's what git said:")
-            print()
+            print(file=sys.stderr)
+            print("Here's what git said:", file=sys.stderr)
+            print(file=sys.stderr)
 
             if error.stdout:
-                print(error.stdout)
+                print(error.stdout, file=sys.stderr)
             if error.stderr:
-                print(error.stderr)
+                print(error.stderr, file=sys.stderr)
 
         if error.details:
-            print()
-            print("Here's what we know:")
-            print(str(error.details))
-            print()
+            print(file=sys.stderr)
+            print("Here's what we know:", file=sys.stderr)
+            print(str(error.details), file=sys.stderr)
+            print(file=sys.stderr)
 
 ###############################################################################
 
@@ -448,10 +451,13 @@ def run(*args, **kwargs):
         else:
             GitUp().version_info()
     else:
+        if '--quiet' in sys.argv:
+            sys.stdout = StringIO()
+
         try:
             gitup = GitUp()
         except GitError:
-            pass  # Error in constructor
+            sys.exit(1)  # Error in constructor
         else:
             gitup.run(*args, **kwargs)
 
