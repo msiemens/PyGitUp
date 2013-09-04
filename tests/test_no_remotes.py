@@ -20,7 +20,7 @@ def setup():
 
 
 @raises(GitError)
-def test_ahead_of_upstream():
+def test_no_remotes():
     """ Run 'git up' w/o remotes """
     os.chdir(master_path)
 

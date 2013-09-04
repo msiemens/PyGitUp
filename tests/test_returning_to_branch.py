@@ -35,7 +35,7 @@ def setup():
     update_file(master, test_name)
 
 
-def test_ahead_of_upstream():
+def test_returning_to_branch():
     """ Run 'git up': return to branch """
     os.chdir(repo_path)
 

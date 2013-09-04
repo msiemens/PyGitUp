@@ -1,11 +1,4 @@
 # coding=utf-8
-
-"""
-Set up the GIT test environment.
-master: the master repo.
-test-*: clone for a specific test
-"""
-
 import os
 import contextlib
 from os.path import join
@@ -20,9 +13,6 @@ basepath = mkdtemp(prefix='PyGitUp.')
 testfile_name = 'file.txt'
 
 
-def fail(message):
-    raise AssertionError(message)
-
 def wip(f):
     @wraps(f)
     def run_test(*args, **kwargs):
@@ -30,8 +20,9 @@ def wip(f):
             f(*args, **kwargs)
         except Exception as e:
             raise SkipTest("WIP test failed: " + str(e))
-        fail("Passing test marked as WIP")
+        raise AssertionError("Passing test marked as WIP")
     return attr('wip')(run_test)
+
 
 @contextlib.contextmanager
 def capture():
@@ -48,9 +39,10 @@ def capture():
             out[0] = out[0].getvalue()
             out[1] = out[1].getvalue()
 
+
 def teardown():
     """
-     Cleanup created files
+     Cleanup created files and directories
     """
     import shutil
     import stat
@@ -73,6 +65,9 @@ def write_file(path, contents):
 
 
 def update_file(repo, commit_message='', counter=[0]):
+    """
+    Update 'testfile_name' using an increasing counter and commit the changes.
+    """
     counter[0] += 1  # See: http://stackoverflow.com/a/279592/997063
 
     path_file = join(repo.working_dir, testfile_name)
@@ -84,18 +79,28 @@ def update_file(repo, commit_message='', counter=[0]):
 
     return path_file
 
+
 def init_git(path):
+    """
+    Create a git repo in the given dir.
+    """
     os.chdir(path)
     os.popen('git init').read()
 
 
 def mkrepo(path):
+    """
+    Make a repository in 'path', create the the dir, if it doesn't exist.
+    """
     if not os.path.exists(path):
         os.makedirs(path, 0700)
     init_git(path)
 
 
 def init_master(test_name):
+    """
+    Initialize the master repo and create & commit a file.
+    """
     # Create repo
     path = join(basepath, 'master.' + test_name)
     mkrepo(path)

@@ -40,7 +40,7 @@ def setup():
 
 @wip
 @raises(CheckoutError)
-def test_fast_forwarded():
+def test_checkout_error():
     """ Run 'git up' with checkout errors """
     os.chdir(repo_path)
 

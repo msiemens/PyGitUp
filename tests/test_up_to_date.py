@@ -34,8 +34,8 @@ def setup():
     repo.remotes.origin.pull()
 
 
-def test_fast_forwarded():
-    """ Run 'git up' with result: fast-forwarded """
+def test_up_to_date():
+    """ Run 'git up' with result: up to date """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp

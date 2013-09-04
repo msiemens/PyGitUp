@@ -51,7 +51,7 @@ def setup():
 
 
 @raises(RebaseError)
-def test_ahead_of_upstream():
+def test_rebase_arguments():
     """ Run 'git up' with rebasing.arguments """
     os.chdir(repo_path)
 

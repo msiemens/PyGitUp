@@ -40,7 +40,7 @@ def setup():
 
 
 @raises(GitError)
-def test_ahead_of_upstream():
+def test_detached():
     """ Run 'git up' with detached head """
     os.chdir(repo_path)
 

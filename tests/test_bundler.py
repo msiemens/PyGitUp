@@ -36,8 +36,8 @@ def setup():
     assert repo.working_dir == path
 
 
-def test_ahead_of_upstream():
-    """ Run 'git up' with result: rebasing """
+def test_bundler():
+    """ Run bundler integration """
     def is_installed(prog):
         dev_null = open(os.devnull, 'wb')
         return_value = subprocess.call([prog, '-v'], shell=True,

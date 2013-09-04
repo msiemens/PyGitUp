@@ -18,7 +18,7 @@ def setup():
 
 
 @raises(GitError)
-def test_ahead_of_upstream():
+def test_not_a_git_repo():
     """ Run 'git up' being not on a git repo """
     os.chdir(repo_path)
 

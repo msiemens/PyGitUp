@@ -39,7 +39,7 @@ def setup():
     master.git.branch(new_branch_name, d=True)
 
 
-def test_ahead_of_upstream():
+def test_remote_branch_deleted():
     """ Run 'git up' with remotely deleted branch """
     os.chdir(repo_path)
 

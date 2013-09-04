@@ -45,7 +45,7 @@ def setup():
     repo.index.commit(test_name)
 
 
-def test_ahead_of_upstream():
+def test_rebasing():
     """ Run 'git up' with result: rebasing """
     os.chdir(repo_path)
 

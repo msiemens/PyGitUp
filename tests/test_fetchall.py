@@ -35,8 +35,8 @@ def setup():
     repo.git.remote('add', test_name, master_path2)
 
 
-def test_ahead_of_upstream():
-    """ Run 'git up' with result: ahead of upstream """
+def test_fetchall():
+    """ Run 'git up' with fetch.all """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp

@@ -32,7 +32,7 @@ def setup():
 
 
 def test_fast_forwarded():
-    """ Run 'git up' with result: up to date """
+    """ Run 'git up' with result: fast-forwarding """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp

@@ -36,7 +36,7 @@ def setup():
 
 
 @raises(GitError)
-def test_log_hook():
+def test_fetch_fail():
     """ Run 'git up' with a non-existent remote """
     os.chdir(repo_path)
 

@@ -37,7 +37,7 @@ def setup():
     update_file(repo, test_name)
 
 
-def test_ahead_of_upstream():
+def test_diverged():
     """ Run 'git up' with result: diverged """
     os.chdir(repo_path)
 
