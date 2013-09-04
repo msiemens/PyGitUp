@@ -1,8 +1,16 @@
 # coding=utf-8
 """
-Python implementation of git-up.
+git up -- like 'git pull', but polite
 
-Why use git-up? ``git pull` has two problems:
+Usage: git up [-h | --version | --quiet]
+
+Options:
+  -h            Show this screen.
+  --version     Show version (and if there is a newer version).
+  --quiet       Be quiet, only print error messages.
+
+
+Why use git-up? `git pull` has two problems:
   - It merges upstream changes by default, when it's really more polite to
     rebase over them, unless your collaborators enjoy a commit graph that
     looks like bedhead.
@@ -11,6 +19,12 @@ Why use git-up? ``git pull` has two problems:
     care about right now.
 (from the orignial git-up https://github.com/aanand/git-up/)
 
+
+For configuration options, please see https://github.com/msiemens/PyGitUp#readme
+or <path-to-PyGitUp>/README.rst.
+
+
+Python port of https://github.com/aanand/git-up/
 Project Author: Markus Siemens <markus@m-siemens.de>
 Project URL: https://github.com/msiemens/PyGitUp
 """
@@ -45,6 +59,7 @@ else:
     NO_DISTRIBUTE = False
 
 import colorama
+from docopt import docopt
 from git import Repo, GitCmdObjectDB
 from termcolor import colored
 
@@ -90,6 +105,8 @@ class GitUp(object):
         self.testing = testing
         if testing:
             self.stderr = sys.stdout  # Quiet testing
+        else:
+            self.stderr = sys.stderr
 
         self.states = []
 
@@ -483,14 +500,15 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
 
 
 def run():
-    if '--version' in sys.argv:
+    arguments = docopt(__doc__, ['up'] + sys.argv[1:])
+    if arguments['--version']:
         if NO_DISTRIBUTE:
             print(colored('Please install \'git-up\' via pip in order to '
                           'get version information.', 'yellow'))
         else:
             GitUp().version_info()
     else:
-        if '--quiet' in sys.argv:
+        if arguments['--quiet']:
             sys.stdout = StringIO()
 
         try:

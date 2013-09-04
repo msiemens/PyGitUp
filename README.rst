@@ -52,7 +52,7 @@ information. And don't forget to either:
   you,
 - run ``pip`` with admin privileges
 - or use ``pip install --user git-up`` and add ``%APPDATA%/Python/Scripts``
-  to %PATH%
+  to ``%PATH%``
 
 otherwise ``pip`` won't install due to ``Access denied`` errors.
 
@@ -85,7 +85,7 @@ options:
    ``git-up.bundler.autoinstall`` is also set to ``true`` or it won't do
    anything.
 
-- ``git-up.bundler.rbenv [true|false]:`` If you have rbenv installed,
+- ``git-up.bundler.rbenv [true|*false*]:`` If you have rbenv installed,
   you can tell ``PyGitUp`` to run ``rbenv rehash`` for you after it installs
   your gems so any binaries will be available right away. Make sure ``git-up
   .bundler.autoinstall`` is also set to ``true`` or it won't do anything.
