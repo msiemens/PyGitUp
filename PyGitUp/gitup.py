@@ -73,6 +73,19 @@ PYPI_URL = 'https://pypi.python.org/pypi/git-up/json'
 class GitUp(object):
     """ Conainter class for GitUp methods """
 
+    default_settings = {
+        'bundler.check': False,
+        'bundler.autoinstall': False,
+        'bundler.local': False,
+        'bundler.rbenv': False,
+        'fetch.prune': True,
+        'fetch.all': False,
+        'rebase.arguments': None,
+        'rebase.auto': True,
+        'rebase.log-hook': None,
+        'updates.check': True
+    }
+
     def __init__(self, testing=False):
         self.testing = testing
         if testing:
@@ -122,6 +135,10 @@ class GitUp(object):
         self.change_count = len(
             self.git.status(porcelain=True, untracked_files='no').split('\n')
         )
+
+        # Load configuration
+        self.settings = self.default_settings.copy()
+        self.load_config()
 
     def run(self):
         """ Run all the git-up stuff. """
@@ -184,7 +201,7 @@ class GitUp(object):
                 print(colored('fast-forwarding...', 'yellow'))
                 self.states.append('fast-forwarding')
 
-            elif self.config('rebase.auto') == 'false':
+            elif not self.settings['rebase.auto']:
                 print(colored('diverged', 'red'))
                 self.states.append('diverged')
 
@@ -210,7 +227,7 @@ class GitUp(object):
         if self.is_prune():
             fetch_kwargs['prune'] = True
 
-        if self.config('fetch.all'):
+        if self.settings['fetch.all']:
             fetch_kwargs['all'] = True
         else:
             fetch_args.append(self.remotes)
@@ -223,7 +240,7 @@ class GitUp(object):
 
     def log(self, branch, remote):
         """ Call a log-command, if set by git-up.fetch.all. """
-        log_hook = self.config('rebase.log-hook')
+        log_hook = self.settings['rebase.log-hook']
 
         if log_hook:
             if platform.system() == 'Windows':
@@ -277,7 +294,7 @@ class GitUp(object):
 
         print('GitUp version is: ' + colored('v' + local_version_str, 'green'))
 
-        if self.config('updates.check') == 'false':
+        if not self.settings['updates.check']:
             return
 
         # Check for updates
@@ -330,6 +347,24 @@ class GitUp(object):
             print(colored('returning to {0}'.format(branch_name), 'magenta'))
             self.git.checkout(branch_name)
 
+    def load_config(self):
+        """
+        Load the configuration from git config.
+        """
+        for key in self.settings:
+            value = self.config(key)
+            # Parse true/false
+            if value == '' or value is None:
+                continue  # Not set by user, go on
+            if value.lower() == 'true':
+                value = True
+            elif value.lower() == 'false':
+                value = False
+            elif value:
+                pass  # A user-defined string, store the value later
+
+            self.settings[key] = value
+
     def config(self, key):
         """ Get a git-up-specific config value. """
         return self.git.config('git-up.{0}'.format(key))
@@ -342,10 +377,10 @@ class GitUp(object):
         treatment.
         """
         required_version = "1.6.6"
-        config_value = self.config("fetch.prune")
+        config_value = self.settings['fetch.prune']
 
         if self.git.is_version_min(required_version):
-            return config_value != 'false'
+            return config_value != False
         else:
             if config_value == 'true':
                 print(colored(
@@ -389,7 +424,7 @@ git config git-up.bundler.check true
 
 Replace 'true' with 'false' to disable checking.''', 'yellow'))
 
-        if self.config('bundler.check') == 'true':
+        if self.settings['bundler.check']:
             return gemfile_exists()
 
         if ('GIT_UP_BUNDLER_CHECK' in os.environ
