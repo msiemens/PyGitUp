@@ -269,7 +269,7 @@ class RebaseError(GitError):
         kwargs.pop('command', None)
         kwargs.pop('status', None)
 
-        message = "Failed to rebase {0} onto {1}".format(
+        message = "Failed to rebase {1} onto {0}".format(
             current_branch, target_branch
         )
         GitError.__init__(self, message, **kwargs)

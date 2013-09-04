@@ -342,10 +342,19 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
             return name if self.config('bundler.' + name) else ''
 
         from pkg_resources import Requirement, resource_filename
+        relative_path = os.path.join('PyGitUp', 'check-bundler.rb')
         bundler_script = resource_filename(Requirement.parse('git-up'),
-                                           'check-bundler.rb')
-        subprocess.call(['ruby', bundler_script, get_config('autoinstall'),
-                         get_config('local'), get_config('rbenv')])
+                                           relative_path)
+        assert os.path.exists(bundler_script), 'check-bundler.rb doesn\'t ' \
+                                               'exist!'
+
+        return_value = subprocess.call(
+            ['ruby', bundler_script, get_config('autoinstall'),
+             get_config('local'), get_config('rbenv')]
+        )
+
+        if self.testing:
+            assert return_value == 0, 'Errors while executing check-bundler.rb'
 
     def print_error(self, error):
         """
