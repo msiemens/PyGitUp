@@ -28,13 +28,22 @@ import sys
 import os
 import re
 import platform
+import json
+import urllib2
 import subprocess
 from contextlib import contextmanager
 from tempfile import NamedTemporaryFile
 
 # 3rd party libs
-from git import Repo, GitCmdObjectDB
+try:
+    import pkg_resources as pkg
+except ImportError:
+    NO_DISTRIBUTE = True
+else:
+    NO_DISTRIBUTE = False
+
 import colorama
+from git import Repo, GitCmdObjectDB
 from termcolor import colored
 
 # PyGitUp libs
@@ -46,6 +55,13 @@ from PyGitUp.git_wrapper import GitWrapper, GitError
 ###############################################################################
 
 colorama.init(autoreset=True)
+
+
+###############################################################################
+# Setup constants
+###############################################################################
+
+PYPI_URL = 'https://pypi.python.org/pypi/git-up/json'
 
 
 ###############################################################################
@@ -245,6 +261,43 @@ class GitUp(object):
             if self.testing:
                 assert state == 0, 'log_hook returned != 0'
 
+    def version_info(self):
+        """ Tell, what version we're running at and if it's up to date. """
+
+        # Retrive and show local version info
+        package = pkg.get_distribution('git-up')
+        local_version_str = package.version
+        local_version = package.parsed_version
+
+        print('GitUp version is: ' + colored('v' + local_version_str, 'green'))
+
+        if self.config('updates.check') == 'false':
+            return
+
+        # Check for updates
+        print('Checking for updates...', end='')
+
+        try:
+            # Get version information from the PyPI JSON API
+            details = json.load(urllib2.urlopen(PYPI_URL))
+            online_version = details['info']['version']
+        except (urllib2.HTTPError, urllib2.URLError, ValueError):
+            recent = True  # To not disturb the user with HTTP/parsing errors
+        else:
+            recent = local_version >= pkg.parse_version(online_version)
+
+        if not recent:
+            print(
+                '\rRecent version is: '
+                + colored('v' + online_version, color='yellow', attrs=['bold'])
+            )
+            print('Run \'pip install -U git-up\' to get the update.')
+        else:
+            # Clear the update line
+            sys.stdout.write('\r' + ' ' * 80)
+
+
+
     ###########################################################################
     # Helpers
     ###########################################################################
@@ -388,12 +441,19 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
 
 
 def run(*args, **kwargs):
-    try:
-        gitup = GitUp()
-    except GitError:
-        pass  # Error in constructor
+    if '--version' in sys.argv:
+        if NO_DISTRIBUTE:
+            print(colored('Please install \'git-up\' via pip in order to '
+                          'get version information.', 'yellow'))
+        else:
+            GitUp().version_info()
     else:
-        gitup.run(*args, **kwargs)
+        try:
+            gitup = GitUp()
+        except GitError:
+            pass  # Error in constructor
+        else:
+            gitup.run(*args, **kwargs)
 
 if __name__ == '__main__':
     run()
