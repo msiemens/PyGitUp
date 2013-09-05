@@ -335,7 +335,7 @@ class GitUp(object):
             print('Run \'pip install -U git-up\' to get the update.')
         else:
             # Clear the update line
-            sys.stdout.write('\r' + ' ' * 80)
+            sys.stdout.write('\r' + ' ' * 80 + '\n')
 
 
 
