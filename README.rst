@@ -21,6 +21,11 @@ Why using ``git up``?
 
     (https://github.com/aanand/git-up/)
 
+Demonstration
+-------------
+
+.. image:: http://i.imgur.com/EC3pvYu.gif
+
 Why using the Python port?
 --------------------------
 
