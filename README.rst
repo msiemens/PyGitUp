@@ -2,18 +2,22 @@ PyGitUp |Build Status|
 ======================
 
 ``PyGitUp`` is a Python implementation of the great
-`aanand/git-up/ <https://github.com/aanand/git-up/>`__. Right now it
-fully covers the abilities of git-up and should be a drop-in
-replacement.
+`aanand/git-up/ <https://github.com/aanand/git-up/>`__. It not only
+fully covers the abilities of git-up and should be a drop-in replacement,
+but also extends it slightly.
 
 Why using ``git up``?
 ---------------------
 
     git pull has two problems:
 
-    * It merges upstream changes by default, when it's really more polite to `rebase over them <http://gitready.com/advanced/2009/02/11/pull-with-rebase.html>`__, unless your collaborators enjoy a commit graph that looks like bedhead.
+    * It merges upstream changes by default, when it's really more polite to `rebase
+      over them <http://gitready.com/advanced/2009/02/11/pull-with-rebase.html>`__,
+      unless your collaborators enjoy a commit graph that looks like bedhead.
 
-    * It only updates the branch you're currently on, which means git push will shout at you for being behind on branches you don't particularly care about right now.
+    * It only updates the branch you're currently on, which means git push will
+      shout at you for being behind on branches you don't particularly care about
+      right now.
 
     (https://github.com/aanand/git-up/)
 
@@ -27,12 +31,6 @@ and using this port are:
 
 1. Windows support.
 2. Written in Python ;)
-
-Is it stable?
--------------
-
-Yes, it should be stable now. If you nevertheless find errors, please
-report them `here <https://github.com/msiemens/PyGitUp/issues>`__.
 
 How do I install it?
 --------------------
@@ -113,11 +111,18 @@ options:
    work that you don't want to deal with at once, but still want to
    update other branches.
 
--  ``git-up.rebase.log-hook [cmd]:`` Runs ``cmd``\ every time a branch
+-  ``git-up.rebase.log-hook [cmd]:`` Runs ``cmd`` every time a branch
    is rebased or fast-forwarder, with the old head as ``$1`` and the new
    head as ``$2``. This can be used to view logs or diffs of incoming
    changes. Example:
-   '``echo "changes on $1:"; git log --oneline --decorate $1..$2``\ '
+   '``echo "changes on $1:"; git log --oneline --decorate $1..$2``'
+
+New in v1.0.0:
+~~~~~~~~~~~~~~
+
+- ``git-up.updates.check [*true*|false]:`` When running ``git up --version``,
+  it shows the version number and checks for updates. If you nevertheless
+  feel uncomfortable with it, just set it to ``false`` to turn off the checks.
 
 Credits
 -------
@@ -128,6 +133,19 @@ The original ``git-up`` has been written by aanand:
 
 Changelog
 ---------
+
+v1.0.0 (*2013-09-05*)
+~~~~~~~~~~~~~~~~~~~~~
+
+Finally ``PyGitUp`` reaches 1.0.0. You can consider it stable now :)
+
+- Added a comprehensive test suite, now with a coverage of about 90%.
+- Lots of code cleanup.
+- Added option ``-h`` to display a help screen (``--help`` **won't** work, because
+  ``git`` catchs this option and handles it before ``PyGitUp`` can do).
+- Added option ``--version`` to show, what version of ``PyGitUp`` is running.
+  Also checks for updates (can be disabled, see configuration).
+- Added option ``--quiet`` to be quiet and only display error messages.
 
 v0.2.3 (*2013-06-05*)
 ~~~~~~~~~~~~~~~~~~~~~

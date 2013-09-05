@@ -1,12 +1,28 @@
 # coding=utf-8
 from setuptools import setup, find_packages
+try:
+    from pip.req import parse_requirements
+except ImportError:
+    def requirements(f):
+        reqs = open(f, 'r').read().splitlines()
+        reqs = [r for r in reqs if not r.strip().startswith('#')]
+        return reqs
+else:
+    def requirements(f):
+        install_reqs = parse_requirements(f)
+        reqs = [str(r.req) for r in install_reqs]
+        return reqs
 
 setup(
     name = "git-up",
-    version = "0.2.3",
+    version = "1.0.0",
     packages = find_packages(),
     scripts = ['PyGitUp/gitup.py'],
-    install_requires = ['GitPython', 'colorama', 'termcolor'],
+    install_requires = requirements('requirements.txt'),
+
+    # Tests
+    test_suite="nose.collector",
+    tests_require = requirements('dev-requirements.txt'),
 
     entry_points = {
         'console_scripts': [
@@ -18,8 +34,7 @@ setup(
         'PyGitUp': ['check-bundler.rb']
     },
 
-    # development metadata
-    zip_safe = True,
+    zip_safe = False,
 
     # metadata for upload to PyPI
     author = "Markus Siemens",
@@ -29,7 +44,7 @@ setup(
     keywords = "git git-up",
     url = "https://github.com/msiemens/PyGitUp",
     classifiers  = [
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
