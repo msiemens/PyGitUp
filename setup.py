@@ -1,28 +1,16 @@
 # coding=utf-8
 from setuptools import setup, find_packages
-try:
-    from pip.req import parse_requirements
-except ImportError:
-    def requirements(f):
-        reqs = open(f, 'r').read().splitlines()
-        reqs = [r for r in reqs if not r.strip().startswith('#')]
-        return reqs
-else:
-    def requirements(f):
-        install_reqs = parse_requirements(f)
-        reqs = [str(r.req) for r in install_reqs]
-        return reqs
 
 setup(
     name = "git-up",
     version = "1.0.0",
     packages = find_packages(),
     scripts = ['PyGitUp/gitup.py'],
-    install_requires = requirements('requirements.txt'),
+    install_requires = ['GitPython==0.3.2.RC1', 'colorama==0.2.5', 'termcolor==1.1.0', 'docopt==0.6.1'],
 
     # Tests
     test_suite="nose.collector",
-    tests_require = requirements('dev-requirements.txt'),
+    tests_require = 'nose',
 
     entry_points = {
         'console_scripts': [
