@@ -97,4 +97,3 @@ def init_master(test_name):
     repo.git.checkout(b='initial')
 
     return path, repo
-

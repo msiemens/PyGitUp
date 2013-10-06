@@ -20,8 +20,8 @@ Why use git-up? `git pull` has two problems:
 (from the orignial git-up https://github.com/aanand/git-up/)
 
 
-For configuration options, please see https://github.com/msiemens/PyGitUp#readme
-or <path-to-PyGitUp>/README.rst.
+For configuration options, please see
+https://github.com/msiemens/PyGitUp#readme or <path-to-PyGitUp>/README.rst.
 
 
 Python port of https://github.com/aanand/git-up/
@@ -147,7 +147,7 @@ class GitUp(object):
 
         # branches: all local branches with tracking information
         self.branches = [b for b in self.repo.branches if b.tracking_branch()]
-        self.branches.sort(key=lambda b: b.name)
+        self.branches.sort(key=lambda br: br.name)
 
         # remotes: all remotes that are associated with local branches
         self.remotes = uniq(
@@ -188,7 +188,7 @@ class GitUp(object):
 
     def rebase_all_branches(self):
         """ Rebase all branches, if possible. """
-        col_width = max([len(b.name) for b in self.branches]) + 1
+        col_width = max(len(b.name) for b in self.branches) + 1
 
         for branch in self.branches:
             target = self.target_map[branch.name]
@@ -367,8 +367,6 @@ class GitUp(object):
             # Clear the update line
             sys.stdout.write('\r' + ' ' * 80 + '\n')
 
-
-
     ###########################################################################
     # Helpers
     ###########################################################################
@@ -427,13 +425,14 @@ class GitUp(object):
         config_value = self.settings['fetch.prune']
 
         if self.git.is_version_min(required_version):
-            return config_value != False
+            return config_value is not False
         else:
             if config_value == 'true':
                 print(colored(
-                    "Warning: fetch.prune is set to 'true' but your git "
-                    "version doesn't seem to support it ({0} < {1}). Defaulting"
-                    " to 'false'.".format(self.git.version(), required_version),
+                    "Warning: fetch.prune is set to 'true' but your git"
+                    "version doesn't seem to support it ({0} < {1})."
+                    "Defaulting to 'false'.".format(self.git.version,
+                                                    required_version),
                     'yellow'
                 ))
 

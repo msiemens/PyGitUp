@@ -145,17 +145,12 @@ class GitWrapper(object):
             except GitError as e:
                 raise UnstashError(stderr=e.stderr, stdout=e.stdout)
 
-    @property
-    def change_count(self):
-        """ The number of changes in the working directory. """
-        return len(
-            self.git.status(porcelain=True, untracked_files='no').split('\n')
-        )
-
     def checkout(self, branch_name):
         """ Checkout a branch by name. """
         try:
-            find(self.repo.branches, lambda b: b.name == branch_name).checkout()
+            find(
+                self.repo.branches, lambda b: b.name == branch_name
+            ).checkout()
         except OrigCheckoutError as e:
             raise CheckoutError(branch_name, details=e)
 
@@ -180,6 +175,15 @@ class GitWrapper(object):
         except GitCommandError:
             return None
 
+    @property
+    def change_count(self):
+        """ The number of changes in the working directory. """
+        return len(
+            self.git.status(porcelain=True, untracked_files='no').split(
+                '\n')
+        )
+
+    @property
     def version(self):
         """
         Return git's version as a list of numbers.
@@ -191,11 +195,11 @@ class GitWrapper(object):
 
     def is_version_min(self, required_version):
         """ Does git's version match the requirements? """
-        return self.version().split('.') >= required_version.split('.')
+        return self.version.split('.') >= required_version.split('.')
 
 
 ###############################################################################
-# GitError
+# GitError + subclasses
 ###############################################################################
 
 class GitError(GitCommandError):
@@ -204,7 +208,7 @@ class GitError(GitCommandError):
 
     New:
     - stdout
-    - details: a 'nested' exception with more details)
+    - details: a 'nested' exception with more details
     """
 
     def __init__(self, message=None, stderr=None, stdout=None, details=None):

@@ -56,4 +56,3 @@ def test_bundler():
     from PyGitUp.gitup import GitUp
     gitup = GitUp(testing=True)
     gitup.run()
-

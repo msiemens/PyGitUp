@@ -40,6 +40,6 @@ setup(
         "Topic :: Utilities"
     ],
 
-    long_description = open('README.rst', 'r').read()
+    long_description = open('README.rst').read()
     # could also include download_url etc.
 )

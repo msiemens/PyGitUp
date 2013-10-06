@@ -40,7 +40,7 @@ def setup():
     contents = contents.replace('line 1', 'line x')
     repo_file = join(path, testfile_name)
 
-    write_file(repo_file , contents)
+    write_file(repo_file, contents)
     repo.index.add([repo_file])
     repo.index.commit(test_name)
 
