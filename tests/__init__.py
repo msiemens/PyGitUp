@@ -23,14 +23,6 @@ def wip(f):
     return attr('wip')(run_test)
 
 
-def setup():
-    global repo
-    mkrepo(basepath)
-    repo = Repo(basepath)
-    update_file(repo, 'Initial commit')
-    repo.git.checkout(b='initial')
-
-
 def teardown():
     """
      Cleanup created files and directories
@@ -94,7 +86,15 @@ def init_master(test_name):
     Initialize the master repo and create & commit a file.
     """
     # Create repo
-    repo.git.checkout('initial', f=True)
+    path = os.path.join(basepath, 'master.' + test_name)
+    mkrepo(path)
+    repo = Repo(path)
 
-    return basepath, repo
+    assert repo.working_dir == path
+
+    # Add file
+    update_file(repo, 'Initial commit')
+    repo.git.checkout(b='initial')
+
+    return path, repo
 

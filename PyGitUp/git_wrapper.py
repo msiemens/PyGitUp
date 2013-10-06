@@ -145,29 +145,6 @@ class GitWrapper(object):
             except GitError as e:
                 raise UnstashError(stderr=e.stderr, stdout=e.stdout)
 
-    def remote_ref_for_branch(self, branch):
-        """ Get the remote reference for a local branch. """
-
-        # Get name of the remote containing the branch
-        remote_name = (self.config('branch.{0}.remote'.format(branch.name)) or
-                       'origin')
-
-        # Get name of the remote branch
-        remote_branch = (self.config('branch.{0}.merge'.format(branch.name)) or
-                         branch.name)
-        remote_branch = remote_branch.split('refs/heads/').pop()
-
-        # Search the remote reference
-        remote = find(
-            self.repo.remotes,
-            lambda remote: remote.name == remote_name
-        )
-
-        return find(
-            remote.refs,
-            lambda ref: ref.name == "{0}/{1}".format(remote_name, remote_branch)
-        )
-
     @property
     def change_count(self):
         """ The number of changes in the working directory. """
