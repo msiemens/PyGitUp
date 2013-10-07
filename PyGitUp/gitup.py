@@ -102,15 +102,13 @@ class GitUp(object):
     }
 
     def __init__(self, testing=False, sparse=False):
+        # Sparse init: config only
         if sparse:
             self.git = GitWrapper(None)
 
-        # Load configuration
-        self.settings = self.default_settings.copy()
-        self.load_config()
-
-        # Sparse init: config only
-        if sparse:
+            # Load configuration
+            self.settings = self.default_settings.copy()
+            self.load_config()
             return
 
         # Testing: redirect stderr to stdout
@@ -172,6 +170,10 @@ class GitUp(object):
         self.change_count = len(
             self.git.status(porcelain=True, untracked_files='no').split('\n')
         )
+
+        # Load configuration
+        self.settings = self.default_settings.copy()
+        self.load_config()
 
     def run(self):
         """ Run all the git-up stuff. """
