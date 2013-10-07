@@ -1,6 +1,5 @@
 # coding=utf-8
 import os
-import contextlib
 from os.path import join
 from tempfile import mkdtemp
 from functools import wraps
@@ -22,23 +21,6 @@ def wip(f):
             raise SkipTest("WIP test failed: " + str(e))
         raise AssertionError("Passing test marked as WIP")
     return attr('wip')(run_test)
-
-
-@contextlib.contextmanager
-def capture():
-    import sys
-    from cStringIO import StringIO
-    oldout, olderr = sys.stdout, sys.stderr
-    out = None
-    try:
-        out = [StringIO(), StringIO()]
-        sys.stdout, sys.stderr = out
-        yield out
-    finally:
-        sys.stdout, sys.stderr = oldout, olderr
-        if out:
-            out[0] = out[0].getvalue()
-            out[1] = out[1].getvalue()
 
 
 def teardown():
@@ -104,7 +86,7 @@ def init_master(test_name):
     Initialize the master repo and create & commit a file.
     """
     # Create repo
-    path = join(basepath, 'master.' + test_name)
+    path = os.path.join(basepath, 'master.' + test_name)
     mkrepo(path)
     repo = Repo(path)
 
@@ -115,4 +97,3 @@ def init_master(test_name):
     repo.git.checkout(b='initial')
 
     return path, repo
-

@@ -25,7 +25,7 @@ from contextlib import contextmanager
 
 # 3rd party libs
 from termcolor import colored  # Assume, colorama is already initialized
-from git import GitCommandError, CheckoutError as OrigCheckoutError
+from git import GitCommandError, CheckoutError as OrigCheckoutError, Git
 
 # PyGitUp libs
 from PyGitUp.utils import find
@@ -45,10 +45,14 @@ class GitWrapper(object):
     """
 
     def __init__(self, repo):
-        #: :type: git.Repo
-        self.repo = repo
-        #: :type: git.Git
-        self.git = self.repo.git
+        if repo:
+            #: :type: git.Repo
+            self.repo = repo
+            #: :type: git.Git
+            self.git = self.repo.git
+        else:
+            #: :type: git.Git
+            self.git = Git()
 
     def __del__(self):
         # Is the following true?
@@ -145,40 +149,12 @@ class GitWrapper(object):
             except GitError as e:
                 raise UnstashError(stderr=e.stderr, stdout=e.stdout)
 
-    def remote_ref_for_branch(self, branch):
-        """ Get the remote reference for a local branch. """
-
-        # Get name of the remote containing the branch
-        remote_name = (self.config('branch.{0}.remote'.format(branch.name)) or
-                       'origin')
-
-        # Get name of the remote branch
-        remote_branch = (self.config('branch.{0}.merge'.format(branch.name)) or
-                         branch.name)
-        remote_branch = remote_branch.split('refs/heads/').pop()
-
-        # Search the remote reference
-        remote = find(
-            self.repo.remotes,
-            lambda remote: remote.name == remote_name
-        )
-
-        return find(
-            remote.refs,
-            lambda ref: ref.name == "{0}/{1}".format(remote_name, remote_branch)
-        )
-
-    @property
-    def change_count(self):
-        """ The number of changes in the working directory. """
-        return len(
-            self.git.status(porcelain=True, untracked_files='no').split('\n')
-        )
-
     def checkout(self, branch_name):
         """ Checkout a branch by name. """
         try:
-            find(self.repo.branches, lambda b: b.name == branch_name).checkout()
+            find(
+                self.repo.branches, lambda b: b.name == branch_name
+            ).checkout()
         except OrigCheckoutError as e:
             raise CheckoutError(branch_name, details=e)
 
@@ -203,6 +179,15 @@ class GitWrapper(object):
         except GitCommandError:
             return None
 
+    @property
+    def change_count(self):
+        """ The number of changes in the working directory. """
+        return len(
+            self.git.status(porcelain=True, untracked_files='no').split(
+                '\n')
+        )
+
+    @property
     def version(self):
         """
         Return git's version as a list of numbers.
@@ -214,11 +199,11 @@ class GitWrapper(object):
 
     def is_version_min(self, required_version):
         """ Does git's version match the requirements? """
-        return self.version().split('.') >= required_version.split('.')
+        return self.version.split('.') >= required_version.split('.')
 
 
 ###############################################################################
-# GitError
+# GitError + subclasses
 ###############################################################################
 
 class GitError(GitCommandError):
@@ -227,7 +212,7 @@ class GitError(GitCommandError):
 
     New:
     - stdout
-    - details: a 'nested' exception with more details)
+    - details: a 'nested' exception with more details
     """
 
     def __init__(self, message=None, stderr=None, stdout=None, details=None):

@@ -7,9 +7,9 @@ from nose.tools import *
 from git import *
 
 # PyGitup imports
-from tests import basepath, write_file, init_master, update_file, testfile_name
+from tests import basepath, init_master, update_file
 
-test_name = 'rebasing'
+test_name = 'tracking'
 repo_path = join(basepath, test_name + os.sep)
 
 
@@ -30,23 +30,17 @@ def setup():
     master.clone(path, b=test_name)
     repo = Repo(path, odbt=GitCmdObjectDB)
 
+    # Rename test repo branch
+    repo.git.branch(test_name + '_renamed', m=True)
+
     assert repo.working_dir == path
 
     # Modify file in master
-    master_file = update_file(master, test_name)
-
-    # Modify file in our repo
-    contents = _read_file(master_file)
-    contents = contents.replace('line 1', 'line x')
-    repo_file = join(path, testfile_name)
-
-    write_file(repo_file, contents)
-    repo.index.add([repo_file])
-    repo.index.commit(test_name)
+    update_file(master, test_name)
 
 
-def test_rebasing():
-    """ Run 'git up' with result: rebasing """
+def test_tracking():
+    """ Run 'git up' with a local tracking branch """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
@@ -54,4 +48,4 @@ def test_rebasing():
     gitup.run()
 
     assert_equal(len(gitup.states), 1)
-    assert_equal(gitup.states[0], 'rebasing')
+    assert_equal(gitup.states[0], 'fast-forwarding')

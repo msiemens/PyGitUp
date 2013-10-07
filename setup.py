@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "git-up",
-    version = "1.0.0",
+    version = "1.1.0",
     packages = find_packages(),
     scripts = ['PyGitUp/gitup.py'],
     install_requires = ['GitPython==0.3.2.RC1', 'colorama==0.2.5', 'termcolor==1.1.0', 'docopt==0.6.1'],
@@ -40,6 +40,6 @@ setup(
         "Topic :: Utilities"
     ],
 
-    long_description = open('README.rst', 'r').read()
+    long_description = open('README.rst').read()
     # could also include download_url etc.
 )

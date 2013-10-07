@@ -20,8 +20,8 @@ Why use git-up? `git pull` has two problems:
 (from the orignial git-up https://github.com/aanand/git-up/)
 
 
-For configuration options, please see https://github.com/msiemens/PyGitUp#readme
-or <path-to-PyGitUp>/README.rst.
+For configuration options, please see
+https://github.com/msiemens/PyGitUp#readme or <path-to-PyGitUp>/README.rst.
 
 
 Python port of https://github.com/aanand/git-up/
@@ -64,7 +64,7 @@ from git import Repo, GitCmdObjectDB
 from termcolor import colored
 
 # PyGitUp libs
-from PyGitUp.utils import execute, uniq
+from PyGitUp.utils import execute, uniq, find
 from PyGitUp.git_wrapper import GitWrapper, GitError
 
 ###############################################################################
@@ -101,7 +101,19 @@ class GitUp(object):
         'updates.check': True
     }
 
-    def __init__(self, testing=False):
+    def __init__(self, testing=False, sparse=False):
+        if sparse:
+            self.git = GitWrapper(None)
+
+        # Load configuration
+        self.settings = self.default_settings.copy()
+        self.load_config()
+
+        # Sparse init: config only
+        if sparse:
+            return
+
+        # Testing: redirect stderr to stdout
         self.testing = testing
         if testing:
             self.stderr = sys.stdout  # Quiet testing
@@ -110,6 +122,7 @@ class GitUp(object):
 
         self.states = []
 
+        # Check, if we're in a git repo
         try:
             self.repo = Repo(execute('git rev-parse --show-toplevel'),
                              odbt=GitCmdObjectDB)
@@ -119,43 +132,46 @@ class GitUp(object):
 
             raise exc
 
-        if len(self.repo.remotes) == 0:
+        # Check for branch tracking informatino
+        if not any(b.tracking_branch() for b in self.repo.branches):
             exc = GitError("Can\'t update your repo because it doesn\'t has "
-                           "any remotes.")
+                           "any branches with tracking information.")
             self.print_error(exc)
 
             raise exc
 
         self.git = GitWrapper(self.repo)
 
-        # remote_map: map local branch names to remote branches
-        self.remote_map = dict()
+        # target_map: map local branch names to remote tracking branches
+        self.target_map = dict()
 
         for branch in self.repo.branches:
-            remote = self.git.remote_ref_for_branch(branch)
-            if remote:
-                self.remote_map[branch.name] = remote
+            target = branch.tracking_branch()
 
-        # branches: all local branches that has a corresponding remote branch
-        self.branches = [
-            branch for branch in self.repo.branches
-            if branch.name in list(self.remote_map.keys())
-        ]
-        self.branches.sort(key=lambda b: b.name)
+            if target:
+                if target.name.startswith('./'):
+                    # Tracking branch is in local repo
+                    target.is_local = True
+                else:
+                    target.is_local = False
+
+                self.target_map[branch.name] = target
+
+        # branches: all local branches with tracking information
+        self.branches = [b for b in self.repo.branches if b.tracking_branch()]
+        self.branches.sort(key=lambda br: br.name)
 
         # remotes: all remotes that are associated with local branches
         self.remotes = uniq(
-            [r.name.split('/', 2)[0] for r in list(self.remote_map.values())]
+            # name = '<remote>/<branch>' -> '<remote>'
+            [r.name.split('/', 2)[0]
+             for r in list(self.target_map.values())]
         )
 
-        # change_count
+        # change_count: Number of unstaged changes
         self.change_count = len(
             self.git.status(porcelain=True, untracked_files='no').split('\n')
         )
-
-        # Load configuration
-        self.settings = self.default_settings.copy()
-        self.load_config()
 
     def run(self):
         """ Run all the git-up stuff. """
@@ -180,10 +196,12 @@ class GitUp(object):
 
     def rebase_all_branches(self):
         """ Rebase all branches, if possible. """
-        col_width = max([len(b.name) for b in self.branches]) + 1
+        col_width = max(len(b.name) for b in self.branches) + 1
 
         for branch in self.branches:
-            remote = self.remote_map[branch.name]
+            target = self.target_map[branch.name]
+
+            # Print branch name
             if branch.name == self.repo.active_branch.name:
                 attrs = ['bold']
             else:
@@ -191,24 +209,38 @@ class GitUp(object):
             print(colored(branch.name.ljust(col_width), attrs=attrs),
                   end=' ')
 
+            # Check, if target branch exists
             try:
-                remote.commit
-            except ValueError:
+                if target.name.startswith('./'):
+                    # Check, if local branch exists
+                    self.git.rev_parse(target.name[2:])
+
+                else:
+                    # Check, if remote branch exists
+                    _ = target.commit
+
+            except (ValueError, GitError):
                 # Remote branch doesn't exist!
                 print(colored('error: remote branch doesn\'t exist', 'red'))
                 self.states.append('remote branch doesn\'t exist')
 
                 continue
 
-            if remote.commit.hexsha == branch.commit.hexsha:
+            # Get tracking branch
+            if target.is_local:
+                target = find(self.repo.branches,
+                              lambda b: b.name == target.name[2:])
+
+            # Check status and act appropriately
+            if target.commit.hexsha == branch.commit.hexsha:
                 print(colored('up to date', 'green'))
                 self.states.append('up to date')
 
                 continue  # Do not do anything
 
-            base = self.git.merge_base(branch.name, remote.name)
+            base = self.git.merge_base(branch.name, target.name)
 
-            if base == remote.commit.hexsha:
+            if base == target.commit.hexsha:
                 print(colored('ahead of upstream', 'green'))
                 self.states.append('ahead')
 
@@ -227,9 +259,9 @@ class GitUp(object):
                 print(colored('rebasing', 'yellow'))
                 self.states.append('rebasing')
 
-            self.log(branch, remote)
+            self.log(branch, target)
             self.git.checkout(branch.name)
-            self.git.rebase(remote)
+            self.git.rebase(target)
 
     def fetch(self):
         """
@@ -248,6 +280,10 @@ class GitUp(object):
             fetch_kwargs['all'] = True
         else:
             fetch_args.append(self.remotes)
+
+            if fetch_args[-1] == ['.']:
+                # Only local target branches, `git fetch --multiple` will fail
+                return
 
         try:
             self.git.fetch(tostdout=True, *fetch_args, **fetch_kwargs)
@@ -278,12 +314,13 @@ class GitUp(object):
                 log_hook = re.sub(r'; ?', r'\n', log_hook)
 
                 # Write log_hook to an temporary file and get it's path
-                bat_file = NamedTemporaryFile(
-                    prefix='PyGitUp.', suffix='.bat', delete=False
-                )
-                bat_file.file.write('@echo off\n')  # Do not echo all commands
-                bat_file.file.write(log_hook)
-                bat_file.file.close()
+                with NamedTemporaryFile(
+                        prefix='PyGitUp.', suffix='.bat', delete=False
+                ) as bat_file:
+                    # Don't echo all commands
+                    bat_file.file.write('@echo off\n')
+                    # Run log_hook
+                    bat_file.file.write(log_hook)
 
                 # Run bat_file
                 state = subprocess.call(
@@ -298,6 +335,7 @@ class GitUp(object):
                     [log_hook, 'git-up', branch.name, remote.name],
                     shell=True
                 )
+
             if self.testing:
                 assert state == 0, 'log_hook returned != 0'
 
@@ -336,8 +374,6 @@ class GitUp(object):
         else:
             # Clear the update line
             sys.stdout.write('\r' + ' ' * 80 + '\n')
-
-
 
     ###########################################################################
     # Helpers
@@ -397,13 +433,14 @@ class GitUp(object):
         config_value = self.settings['fetch.prune']
 
         if self.git.is_version_min(required_version):
-            return config_value != False
+            return config_value is not False
         else:
             if config_value == 'true':
                 print(colored(
-                    "Warning: fetch.prune is set to 'true' but your git "
-                    "version doesn't seem to support it ({0} < {1}). Defaulting"
-                    " to 'false'.".format(self.git.version(), required_version),
+                    "Warning: fetch.prune is set to 'true' but your git"
+                    "version doesn't seem to support it ({0} < {1})."
+                    "Defaulting to 'false'.".format(self.git.version,
+                                                    required_version),
                     'yellow'
                 ))
 
@@ -506,7 +543,7 @@ def run():
             print(colored('Please install \'git-up\' via pip in order to '
                           'get version information.', 'yellow'))
         else:
-            GitUp().version_info()
+            GitUp(sparse=True).version_info()
     else:
         if arguments['--quiet']:
             sys.stdout = StringIO()

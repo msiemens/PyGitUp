@@ -139,6 +139,27 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.1.0 (*2013-10-07*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Prior to v1.1.0, ``PyGitUp`` tried to guess the upstream branch for a local
+  branch by looking for a branch on any remote with the same name. With v1.1.0,
+  ``PyGitUp`` stops guessing and uses the upstream branch config instead.
+
+  This by the way fixes issue `#6 <https://github.com/msiemens/PyGitUp/issues/6>`__
+  (``git up`` doesn't work with local only branches).
+
+  **Note:**
+  This change may break setups, where a local branch accidently has
+  the same name as a remote branch without any tracking information set. Prior
+  to v1.1.0, ``git up`` would still fetch and rebase from the remote branch.
+  If you run into troubles with such a setup, setting tracking information
+  using ``git branch -u <remote>/<remote branch> <local branch>`` should help.
+
+- 3rd party dependencies have been updated.
+
+- Allows to run ``git up --version`` from non-git dirs, too.
+
 v1.0.0 (*2013-09-05*)
 ~~~~~~~~~~~~~~~~~~~~~
 
