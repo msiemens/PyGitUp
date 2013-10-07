@@ -25,7 +25,7 @@ from contextlib import contextmanager
 
 # 3rd party libs
 from termcolor import colored  # Assume, colorama is already initialized
-from git import GitCommandError, CheckoutError as OrigCheckoutError
+from git import GitCommandError, CheckoutError as OrigCheckoutError, Git
 
 # PyGitUp libs
 from PyGitUp.utils import find
@@ -45,10 +45,14 @@ class GitWrapper(object):
     """
 
     def __init__(self, repo):
-        #: :type: git.Repo
-        self.repo = repo
-        #: :type: git.Git
-        self.git = self.repo.git
+        if repo:
+            #: :type: git.Repo
+            self.repo = repo
+            #: :type: git.Git
+            self.git = self.repo.git
+        else:
+            #: :type: git.Git
+            self.git = Git()
 
     def __del__(self):
         # Is the following true?

@@ -101,7 +101,19 @@ class GitUp(object):
         'updates.check': True
     }
 
-    def __init__(self, testing=False):
+    def __init__(self, testing=False, sparse=False):
+        if sparse:
+            self.git = GitWrapper(None)
+
+        # Load configuration
+        self.settings = self.default_settings.copy()
+        self.load_config()
+
+        # Sparse init: config only
+        if sparse:
+            return
+
+        # Testing: redirect stderr to stdout
         self.testing = testing
         if testing:
             self.stderr = sys.stdout  # Quiet testing
@@ -160,10 +172,6 @@ class GitUp(object):
         self.change_count = len(
             self.git.status(porcelain=True, untracked_files='no').split('\n')
         )
-
-        # Load configuration
-        self.settings = self.default_settings.copy()
-        self.load_config()
 
     def run(self):
         """ Run all the git-up stuff. """
@@ -535,7 +543,7 @@ def run():
             print(colored('Please install \'git-up\' via pip in order to '
                           'get version information.', 'yellow'))
         else:
-            GitUp().version_info()
+            GitUp(sparse=True).version_info()
     else:
         if arguments['--quiet']:
             sys.stdout = StringIO()
