@@ -140,7 +140,7 @@ Changelog
 ---------
 
 v1.1.1 (*2013-10-07*)
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 - Fix for `#7 <https://github.com/msiemens/PyGitUp/issues/6>`__
   (AttributeError: 'GitUp' object has no attribute 'git') introduced by
