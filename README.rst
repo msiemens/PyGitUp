@@ -139,8 +139,13 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.1.2 (*2013-10-08*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Fixed problems with the dependency declaration.
+
 v1.1.1 (*2013-10-07*)
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 - Fix for `#7 <https://github.com/msiemens/PyGitUp/issues/6>`__
   (AttributeError: 'GitUp' object has no attribute 'git') introduced by
