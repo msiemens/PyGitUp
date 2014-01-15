@@ -243,7 +243,7 @@ class GitUp(object):
             base = self.git.merge_base(branch.name, target.name)
 
             if base == target.commit.hexsha:
-                print(colored('ahead of upstream', 'green'))
+                print(colored('ahead of upstream', 'cyan'))
                 self.states.append('ahead')
 
                 continue  # Do not do anything
