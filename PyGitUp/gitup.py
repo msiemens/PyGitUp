@@ -312,9 +312,11 @@ class GitUp(object):
                 # running other commands
 
                 # Prepare log_hook
+                log_hook = re.sub(r'\%', '%%', log_hook)
                 log_hook = re.sub(r'\$(\d+)', r'%\1', log_hook)
                 log_hook = re.sub(r'; ?', r'\n', log_hook)
-
+                log_hook = re.sub(r'\'', '"', log_hook)
+				
                 # Write log_hook to an temporary file and get it's path
                 with NamedTemporaryFile(
                         prefix='PyGitUp.', suffix='.bat', delete=False
