@@ -243,7 +243,7 @@ class GitUp(object):
             base = self.git.merge_base(branch.name, target.name)
 
             if base == target.commit.hexsha:
-                print(colored('ahead of upstream', 'green'))
+                print(colored('ahead of upstream', 'cyan'))
                 self.states.append('ahead')
 
                 continue  # Do not do anything
@@ -283,9 +283,11 @@ class GitUp(object):
         else:
             fetch_args.append(self.remotes)
 
-            if fetch_args[-1] == ['.']:
+            if fetch_args == ['.']:
                 # Only local target branches, `git fetch --multiple` will fail
                 return
+            elif '.' in fetch_args[-1]:
+                fetch_args[-1].remove('.')
 
         try:
             self.git.fetch(tostdout=True, *fetch_args, **fetch_kwargs)
@@ -306,6 +308,9 @@ class GitUp(object):
 
                 # In addition, we replace occurences of $1 with %1 and so forth
                 # in case the user is used to Bash or sh.
+                # If there are occurences of %something, we'll replace it with
+                # %%something. This is the case when running something like
+                # 'git log --pretty=format:"%Cred%h..."'.
                 # Also, we replace a semicolon with a newline, because if you
                 # start with 'echo' on Windows, it will simply echo the
                 # semicolon and the commands behind instead of echoing and then
@@ -313,6 +318,7 @@ class GitUp(object):
 
                 # Prepare log_hook
                 log_hook = re.sub(r'\$(\d+)', r'%\1', log_hook)
+                log_hook = re.sub(r'%(?!\d)', '%%', log_hook)
                 log_hook = re.sub(r'; ?', r'\n', log_hook)
 
                 # Write log_hook to an temporary file and get it's path
