@@ -139,6 +139,12 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.1.3 (*2014-03-23*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- ``ahead of upstream`` messages are now cyan (see `aanand/git-up#60 <https://github.com/aanand/git-up/issues/60>`__)
+- Fixed problem when using % in the log hook (`#1 <https://github.com/msiemens/PyGitUp/issues/11>`__)
+
 v1.1.2 (*2013-10-08*)
 ~~~~~~~~~~~~~~~~~~~~~
 
