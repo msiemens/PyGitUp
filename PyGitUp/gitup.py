@@ -308,6 +308,9 @@ class GitUp(object):
 
                 # In addition, we replace occurences of $1 with %1 and so forth
                 # in case the user is used to Bash or sh.
+                # If there are occurences of %something, we'll replace it with
+                # %%something. This is the case when running something like
+                # 'git log --pretty=format:"%Cred%h..."'.
                 # Also, we replace a semicolon with a newline, because if you
                 # start with 'echo' on Windows, it will simply echo the
                 # semicolon and the commands behind instead of echoing and then
@@ -315,6 +318,7 @@ class GitUp(object):
 
                 # Prepare log_hook
                 log_hook = re.sub(r'\$(\d+)', r'%\1', log_hook)
+                log_hook = re.sub(r'%(?!\d)', '%%', log_hook)
                 log_hook = re.sub(r'; ?', r'\n', log_hook)
 
                 # Write log_hook to an temporary file and get it's path
