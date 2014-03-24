@@ -2,9 +2,9 @@ PyGitUp |Build Status|
 ======================
 
 ``PyGitUp`` is a Python implementation of the great
-`aanand/git-up/ <https://github.com/aanand/git-up/>`__. It not only
-fully covers the abilities of git-up and should be a drop-in replacement,
-but also extends it slightly.
+`aanand/git-up/ <https://github.com/aanand/git-up/>`__. It fully covers all
+features of git-up and should be a drop-in replacement, and even extends it
+slightly.
 
 Why using ``git up``?
 ---------------------
@@ -42,7 +42,7 @@ How do I install it?
 
 1. Run ``$ pip install git-up``
 2. ``cd`` to your project's directory.
-3. Run ``git up`` enjoy!
+3. Run ``git up`` and enjoy!
 
 Note for Windows users:
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,18 +55,31 @@ information. And don't forget to either:
   you,
 - run ``pip`` with admin privileges
 - or use ``pip install --user git-up`` and add ``%APPDATA%/Python/Scripts``
-  to ``%PATH%``
+  to ``%PATH%``.
 
-otherwise ``pip`` won't install due to ``Access denied`` errors.
+Otherwise ``pip`` won't install due to ``Access denied`` errors.
 
-Compatibility note:
-~~~~~~~~~~~~~~~~~~~
+Python 3 compatibility:
+~~~~~~~~~~~~~~~~~~~~~~~
 
 ``PyGitUp`` is not compatible with Python 3 because some essential 3rd party
 libs don't support it. Sorry.
 
-How to configure it?
---------------------
+Options and Configuration
+-------------------------
+
+Command Line Arguments
+~~~~~~~~~~~~~~~~~~~~~~
+
+- ``git up -h`` shows a help message.
+
+- ``git up --quiet`` suppresses all output except for error messages.
+
+- ``git up --version`` shows the current version and optionally checks for
+  updates (see below).
+
+Configuration
+~~~~~~~~~~~~~
 
 To configure ``PyGitUp``, you can set options in your git config. Run
 ``git config [--global] git-up.[name] [value]`` to set one of these
@@ -126,8 +139,8 @@ New in v1.0.0:
 ~~~~~~~~~~~~~~
 
 - ``git-up.updates.check [*true*|false]:`` When running ``git up --version``,
-  it shows the version number and checks for updates. If you nevertheless
-  feel uncomfortable with it, just set it to ``false`` to turn off the checks.
+  it shows the version number and checks for updates. If you feel
+  uncomfortable with it, just set it to ``false`` to turn off the checks.
 
 Credits
 -------
@@ -143,7 +156,7 @@ v1.1.3 (*2014-03-23*)
 ~~~~~~~~~~~~~~~~~~~~~
 
 - ``ahead of upstream`` messages are now cyan (see `aanand/git-up#60 <https://github.com/aanand/git-up/issues/60>`__)
-- Fixed problem when using % in the log hook (`#1 <https://github.com/msiemens/PyGitUp/issues/11>`__)
+- Fixed problem when using % in the log hook (`#11 <https://github.com/msiemens/PyGitUp/issues/11>`__)
 
 v1.1.2 (*2013-10-08*)
 ~~~~~~~~~~~~~~~~~~~~~
@@ -186,7 +199,7 @@ Finally ``PyGitUp`` reaches 1.0.0. You can consider it stable now :)
 - Added a comprehensive test suite, now with a coverage of about 90%.
 - Lots of code cleanup.
 - Added option ``-h`` to display a help screen (``--help`` **won't** work, because
-  ``git`` catchs this option and handles it before ``PyGitUp`` can do).
+  ``git`` catches this option and handles it before ``PyGitUp`` can do).
 - Added option ``--version`` to show, what version of ``PyGitUp`` is running.
   Also checks for updates (can be disabled, see configuration).
 - Added option ``--quiet`` to be quiet and only display error messages.
