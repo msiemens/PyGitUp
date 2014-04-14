@@ -15,7 +15,7 @@ install:
   - pip install coveralls
 
 # command to run tests, e.g. python setup.py test
-script: nosetests -v --with-coverage
+script: nosetests -v --with-coverage --cover-package=PyGitUp
 
 after_success:
   - coverage report
