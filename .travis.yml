@@ -18,5 +18,4 @@ install:
 script: nosetests -v --with-coverage --cover-package=PyGitUp
 
 after_success:
-  - coverage report
   - coveralls
