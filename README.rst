@@ -228,4 +228,7 @@ v0.1 (*2013-03-14*)
 .. |Build Status| image:: https://travis-ci.org/msiemens/PyGitUp.png?branch=dev
    :target: https://travis-ci.org/msiemens/PyGitUp
 
-.. |Coverage Status| image:: https://coveralls.io/repos/hugovk/PyGitUp/badge.png?branch=coverage :target: https://coveralls.io/r/hugovk/PyGitUp?branch=coverage
+.. |Coverage Status| image:: https://coveralls.io/repos/hugovk/PyGitUp/badge.png?branch=coverage
+  :target: https://coveralls.io/r/hugovk/PyGitUp?branch=coverage
+
+
