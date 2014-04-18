@@ -17,7 +17,7 @@ Why use git-up? `git pull` has two problems:
   - It only updates the branch you're currently on, which means git push
     will shout at you for being behind on branches you don't particularly
     care about right now.
-(from the orignial git-up https://github.com/aanand/git-up/)
+(from the original git-up https://github.com/aanand/git-up/)
 
 
 For configuration options, please see

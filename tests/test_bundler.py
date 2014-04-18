@@ -1,5 +1,6 @@
 # System imports
 import os
+import platform
 import subprocess
 from os.path import join
 
@@ -38,16 +39,25 @@ def setup():
 
 def test_bundler():
     """ Run bundler integration """
+    shell = True if platform.system() == 'Windows' else False
+
     if os.environ.get('TRAVIS', False):
         raise SkipTest('Skip this test on Travis CI :(')
 
+    # Helper methods
     def is_installed(prog):
         dev_null = open(os.devnull, 'wb')
-        return_value = subprocess.call([prog, '--version'], shell=True,
+        return_value = subprocess.call([prog, '--version'], shell=shell,
                                        stdout=dev_null, stderr=dev_null)
         return return_value == 0
 
-    if not (is_installed('ruby') and is_installed('gem')):
+    def get_output(cmd):
+        return subprocess.check_output(cmd, shell=shell)
+
+    # Check for ruby and bundler
+    if not (is_installed('ruby') and is_installed('gem')
+            and 'bundler' in get_output(['gem', 'list'])):
+
         # Ruby not installed, skip test
         raise SkipTest('Ruby not installed, skipped Bundler integration test')
 
