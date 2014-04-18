@@ -134,11 +134,11 @@ class GitWrapper(object):
 
         if self.repo.is_dirty():
             if self.change_count > 1:
-                text = 'stashing {0} changes'
+                message = 'stashing {0} changes'
             else:
-                text = 'stashing {0} change'
+                message = 'stashing {0} change'
             print(colored(
-                text.format(self.change_count),
+                message.format(self.change_count),
                 'magenta'
             ))
             self.git.stash()
