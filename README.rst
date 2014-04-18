@@ -152,6 +152,12 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.1.4 (*2014-04-18*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Fixed some typos in README and ``PyGitUp`` output.
+- 3rd party dependencies have been updated.
+
 v1.1.3 (*2014-03-23*)
 ~~~~~~~~~~~~~~~~~~~~~
 
