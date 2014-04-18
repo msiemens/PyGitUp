@@ -298,7 +298,7 @@ class GitUp(object):
         log_hook = self.settings['rebase.log-hook']
 
         if log_hook:
-            if platform.system() == 'Windows':
+            if platform.system() == 'Windows':  # pragma: no cover
                 # Running a string in CMD from Python is not that easy on
                 # Windows. Running 'cmd /C log_hook' produces problems when
                 # using multiple statements or things like 'echo'. Therefore,
@@ -561,5 +561,5 @@ def run():
         else:
             gitup.run()
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     run()
