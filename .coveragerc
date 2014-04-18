@@ -3,9 +3,3 @@ omit =
     */python?.?/*
     */site-packages/nose/*
     tests/*
-
-exclude_lines =
-    pragma: no cover
-    if platform.system() == 'Windows':
-    if __name__ == .__main__.:
-    def run

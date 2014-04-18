@@ -63,7 +63,7 @@ class GitWrapper(object):
         # trying to remove the directory right after the test has finished).
         # 'clear_cache' kills the processes...
 
-        if platform.system() == 'Windows':
+        if platform.system() == 'Windows':  # pragma: no cover
             pass
             # ... or rather "should kill", because but somehow it recently
             # started to not kill cat_file_header out of the blue (I even
