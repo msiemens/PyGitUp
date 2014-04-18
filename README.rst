@@ -6,8 +6,8 @@ PyGitUp |Build Status|
 features of git-up and should be a drop-in replacement, and even extends it
 slightly.
 
-Why using ``git up``?
----------------------
+Why use ``git up``?
+-------------------
 
     git pull has two problems:
 
@@ -26,8 +26,8 @@ Demonstration
 
 .. image:: http://i.imgur.com/EC3pvYu.gif
 
-Why using the Python port?
---------------------------
+Why use the Python port?
+------------------------
 
 I wasn't able to use the original ``git-up``, because I didn't want to install
 a whole Ruby suite just for `git-up` and even with Ruby installed, there were
@@ -85,15 +85,15 @@ To configure ``PyGitUp``, you can set options in your git config. Run
 ``git config [--global] git-up.[name] [value]`` to set one of these
 options:
 
--  ``git-up.bundler.check [true|*false*]:`` If set to
+-  ``git-up.bundler.check [true|*false*]``: If set to
    ``true``,\ ``PyGitUp`` will check your app for any new bundled gems
    and suggest a ``bundle install`` if necessary.
 
--  ``git-up.bundler.autoinstall [true|*false*]:`` If set to
+-  ``git-up.bundler.autoinstall [true|*false*]``: If set to
    ``true``,\ ``PyGitUp`` will run ``bundle install`` automatically.
    Requires ``git-up.bundler.check`` to be true.
 
--  ``git-up.bundler.local [true|*false*]:`` If you've ``bundle package``-ed
+-  ``git-up.bundler.local [true|*false*]``: If you've ``bundle package``-ed
    your  project gems, you can tell ``PyGitUp`` to run ``bundle install
    --local`` for you if it finds missing gems. Much faster than just a plain
    old ``bundle install``. Don't worry if you're missing gems, it will
@@ -101,36 +101,36 @@ options:
    ``git-up.bundler.autoinstall`` is also set to ``true`` or it won't do
    anything.
 
-- ``git-up.bundler.rbenv [true|*false*]:`` If you have rbenv installed,
+- ``git-up.bundler.rbenv [true|*false*]``: If you have rbenv installed,
   you can tell ``PyGitUp`` to run ``rbenv rehash`` for you after it installs
   your gems so any binaries will be available right away. Make sure ``git-up
   .bundler.autoinstall`` is also set to ``true`` or it won't do anything.
 
--  ``git-up.fetch.prune [*true*|false]:`` If set to ``true``,
+-  ``git-up.fetch.prune [*true*|false]``: If set to ``true``,
    ``PyGitUp`` will append the ``--prune``\ option to ``git fetch`` and
-   thus removing any remote tracking branches which no longer exist on
+   thus remove any remote tracking branches which no longer exist on
    the remote (see `git fetch
    --help <http://linux.die.net/man/1/git-fetch>`__).
 
--  ``git-up.fetch.all [true|*false*]:`` If set to ``false``, ``PyGitUp``
+-  ``git-up.fetch.all [true|*false*]``: If set to ``false``, ``PyGitUp``
    will only fetch remotes for which there is at least one local
-   tracking branch. Setting this option will it ``git up`` always fetch
+   tracking branch. Setting this option will make ``git up`` always fetch
    from all remotes, which is useful if e.g. you use a remote to push to
    your CI system but never check those branches out.
 
--  ``git-up.rebase.arguments [string]:`` If set, ``PyGitUp`` will use
+-  ``git-up.rebase.arguments [string]``: If set, ``PyGitUp`` will use
    this string as additional arguments when calling ``git rebase``.
    Example: ``--preserve-merges`` to recreate merge commits in the
    rebased branch.
 
--  ``git-up.rebase.auto [*true*|false]:`` If set to ``false``,
+-  ``git-up.rebase.auto [*true*|false]``: If set to ``false``,
    ``PyGitUp`` won't rebase your branches for you but notify you that
    they diverged. This can be useful if you have a lot of in-progress
    work that you don't want to deal with at once, but still want to
    update other branches.
 
--  ``git-up.rebase.log-hook [cmd]:`` Runs ``cmd`` every time a branch
-   is rebased or fast-forwarder, with the old head as ``$1`` and the new
+-  ``git-up.rebase.log-hook [cmd]``: Runs ``cmd`` every time a branch
+   is rebased or fast-forwarded, with the old head as ``$1`` and the new
    head as ``$2``. This can be used to view logs or diffs of incoming
    changes. Example:
    '``echo "changes on $1:"; git log --oneline --decorate $1..$2``'
@@ -138,7 +138,7 @@ options:
 New in v1.0.0:
 ~~~~~~~~~~~~~~
 
-- ``git-up.updates.check [*true*|false]:`` When running ``git up --version``,
+- ``git-up.updates.check [*true*|false]``: When running ``git up --version``,
   it shows the version number and checks for updates. If you feel
   uncomfortable with it, just set it to ``false`` to turn off the checks.
 
