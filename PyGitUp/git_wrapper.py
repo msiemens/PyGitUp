@@ -225,7 +225,7 @@ class GitError(GitCommandError):
         self.details = details
         self.message = message
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return self.message
 
 
