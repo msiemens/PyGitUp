@@ -172,7 +172,7 @@ v1.1.2 (*2013-10-08*)
 v1.1.1 (*2013-10-07*)
 ~~~~~~~~~~~~~~~~~~~~~
 
-- Fix for `#7 <https://github.com/msiemens/PyGitUp/issues/6>`__
+- Fix for `#7 <https://github.com/msiemens/PyGitUp/issues/7>`__
   (AttributeError: 'GitUp' object has no attribute 'git') introduced by
   v1.1.0.
 
