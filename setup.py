@@ -6,7 +6,7 @@ setup(
     version="1.1.4",
     packages=find_packages(exclude=["tests"]),
     scripts=['PyGitUp/gitup.py'],
-    install_requires=['GitPython==0.3.2.RC1', 'colorama==0.2.4,==0.3.0',
+    install_requires=['GitPython==0.3.2.1', 'colorama==0.2.4,==0.3.2',
                       'termcolor==1.1.0', 'docopt==0.6.1'],
 
     # Tests
