@@ -1,11 +1,10 @@
-=======
 PyGitUp |Version| |Build Status| |Coverage Status|
 ==================================================
 
 ``PyGitUp`` is a Python implementation of the great
-`aanand/git-up/ <https://github.com/aanand/git-up/>`__. It fully covers all
-features of git-up and should be a drop-in replacement, and even extends it
-slightly.
+`aanand/git-up/ <https://github.com/aanand/git-up/>`__. It not only
+fully covers the abilities of git-up and should be a drop-in replacement,
+but also extends it slightly.
 
 Why use ``git up``?
 -------------------
@@ -153,6 +152,12 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.1.5 (*2014-11-19*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- 3rd party dependencies have been updated to fix a problem with a 3rd party
+  library (`#18 <https://github.com/msiemens/PyGitUp/issues/18>`__)
+
 v1.1.4 (*2014-04-18*)
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -173,7 +178,7 @@ v1.1.2 (*2013-10-08*)
 v1.1.1 (*2013-10-07*)
 ~~~~~~~~~~~~~~~~~~~~~
 
-- Fix for `#7 <https://github.com/msiemens/PyGitUp/issues/6>`__
+- Fix for `#7 <https://github.com/msiemens/PyGitUp/issues/7>`__
   (AttributeError: 'GitUp' object has no attribute 'git') introduced by
   v1.1.0.
 

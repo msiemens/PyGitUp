@@ -53,9 +53,9 @@ from tempfile import NamedTemporaryFile
 try:
     #noinspection PyUnresolvedReferences
     import pkg_resources as pkg
-except ImportError:
+except ImportError:  # pragma: no cover
     NO_DISTRIBUTE = True
-else:
+else:  # pragma: no cover
     NO_DISTRIBUTE = False
 
 import colorama
@@ -113,9 +113,9 @@ class GitUp(object):
 
         # Testing: redirect stderr to stdout
         self.testing = testing
-        if testing:
+        if self.testing:
             self.stderr = sys.stdout  # Quiet testing
-        else:
+        else:  # pragma: no cover
             self.stderr = sys.stderr
 
         self.states = []
@@ -193,7 +193,7 @@ class GitUp(object):
             # Used for test cases
             if self.testing:
                 raise
-            else:
+            else:  # pragma: no cover
                 sys.exit(1)
 
     def rebase_all_branches(self):
@@ -298,7 +298,7 @@ class GitUp(object):
         log_hook = self.settings['rebase.log-hook']
 
         if log_hook:
-            if platform.system() == 'Windows':
+            if platform.system() == 'Windows':  # pragma: no cover
                 # Running a string in CMD from Python is not that easy on
                 # Windows. Running 'cmd /C log_hook' produces problems when
                 # using multiple statements or things like 'echo'. Therefore,
@@ -335,7 +335,7 @@ class GitUp(object):
 
                 # Clean up file
                 os.remove(bat_file.name)
-            else:
+            else:  # pragma: no cover
                 # Run log_hook via 'shell -c'
                 state = subprocess.call(
                     [log_hook, 'git-up', branch.name, remote.name],
@@ -440,7 +440,7 @@ class GitUp(object):
 
         if self.git.is_version_min(required_version):
             return config_value is not False
-        else:
+        else:  # pragma: no cover
             if config_value == 'true':
                 print(colored(
                     "Warning: fetch.prune is set to 'true' but your git"
@@ -542,7 +542,7 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
 ###############################################################################
 
 
-def run():
+def run():  # pragma: no cover
     arguments = docopt(__doc__, ['up'] + sys.argv[1:])
     if arguments['--version']:
         if NO_DISTRIBUTE:
@@ -561,5 +561,5 @@ def run():
         else:
             gitup.run()
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     run()
