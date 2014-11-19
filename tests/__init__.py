@@ -1,5 +1,6 @@
 # coding=utf-8
 import contextlib
+import os
 from os.path import join
 from tempfile import mkdtemp
 from functools import wraps
