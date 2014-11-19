@@ -1,5 +1,5 @@
-PyGitUp |Build Status| |Coverage Status|
-========================================
+PyGitUp |Version| |Build Status| |Coverage Status|
+==================================================
 
 ``PyGitUp`` is a Python implementation of the great
 `aanand/git-up/ <https://github.com/aanand/git-up/>`__. It not only
@@ -244,10 +244,11 @@ v0.1 (*2013-03-14*)
 
 - Initial Release
 
-.. |Build Status| image:: https://travis-ci.org/msiemens/PyGitUp.png?branch=dev
+.. |Build Status| image:: http://img.shields.io/travis/msiemens/PyGitUp/dev.svg?style=flat-square
    :target: https://travis-ci.org/msiemens/PyGitUp
 
-.. |Coverage Status| image:: https://coveralls.io/repos/msiemens/PyGitUp/badge.png?branch=dev
+.. |Coverage Status| image:: http://img.shields.io/coveralls/msiemens/PyGitUp/dev.svg?style=flat-square
   :target: https://coveralls.io/r/msiemens/PyGitUp?branch=dev
 
-
+.. |Version| image:: http://img.shields.io/pypi/v/git-up.svg?style=flat-square
+  :target: https://pypi.python.org/pypi/git-up
