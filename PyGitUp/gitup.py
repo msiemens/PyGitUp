@@ -281,11 +281,15 @@ class GitUp(object):
         if self.settings['fetch.all']:
             fetch_kwargs['all'] = True
         else:
-            fetch_args.append(self.remotes)
+            if '.' in self.remotes:
+                self.remotes.remove('.')
 
-            if fetch_args[-1] == ['.']:
-                # Only local target branches, `git fetch --multiple` will fail
-                return
+                if not self.remotes:
+                    # Only local target branches,
+                    # `git fetch --multiple` will fail
+                    return
+
+            fetch_args.append(self.remotes)
 
         try:
             self.git.fetch(tostdout=True, *fetch_args, **fetch_kwargs)
