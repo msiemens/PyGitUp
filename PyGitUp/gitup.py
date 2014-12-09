@@ -95,6 +95,7 @@ class GitUp(object):
         'bundler.rbenv': False,
         'fetch.prune': True,
         'fetch.all': False,
+        'rebase.show-hashes': False,
         'rebase.arguments': None,
         'rebase.auto': True,
         'rebase.log-hook': None,
@@ -141,6 +142,7 @@ class GitUp(object):
         self.git = GitWrapper(self.repo)
 
         # target_map: map local branch names to remote tracking branches
+        #: :type: dict[str, git.refs.remote.RemoteReference]
         self.target_map = dict()
 
         for branch in self.repo.branches:
@@ -156,10 +158,12 @@ class GitUp(object):
                 self.target_map[branch.name] = target
 
         # branches: all local branches with tracking information
+        #: :type: list[git.refs.head.Head]
         self.branches = [b for b in self.repo.branches if b.tracking_branch()]
         self.branches.sort(key=lambda br: br.name)
 
         # remotes: all remotes that are associated with local branches
+        #: :type: list[git.refs.remote.RemoteReference]
         self.remotes = uniq(
             # name = '<remote>/<branch>' -> '<remote>'
             [r.name.split('/', 2)[0]
@@ -249,7 +253,7 @@ class GitUp(object):
                 continue  # Do not do anything
 
             if base == branch.commit.hexsha:
-                print(colored('fast-forwarding...', 'yellow'))
+                print(colored('fast-forwarding...', 'yellow'), end='')
                 self.states.append('fast-forwarding')
 
             elif not self.settings['rebase.auto']:
@@ -258,8 +262,14 @@ class GitUp(object):
 
                 continue  # Do not do anything
             else:
-                print(colored('rebasing', 'yellow'))
+                print(colored('rebasing', 'yellow'), end='')
                 self.states.append('rebasing')
+
+            if self.settings['rebase.show-hashes']:
+                print(' {}..{}'.format(base[0:7],
+                                       target.commit.hexsha[0:7]))
+            else:
+                print()
 
             self.log(branch, target)
             self.git.checkout(branch.name)

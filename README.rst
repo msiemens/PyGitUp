@@ -133,7 +133,11 @@ options:
    is rebased or fast-forwarded, with the old head as ``$1`` and the new
    head as ``$2``. This can be used to view logs or diffs of incoming
    changes. Example:
-   '``echo "changes on $1:"; git log --oneline --decorate $1..$2``'
+   ``echo "changes on $1:"; git log --oneline --decorate $1..$2``.
+
+- ``git-uprebase.show-hashes [true|*false*]``: If set to ``true``,
+  ``PyGitUp`` will show the hashes of the current commit (or the point
+  where the rebase starts) and the target commit like ``git pull`` does.
 
 New in v1.0.0:
 ~~~~~~~~~~~~~~
