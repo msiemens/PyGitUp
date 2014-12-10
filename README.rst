@@ -133,7 +133,11 @@ options:
    is rebased or fast-forwarded, with the old head as ``$1`` and the new
    head as ``$2``. This can be used to view logs or diffs of incoming
    changes. Example:
-   '``echo "changes on $1:"; git log --oneline --decorate $1..$2``'
+   ``echo "changes on $1:"; git log --oneline --decorate $1..$2``.
+
+- ``git-up.rebase.show-hashes [true|*false*]``: If set to ``true``,
+  ``PyGitUp`` will show the hashes of the current commit (or the point
+  where the rebase starts) and the target commit like ``git pull`` does.
 
 New in v1.0.0:
 ~~~~~~~~~~~~~~
@@ -152,11 +156,19 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.2.0 (*2014-12-10*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Added an option to show hashes when fast-forwarding/rebasing like ``git pull``
+  does (``git-up.rebase.show-hashes``).
+- Fixed a bug when having branches with both local tracking branches and
+  remote tracking branches (`#18 <https://github.com/msiemens/PyGitUp/issues/17>`__).
+
 v1.1.5 (*2014-11-19*)
 ~~~~~~~~~~~~~~~~~~~~~
 
 - 3rd party dependencies have been updated to fix a problem with a 3rd party
-  library (`#18 <https://github.com/msiemens/PyGitUp/issues/18>`__)
+  library (`#18 <https://github.com/msiemens/PyGitUp/issues/18>`__).
 
 v1.1.4 (*2014-04-18*)
 ~~~~~~~~~~~~~~~~~~~~~
@@ -167,8 +179,8 @@ v1.1.4 (*2014-04-18*)
 v1.1.3 (*2014-03-23*)
 ~~~~~~~~~~~~~~~~~~~~~
 
-- ``ahead of upstream`` messages are now cyan (see `aanand/git-up#60 <https://github.com/aanand/git-up/issues/60>`__)
-- Fixed problem when using % in the log hook (`#11 <https://github.com/msiemens/PyGitUp/issues/11>`__)
+- ``ahead of upstream`` messages are now cyan (see `aanand/git-up#60 <https://github.com/aanand/git-up/issues/60>`__).
+- Fixed problem when using % in the log hook (`#11 <https://github.com/msiemens/PyGitUp/issues/11>`__).
 
 v1.1.2 (*2013-10-08*)
 ~~~~~~~~~~~~~~~~~~~~~
