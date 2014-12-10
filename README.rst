@@ -262,11 +262,11 @@ v0.1 (*2013-03-14*)
 
 - Initial Release
 
-.. |Build Status| image:: http://img.shields.io/travis/msiemens/PyGitUp/dev.svg?style=flat-square
+.. |Build Status| image:: http://img.shields.io/travis/msiemens/PyGitUp/master.svg?style=flat-square
    :target: https://travis-ci.org/msiemens/PyGitUp
 
-.. |Coverage Status| image:: http://img.shields.io/coveralls/msiemens/PyGitUp/dev.svg?style=flat-square
-  :target: https://coveralls.io/r/msiemens/PyGitUp?branch=dev
+.. |Coverage Status| image:: http://img.shields.io/coveralls/msiemens/PyGitUp/master.svg?style=flat-square
+  :target: https://coveralls.io/r/msiemens/PyGitUp
 
 .. |Version| image:: http://img.shields.io/pypi/v/git-up.svg?style=flat-square
   :target: https://pypi.python.org/pypi/git-up
