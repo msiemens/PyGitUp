@@ -9,8 +9,8 @@ install:
   - git config --global user.name "Travis CI"
 
   # Setup of Python environment
-  - pip install -r dev-requirements.txt --use-mirrors
-  - pip install -r requirements.txt --use-mirrors
+  - pip install -r dev-requirements.txt
+  - pip install -r requirements.txt
   - python setup.py develop
   - pip install coveralls
 
