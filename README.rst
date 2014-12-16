@@ -156,13 +156,19 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.2.1 (*2014-12-16*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Fixed a problem with ``setuptools 8.x`` (`#19 <https://github.com/msiemens/PyGitUp/issues/19>`__).
+- 3rd party dependencies have been updated
+
 v1.2.0 (*2014-12-10*)
 ~~~~~~~~~~~~~~~~~~~~~
 
 - Added an option to show hashes when fast-forwarding/rebasing like ``git pull``
   does (``git-up.rebase.show-hashes``).
 - Fixed a bug when having branches with both local tracking branches and
-  remote tracking branches (`#18 <https://github.com/msiemens/PyGitUp/issues/17>`__).
+  remote tracking branches (`#17 <https://github.com/msiemens/PyGitUp/issues/17>`__).
 
 v1.1.5 (*2014-11-19*)
 ~~~~~~~~~~~~~~~~~~~~~
