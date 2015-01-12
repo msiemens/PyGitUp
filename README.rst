@@ -40,16 +40,16 @@ and using this port are:
 How do I install it?
 --------------------
 
-1. Run ``$ pip install git-up``
+1. Install ``git-up`` via `pip <https://pip.pypa.io/en/latest/installing.html>`__: ``$ pip install git-up``
 2. ``cd`` to your project's directory.
 3. Run ``git up`` and enjoy!
 
 Note for Windows users:
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-You need ``pip`` installed and working. Check out
-`SO#4750806 <http://stackoverflow.com/q/4750806/997063>`__ for more
-information. And don't forget to either:
+See `these instructions <http://stackoverflow.com/q/4750806/997063>`__
+for installing pip, if you haven't already installed it. And don't forget
+to either:
 
 - make your ``Python/Scripts`` and ``Python/Lib/site-packages`` writable for
   you,
@@ -57,7 +57,7 @@ information. And don't forget to either:
 - or use ``pip install --user git-up`` and add ``%APPDATA%/Python/Scripts``
   to ``%PATH%``.
 
-Otherwise ``pip`` won't install due to ``Access denied`` errors.
+Otherwise pip will refuse to install ``git-up`` due to ``Access denied`` errors.
 
 Python 3 compatibility:
 ~~~~~~~~~~~~~~~~~~~~~~~
