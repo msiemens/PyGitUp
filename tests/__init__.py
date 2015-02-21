@@ -94,9 +94,7 @@ def mkrepo(path):
     """
     Make a repository in 'path', create the the dir, if it doesn't exist.
     """
-    if not os.path.exists(path):
-        os.makedirs(path, 0700)
-    init_git(path)
+    return Repo.init(path)
 
 
 def init_master(test_name):
@@ -105,8 +103,7 @@ def init_master(test_name):
     """
     # Create repo
     path = os.path.join(basepath, 'master.' + test_name)
-    mkrepo(path)
-    repo = Repo(path)
+    repo = mkrepo(path)
 
     assert repo.working_dir == path
 

@@ -85,6 +85,16 @@ PYPI_URL = 'https://pypi.python.org/pypi/git-up/json'
 # GitUp
 ###############################################################################
 
+def get_git_dir():
+    abspath = os.path.abspath('.')
+    git_dir = os.path.join(abspath, '.git')
+
+    if os.path.exists(git_dir) and os.path.isdir(git_dir):
+        return abspath
+    else:
+        return execute('git rev-parse --show-toplevel')
+
+
 class GitUp(object):
     """ Conainter class for GitUp methods """
 
@@ -123,8 +133,7 @@ class GitUp(object):
 
         # Check, if we're in a git repo
         try:
-            self.repo = Repo(execute('git rev-parse --show-toplevel'),
-                             odbt=GitCmdObjectDB)
+            self.repo = Repo(get_git_dir(), odbt=GitCmdObjectDB)
         except IndexError:
             exc = GitError("We don't seem to be in a git repository.")
             self.print_error(exc)
