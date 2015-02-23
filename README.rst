@@ -156,6 +156,11 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.2.2 (*2015-02-23*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Now updates submodules when called from ``git submodule foreach`` (`#8 <https://github.com/msiemens/PyGitUp/issues/8>`__).
+
 v1.2.1 (*2014-12-16*)
 ~~~~~~~~~~~~~~~~~~~~~
 
