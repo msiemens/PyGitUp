@@ -4,6 +4,8 @@ import platform
 import subprocess
 from os.path import join
 
+import six
+
 # 3rd party libs
 from nose.plugins.skip import SkipTest
 from git import *
@@ -55,7 +57,7 @@ def test_bundler():
             return False
 
     def get_output(cmd):
-        return subprocess.check_output(cmd, shell=shell)
+        return str(subprocess.check_output(cmd, shell=shell))
 
     # Check for ruby and bundler
     if not (is_installed('ruby') and is_installed('gem')

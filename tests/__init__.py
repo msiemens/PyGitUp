@@ -27,7 +27,7 @@ def wip(f):
 @contextlib.contextmanager
 def capture():
     import sys
-    from cStringIO import StringIO
+    from six.moves import cStringIO as StringIO
     oldout, olderr = sys.stdout, sys.stderr
     out = None
     try:
