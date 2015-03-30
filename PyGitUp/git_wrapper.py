@@ -23,6 +23,8 @@ import subprocess
 import platform
 from contextlib import contextmanager
 
+import six
+
 # 3rd party libs
 from termcolor import colored  # Assume, colorama is already initialized
 from git import GitCommandError, CheckoutError as OrigCheckoutError, Git
@@ -84,7 +86,7 @@ class GitWrapper(object):
         """ Run a git command specified by name and args/kwargs. """
 
         tostdout = kwargs.pop('tostdout', False)
-        stdout = ''
+        stdout = six.b('')
 
         # Execute command
         cmd = getattr(self.git, name)(as_process=True, *args, **kwargs)
@@ -95,12 +97,12 @@ class GitWrapper(object):
 
             # Print to stdout
             if tostdout:
-                sys.stdout.write(output)
+                sys.stdout.write(output.decode('utf-8'))
                 sys.stdout.flush()
 
             stdout += output
 
-            if output == "":
+            if output == six.b(""):
                 break
 
         # Wait for the process to quit

@@ -43,11 +43,14 @@ import os
 import re
 import platform
 import json
-import urllib2
 import subprocess
-from cStringIO import StringIO
 from contextlib import contextmanager
 from tempfile import NamedTemporaryFile
+
+import six
+from six.moves import cStringIO as StringIO
+from six.moves.urllib.error import HTTPError, URLError
+from six.moves.urllib.request import urlopen
 
 # 3rd party libs
 try:
@@ -181,7 +184,8 @@ class GitUp(object):
 
         # change_count: Number of unstaged changes
         self.change_count = len(
-            self.git.status(porcelain=True, untracked_files='no').split('\n')
+            self.git.status(porcelain=True, untracked_files='no').split(
+                six.b('\n'))
         )
 
         # Load configuration
@@ -253,7 +257,7 @@ class GitUp(object):
 
                 continue  # Do not do anything
 
-            base = self.git.merge_base(branch.name, target.name)
+            base = self.git.merge_base(branch.name, target.name).decode('utf-8')
 
             if base == target.commit.hexsha:
                 print(colored('ahead of upstream', 'cyan'))
@@ -386,9 +390,9 @@ class GitUp(object):
 
         try:
             # Get version information from the PyPI JSON API
-            details = json.load(urllib2.urlopen(PYPI_URL))
+            details = json.load(urlopen(PYPI_URL))
             online_version = details['info']['version']
-        except (urllib2.HTTPError, urllib2.URLError, ValueError):
+        except (HTTPError, URLError, ValueError):
             recent = True  # To not disturb the user with HTTP/parsing errors
         else:
             recent = local_version >= pkg.parse_version(online_version)

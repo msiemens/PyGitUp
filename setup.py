@@ -6,8 +6,9 @@ setup(
     version="1.2.2",
     packages=find_packages(exclude=["tests"]),
     scripts=['PyGitUp/gitup.py'],
-    install_requires=['GitPython==0.3.4', 'colorama==0.3.2',
-                      'termcolor==1.1.0', 'docopt==0.6.2'],
+    install_requires=['GitPython==0.3.6', 'colorama==0.3.3',
+                      'termcolor==1.1.0', 'docopt==0.6.2',
+                      'six==1.9.0'],
 
     # Tests
     test_suite="nose.collector",

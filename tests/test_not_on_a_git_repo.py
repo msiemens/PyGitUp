@@ -14,7 +14,7 @@ repo_path = join(basepath, test_name + os.sep)
 
 
 def setup():
-    os.makedirs(repo_path, 0700)
+    os.makedirs(repo_path, 0o700)
 
 
 @raises(GitError)
