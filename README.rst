@@ -62,8 +62,7 @@ Otherwise pip will refuse to install ``git-up`` due to ``Access denied`` errors.
 Python 3 compatibility:
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-``PyGitUp`` is not compatible with Python 3 because some essential 3rd party
-libs don't support it. Sorry.
+Python 3.3 and 3.4 are supported.
 
 Options and Configuration
 -------------------------
