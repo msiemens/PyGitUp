@@ -49,7 +49,7 @@ def setup():
 
 
 def test_submodules():
-    """ Run 'git up' with a local tracking branch """
+    """ Run 'git up' with submodules """
     repo = Repo(repo_path)
     repo_head = repo.head.commit.hexsha
     submod_head = repo.submodules[0].hexsha
