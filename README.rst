@@ -62,7 +62,7 @@ Otherwise pip will refuse to install ``git-up`` due to ``Access denied`` errors.
 Python 3 compatibility:
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Python 3.3 and 3.4 are supported.
+Python 3.3 and 3.4 are supported :)
 
 Options and Configuration
 -------------------------
@@ -154,6 +154,15 @@ The original ``git-up`` has been written by aanand:
 
 Changelog
 ---------
+
+v1.3.0 (*2015-04-08*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Support for Python 3 has been added. Thanks `@r4ts0n <https://github.com/r4ts0n>`_
+  for the `Pull Request <https://github.com/msiemens/PyGitUp/pull/23>`_
+  and `@Byron <https://github.com/Byron>`_ for quickly merging a Pull Request
+  in `GitPython <https://github.com/gitpython-developers/GitPython>`_
+  and releasing a new version on which this release depends.
 
 v1.2.2 (*2015-02-23*)
 ~~~~~~~~~~~~~~~~~~~~~
