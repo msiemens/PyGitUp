@@ -41,7 +41,6 @@ __all__ = ['GitUp']
 import sys
 import os
 import re
-import platform
 import json
 import subprocess
 from contextlib import contextmanager
@@ -70,11 +69,13 @@ from termcolor import colored
 from PyGitUp.utils import execute, uniq, find
 from PyGitUp.git_wrapper import GitWrapper, GitError
 
+ON_WINDOWS = sys.platform in ('win32', 'cygwin')
+
 ###############################################################################
 # Setup of 3rd party libs
 ###############################################################################
 
-colorama.init(autoreset=True)
+colorama.init(autoreset=True, convert=ON_WINDOWS)
 
 
 ###############################################################################
@@ -325,7 +326,7 @@ class GitUp(object):
         log_hook = self.settings['rebase.log-hook']
 
         if log_hook:
-            if platform.system() == 'Windows':  # pragma: no cover
+            if ON_WINDOWS:  # pragma: no cover
                 # Running a string in CMD from Python is not that easy on
                 # Windows. Running 'cmd /C log_hook' produces problems when
                 # using multiple statements or things like 'echo'. Therefore,
