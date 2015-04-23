@@ -352,9 +352,9 @@ class GitUp(object):
                         prefix='PyGitUp.', suffix='.bat', delete=False
                 ) as bat_file:
                     # Don't echo all commands
-                    bat_file.file.write('@echo off\n')
+                    bat_file.file.write(b'@echo off\n')
                     # Run log_hook
-                    bat_file.file.write(log_hook)
+                    bat_file.file.write(log_hook.encode('utf-8'))
 
                 # Run bat_file
                 state = subprocess.call(
@@ -391,7 +391,7 @@ class GitUp(object):
 
         try:
             # Get version information from the PyPI JSON API
-            details = json.load(urlopen(PYPI_URL))
+            details = json.loads(urlopen(PYPI_URL).read().decode('utf-8'))
             online_version = details['info']['version']
         except (HTTPError, URLError, ValueError):
             recent = True  # To not disturb the user with HTTP/parsing errors
