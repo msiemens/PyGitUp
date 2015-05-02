@@ -17,7 +17,7 @@ setup(
     # Executable
     entry_points={
         'console_scripts': [
-            'git-up = gitup:run'
+            'git-up = PyGitUp.gitup:run'
         ]
     },
 
