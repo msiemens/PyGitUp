@@ -188,10 +188,11 @@ class GitWrapper(object):
     @property
     def change_count(self):
         """ The number of changes in the working directory. """
-        return len(
-            self.git.status(porcelain=True, untracked_files='no').split(
-                '\n')
-        )
+        status = self.git.status(porcelain=True, untracked_files='no').strip()
+        if not status:
+            return 0
+        else:
+            return len(status.split('\n'))
 
     @property
     def version(self):
