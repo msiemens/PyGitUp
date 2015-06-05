@@ -134,7 +134,7 @@ class GitWrapper(object):
         """
         stashed = False
 
-        if self.repo.is_dirty():
+        if self.repo.is_dirty(consider_submodules=False):
             if self.change_count > 1:
                 message = 'stashing {0} changes'
             else:
