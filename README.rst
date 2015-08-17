@@ -59,10 +59,10 @@ to either:
 
 Otherwise pip will refuse to install ``git-up`` due to ``Access denied`` errors.
 
-Python 3 compatibility:
-~~~~~~~~~~~~~~~~~~~~~~~
+Python version compatibility:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Python 3.3 and 3.4 are supported :)
+Python 2.7, 3.3 and 3.4 are supported :)
 
 Options and Configuration
 -------------------------

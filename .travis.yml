@@ -2,10 +2,10 @@ sudo: false
 cache: pip
 language: python
 python:
+  - "3.5-dev"
   - "3.4"
   - "3.3"
   - "2.7"
-  - "2.6"
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
   # Setup of Git environment

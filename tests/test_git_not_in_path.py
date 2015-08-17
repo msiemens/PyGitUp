@@ -23,10 +23,12 @@ def test_not_a_git_repo():
     environ = os.environ.copy()
     os.environ['PATH'] = ''
 
-    with assert_raises(GitError) as e:
-        from PyGitUp.gitup import GitUp
-        GitUp(testing=True)
+    try:
+        with assert_raises(GitError) as e:
+            from PyGitUp.gitup import GitUp
+            GitUp(testing=True)
 
-    assert e.exception.message == "The git executable could not be found"
+        assert e.exception.message == "The git executable could not be found"
 
-    os.environ.update(environ)
+    finally:
+        os.environ.update(environ)
