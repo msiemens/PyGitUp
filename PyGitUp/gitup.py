@@ -38,6 +38,7 @@ __all__ = ['GitUp']
 ###############################################################################
 
 # Python libs
+import errno
 import sys
 import os
 import re
@@ -66,7 +67,7 @@ from git import Repo, GitCmdObjectDB
 from termcolor import colored
 
 # PyGitUp libs
-from PyGitUp.utils import execute, uniq, find
+from PyGitUp.utils import execute, uniq, find, decode
 from PyGitUp.git_wrapper import GitWrapper, GitError
 
 ON_WINDOWS = sys.platform in ('win32', 'cygwin')
@@ -93,7 +94,7 @@ def get_git_dir():
     abspath = os.path.abspath('.')
     git_dir = os.path.join(abspath, '.git')
 
-    if os.path.exists(git_dir) and os.path.isdir(git_dir):
+    if os.path.isdir(git_dir):
         return abspath
     else:
         return execute('git rev-parse --show-toplevel')
@@ -137,12 +138,20 @@ class GitUp(object):
 
         # Check, if we're in a git repo
         try:
-            self.repo = Repo(get_git_dir(), odbt=GitCmdObjectDB)
-        except IndexError:
-            exc = GitError("We don't seem to be in a git repository.")
-            self.print_error(exc)
+            repo_dir = get_git_dir()
+        except EnvironmentError as e:
+            if e.errno == errno.ENOENT:
+                exc = GitError("The git executable could not be found")
+                raise exc
+            else:
+                raise
+        else:
+            if repo_dir is None:
+                exc = GitError("We don't seem to be in a git repository.")
+                raise exc
 
-            raise exc
+            self.repo = Repo(decode(repo_dir),
+                             odbt=GitCmdObjectDB)
 
         # Check for branch tracking informatino
         if not any(b.tracking_branch() for b in self.repo.branches):

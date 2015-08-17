@@ -3,7 +3,8 @@
 Some simple, generic usefull methods.
 """
 
-import os
+import subprocess
+import sys
 
 
 def find(seq, test):
@@ -21,4 +22,22 @@ def uniq(seq):
 
 def execute(cmd):
     """ Execute a command and return it's output. """
-    return os.popen(cmd).readlines()[0].strip()
+    try:
+        lines = subprocess.check_output(cmd).splitlines()
+    except subprocess.CalledProcessError:
+        return None
+    else:
+        if lines:
+            return lines[0].strip()
+        else:
+            return None
+
+
+def decode(s):
+    """
+    Decode a string using the system encoding if needed (ie byte strings)
+    """
+    if isinstance(s, bytes):
+        return s.decode(sys.getdefaultencoding())
+    else:
+        return s
