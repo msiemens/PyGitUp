@@ -38,6 +38,7 @@ __all__ = ['GitUp']
 ###############################################################################
 
 # Python libs
+import codecs
 import errno
 import sys
 import os
@@ -400,7 +401,8 @@ class GitUp(object):
 
         try:
             # Get version information from the PyPI JSON API
-            details = json.loads(urlopen(PYPI_URL).read().decode('utf-8'))
+            reader = codecs.getreader('utf-8')
+            details = json.load(reader(urlopen(PYPI_URL)))
             online_version = details['info']['version']
         except (HTTPError, URLError, ValueError):
             recent = True  # To not disturb the user with HTTP/parsing errors
