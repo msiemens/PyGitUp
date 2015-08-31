@@ -155,6 +155,11 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.3.1 (*2015-08-31*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Fixed a bug when showing the version on Python 3 `#34 <https://github.com/msiemens/PyGitUp/issues/34>`__.
+
 v1.3.0 (*2015-04-08*)
 ~~~~~~~~~~~~~~~~~~~~~
 
