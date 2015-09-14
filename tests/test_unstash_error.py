@@ -7,7 +7,7 @@ from nose.tools import *
 from git import *
 
 # PyGitup imports
-from PyGitUp.git_wrapper import GitError
+from PyGitUp.git_wrapper import GitError, UnstashError
 from tests import basepath, write_file, init_master, testfile_name
 
 test_name = 'unstash_error'
@@ -39,7 +39,7 @@ def setup():
     os.unlink(path_file)
 
 
-@raises(GitError)
+@raises(UnstashError)
 def test_unstash_error():
     """ Run 'git up' with an unclean unstash """
     os.chdir(repo_path)

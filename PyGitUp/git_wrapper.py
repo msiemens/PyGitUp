@@ -143,7 +143,11 @@ class GitWrapper(object):
                 message.format(self.change_count),
                 'magenta'
             ))
-            self.git.stash()
+            try:
+                self.run('stash')
+            except GitError as e:
+                raise StashError(stderr=e.stderr, stdout=e.stdout)
+
             stashed = True
 
         yield
@@ -231,13 +235,22 @@ class GitError(GitCommandError):
         return self.message
 
 
+class StashError(GitError):
+    """
+    Error while stashing
+    """
+    def __init__(self, **kwargs):
+        kwargs.pop('message', None)
+        GitError.__init__(self, 'Stashing failed!', **kwargs)
+
+
 class UnstashError(GitError):
     """
     Error while unstashing
     """
     def __init__(self, **kwargs):
         kwargs.pop('message', None)
-        GitError.__init__(self, 'Unstash failed!', **kwargs)
+        GitError.__init__(self, 'Unstashing failed!', **kwargs)
 
 
 class CheckoutError(GitError):
