@@ -8,7 +8,7 @@ setup(
     scripts=['PyGitUp/gitup.py'],
     install_requires=['GitPython==1.0.1', 'colorama==0.3.3',
                       'termcolor==1.1.0', 'docopt==0.6.2',
-                      'six==1.9.0'],
+                      'six==1.10.0'],
 
     # Tests
     test_suite="nose.collector",
