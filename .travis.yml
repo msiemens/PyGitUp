@@ -9,7 +9,7 @@ python:
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
   # Setup of Git environment
-  - git config --global user.email \<\>
+  - git config --global user.email Test User \<user@example.com\>
   - git config --global user.name "Travis CI"
 
   # Setup of Python environment
