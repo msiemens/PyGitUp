@@ -66,7 +66,7 @@ def write_file(path, contents):
 
 
 #noinspection PyDefaultArgument
-def update_file(repo, commit_message='', counter=[0]):
+def update_file(repo, commit_message='', testfile_name=testfile_name, counter=[0]):
     """
     Update 'testfile_name' using an increasing counter and commit the changes.
     """
