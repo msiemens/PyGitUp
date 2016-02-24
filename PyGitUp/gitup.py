@@ -2,7 +2,7 @@
 """
 git up -- like 'git pull', but polite
 
-Usage: git up [-h | --version | --quiet]
+Usage: git up [-h | --version | --quiet | --no-fetch | --no-f]
 
 Options:
   -h            Show this screen.
@@ -136,6 +136,7 @@ class GitUp(object):
             self.stderr = sys.stderr
 
         self.states = []
+        self.should_fetch = True
 
         # Check, if we're in a git repo
         try:
@@ -206,7 +207,8 @@ class GitUp(object):
     def run(self):
         """ Run all the git-up stuff. """
         try:
-            self.fetch()
+            if self.should_fetch:
+                self.fetch()
 
             with self.git.stash():
                 with self.returning_to_current_branch():
@@ -595,6 +597,9 @@ def run():  # pragma: no cover
 
         try:
             gitup = GitUp()
+
+            if arguments['--no-fetch'] or arguments['--no-f']:
+                gitup.should_fetch = False
         except GitError:
             sys.exit(1)  # Error in constructor
         else:
