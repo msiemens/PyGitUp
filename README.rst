@@ -74,6 +74,8 @@ Command Line Arguments
 
 - ``git up --quiet`` suppresses all output except for error messages.
 
+- ``git up --no-fetch`` skips fetching the remote and rebases all local branches.
+
 - ``git up --version`` shows the current version and optionally checks for
   updates (see below).
 
