@@ -3,12 +3,12 @@ from setuptools import setup, find_packages
 
 setup(
     name="git-up",
-    version="1.3.1",
+    version="1.4.0",
     packages=find_packages(exclude=["tests"]),
     scripts=['PyGitUp/gitup.py'],
-    install_requires=['GitPython==1.0.2', 'colorama==0.3.6',
-                      'termcolor==1.1.0', 'docopt==0.6.2',
-                      'six==1.10.0'],
+    install_requires=['GitPython>=1.0.2', 'colorama>=0.3.6',
+                      'termcolor>=1.1.0', 'docopt>=0.6.2',
+                      'six>=1.10.0'],
 
     # Tests
     test_suite="nose.collector",

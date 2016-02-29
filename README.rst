@@ -157,6 +157,18 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.4.0 (*2016-02-29*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- 3rd party dependencies have been updated.
+- Dependencies on 3rd party libraries have been loosened to better interact with other installed packages.
+  Thanks `MaximilianR <https://github.com/MaximilianR>`_ for the `Pull Request <https://github.com/msiemens/PyGitUp/pull/45>`_.
+- Added an command line argument to turn of fetching (``--no-fetch``). Thanks `@buoto <https://github.com/buoto>`_
+  for the `Pull Request <https://github.com/msiemens/PyGitUp/pull/46>`_.
+- Don't show a stacktrace anymore when stashing fails (`#35 <https://github.com/msiemens/PyGitUp/issues/35>`_).
+- Fixed a bug that cuased problems with submodules if the submodule had unstashed changes/ Thanks
+  `@Javex <https://github.com/Javex>`_ for the `Pull Request <https://github.com/msiemens/PyGitUp/pull/27>`_.
+
 v1.3.1 (*2015-08-31*)
 ~~~~~~~~~~~~~~~~~~~~~
 
