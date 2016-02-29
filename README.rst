@@ -162,12 +162,12 @@ v1.4.0 (*2016-02-29*)
 
 - 3rd party dependencies have been updated.
 - Dependencies on 3rd party libraries have been loosened to better interact with other installed packages.
-  Thanks `MaximilianR <https://github.com/MaximilianR>`_ for the `Pull Request <https://github.com/msiemens/PyGitUp/pull/45>`_.
+  Thanks `MaximilianR <https://github.com/MaximilianR>`_ for `Pull Request #45 <https://github.com/msiemens/PyGitUp/pull/45>`_.
 - Added an command line argument to turn of fetching (``--no-fetch``). Thanks `@buoto <https://github.com/buoto>`_
-  for the `Pull Request <https://github.com/msiemens/PyGitUp/pull/46>`_.
+  for `Pull Request #46 <https://github.com/msiemens/PyGitUp/pull/46>`_.
 - Don't show a stacktrace anymore when stashing fails (`#35 <https://github.com/msiemens/PyGitUp/issues/35>`_).
 - Fixed a bug that cuased problems with submodules if the submodule had unstashed changes/ Thanks
-  `@Javex <https://github.com/Javex>`_ for the `Pull Request <https://github.com/msiemens/PyGitUp/pull/27>`_.
+  `@Javex <https://github.com/Javex>`_ for `Pull Request #27 <https://github.com/msiemens/PyGitUp/pull/27>`_.
 
 v1.3.1 (*2015-08-31*)
 ~~~~~~~~~~~~~~~~~~~~~
@@ -178,7 +178,7 @@ v1.3.0 (*2015-04-08*)
 ~~~~~~~~~~~~~~~~~~~~~
 
 - Support for Python 3 has been added. Thanks `@r4ts0n <https://github.com/r4ts0n>`_
-  for the `Pull Request <https://github.com/msiemens/PyGitUp/pull/23>`_
+  for `Pull Request #23 <https://github.com/msiemens/PyGitUp/pull/23>`_
   and `@Byron <https://github.com/Byron>`_ for quickly merging a Pull Request
   in `GitPython <https://github.com/gitpython-developers/GitPython>`_
   and releasing a new version on which this release depends.
