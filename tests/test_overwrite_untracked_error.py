@@ -7,11 +7,10 @@ from nose.tools import *
 from git import *
 
 # PyGitup imports
-from PyGitUp.git_wrapper import CheckoutError
-from tests import basepath, init_master, testfile_name, wip, write_file
+from PyGitUp.git_wrapper import RebaseError
+from tests import basepath, init_master, update_file, write_file
 
-test_name = 'checkout_error'
-second_branch = test_name + '.2'
+test_name = 'overwrite_untracked_error'
 repo_path = join(basepath, test_name + os.sep)
 
 
@@ -29,21 +28,19 @@ def setup():
 
     assert repo.working_dir == path
 
-    # Create second branch and add test_file.1 to index
-    write_file(join(path, testfile_name + '.1'), 'contents :)')
-    repo.index.add([testfile_name + '.1'])
+    # Modify file in master
+    update_file(master, test_name, filename='test1.txt')
 
-    # Checkout first branch and add same file but untracked
-    repo.git.checkout(test_name)
-    write_file(join(path, testfile_name), 'content')
+    # Modify file in working directory
+    write_file(join(path, 'test1.txt'), 'Hello world!')
 
 
-@wip
-@raises(CheckoutError)
-def test_checkout_error():
-    """ Run 'git up' with checkout errors """
+@raises(RebaseError)
+def test_fast_forwarded():
+    """ Fail correctly when a rebase would overwrite untracked files """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
     gitup = GitUp(testing=True)
+
     gitup.run()

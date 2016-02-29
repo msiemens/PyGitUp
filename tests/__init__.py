@@ -66,13 +66,13 @@ def write_file(path, contents):
 
 
 #noinspection PyDefaultArgument
-def update_file(repo, commit_message='', testfile_name=testfile_name, counter=[0]):
+def update_file(repo, commit_message='', counter=[0], filename=testfile_name):
     """
     Update 'testfile_name' using an increasing counter and commit the changes.
     """
     counter[0] += 1  # See: http://stackoverflow.com/a/279592/997063
 
-    path_file = join(repo.working_dir, testfile_name)
+    path_file = join(repo.working_dir, filename)
     contents = 'line 1\nline 2\ncounter: {0}'.format(counter[0])
     write_file(path_file, contents)
 

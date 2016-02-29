@@ -7,7 +7,7 @@ from nose.tools import *
 from git import *
 
 # PyGitup imports
-from PyGitUp.git_wrapper import GitError
+from PyGitUp.git_wrapper import GitError, RebaseError
 from tests import basepath, write_file, init_master, update_file, testfile_name
 
 test_name = 'rebase_error'
@@ -43,7 +43,7 @@ def setup():
     update_file(master, test_name)
 
 
-@raises(GitError)
+@raises(RebaseError)
 def test_rebase_error():
     """ Run 'git up' with a failing rebase """
     os.chdir(repo_path)
