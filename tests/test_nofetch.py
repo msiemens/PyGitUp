@@ -37,7 +37,7 @@ def setup():
     repo.git.branch(u=origin_test_name)
 
     # Make non-conflicting change in new branch
-    update_file(repo, new_branch_name, testfile_name=another_file_name)
+    update_file(repo, new_branch_name, filename=another_file_name)
 
     # Modify file in master
     update_file(master, test_name)
