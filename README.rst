@@ -157,6 +157,11 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.4.1 (*2016-08-02*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Include tests in PyPI distribution (`#51 <https://github.com/msiemens/PyGitUp/issues/51>`__).
+
 v1.4.0 (*2016-02-29*)
 ~~~~~~~~~~~~~~~~~~~~~
 
