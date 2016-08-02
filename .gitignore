@@ -34,8 +34,5 @@ nosetests.xml
 .project
 .pydevproject
 
-# Test repos
-tests/*/
-
 # PyCharm
 .idea/

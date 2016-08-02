@@ -2,12 +2,10 @@
 import os
 from os.path import join
 
-# 3rd party libs
-from nose.tools import *
 from git import *
+from nose.tools import *
 
-# PyGitup imports
-from tests import basepath, init_master, update_file
+from PyGitUp.tests import basepath, init_master, update_file
 
 test_name = 'fast-forwarded'
 repo_path = join(basepath, test_name + os.sep)

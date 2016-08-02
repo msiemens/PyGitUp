@@ -2,12 +2,10 @@
 import os
 from os.path import join
 
-# 3rd party libs
-from nose.tools import *
 from git import *
+from nose.tools import *
 
-# PyGitup imports
-from tests import basepath, capture, update_file, init_master
+from PyGitUp.tests import basepath, capture, update_file, init_master
 
 test_name = 'no-fetch'
 new_branch_name = test_name + '.2'

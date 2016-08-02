@@ -1,12 +1,10 @@
 # System imports
 import os
 
-# 3rd party libs
 from nose.tools import *
 
-# PyGitup imports
-from tests import init_master
 from PyGitUp.git_wrapper import GitError
+from PyGitUp.tests import init_master
 
 test_name = 'no_remotes'
 

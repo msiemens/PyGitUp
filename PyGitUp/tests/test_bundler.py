@@ -4,14 +4,10 @@ import platform
 import subprocess
 from os.path import join
 
-import six
-
-# 3rd party libs
-from nose.plugins.skip import SkipTest
 from git import *
+from nose.plugins.skip import SkipTest
 
-# PyGitup imports
-from tests import basepath, write_file, init_master
+from PyGitUp.tests import basepath, write_file, init_master
 
 test_name = 'bundler'
 repo_path = join(basepath, test_name + os.sep)

@@ -2,15 +2,14 @@
 import os
 from os.path import join
 
-# 3rd party libs
-from nose.tools import *
 from git import *
+from nose.tools import *
 
-# PyGitup imports
-from PyGitUp.git_wrapper import GitError
-from tests import basepath, init_master, update_file
+from PyGitUp.tests import basepath, write_file, init_master
 
-test_name = 'test-fail'
+test_name = 'ahead-of-upstream'
+testfile_name = 'file'
+
 repo_path = join(basepath, test_name + os.sep)
 
 
@@ -28,18 +27,20 @@ def setup():
 
     assert repo.working_dir == path
 
-    # Set remote
-    repo.git.remote('set-url', 'origin', 'does-not-exist')
+    # Modify file in our repo
+    repo_path_file = join(path, testfile_name)
+    write_file(repo_path_file, 'line 1\nline 2\ncounter: 2')
+    repo.index.add([repo_path_file])
+    repo.index.commit(test_name)
 
-    # Modify file in master
-    update_file(master, test_name)
 
-
-@raises(GitError)
-def test_fetch_fail():
-    """ Run 'git up' with a non-existent remote """
+def test_ahead_of_upstream():
+    """ Run 'git up' with result: ahead of upstream """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
     gitup = GitUp(testing=True)
     gitup.run()
+
+    assert_equal(len(gitup.states), 1)
+    assert_equal(gitup.states[0], 'ahead')

@@ -246,7 +246,6 @@ class GitUp(object):
                 if target.name.startswith('./'):
                     # Check, if local branch exists
                     self.git.rev_parse(target.name[2:])
-
                 else:
                     # Check, if remote branch exists
                     _ = target.commit

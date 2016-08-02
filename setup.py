@@ -4,9 +4,9 @@ from setuptools import setup, find_packages
 setup(
     name="git-up",
     version="1.4.0",
-    packages=find_packages(exclude=["tests"]),
+    packages=find_packages(),
     scripts=['PyGitUp/gitup.py'],
-    install_requires=['GitPython>=1.0.2', 'colorama>=0.3.6',
+    install_requires=['GitPython>=1.0.2', 'colorama>=0.3.7',
                       'termcolor>=1.1.0', 'docopt>=0.6.2',
                       'six>=1.10.0'],
 

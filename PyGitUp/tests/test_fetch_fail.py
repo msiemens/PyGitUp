@@ -2,14 +2,13 @@
 import os
 from os.path import join
 
-# 3rd party libs
-from nose.tools import *
 from git import *
+from nose.tools import *
 
-# PyGitup imports
-from tests import basepath, init_master, update_file
+from PyGitUp.git_wrapper import GitError
+from PyGitUp.tests import basepath, init_master, update_file
 
-test_name = 'diverged'
+test_name = 'test-fail'
 repo_path = join(basepath, test_name + os.sep)
 
 
@@ -27,23 +26,18 @@ def setup():
 
     assert repo.working_dir == path
 
-    # Set git-up.rebase.auto to false
-    repo.git.config('git-up.rebase.auto', 'false')
+    # Set remote
+    repo.git.remote('set-url', 'origin', 'does-not-exist')
 
     # Modify file in master
     update_file(master, test_name)
 
-    # Modify file in our repo
-    update_file(repo, test_name)
 
-
-def test_diverged():
-    """ Run 'git up' with result: diverged """
+@raises(GitError)
+def test_fetch_fail():
+    """ Run 'git up' with a non-existent remote """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
     gitup = GitUp(testing=True)
     gitup.run()
-
-    assert_equal(len(gitup.states), 1)
-    assert_equal(gitup.states[0], 'diverged')

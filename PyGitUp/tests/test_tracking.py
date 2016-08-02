@@ -2,13 +2,12 @@
 import os
 from os.path import join
 
-# 3rd party libs
+from git import *
 from nose.tools import *
 
-# PyGitup imports
-from tests import basepath, init_master, update_file
+from PyGitUp.tests import basepath, init_master, update_file
 
-test_name = 'local_tracking'
+test_name = 'tracking'
 repo_path = join(basepath, test_name + os.sep)
 
 
@@ -18,22 +17,27 @@ def _read_file(path):
 
 
 def setup():
-    global repo_path
     master_path, master = init_master(test_name)
 
     # Prepare master repo
     master.git.checkout(b=test_name)
 
-    # Create branch with local tracking
-    master.git.checkout(b=test_name + '_b', t=True)
-    repo_path = master_path
+    # Clone to test repo
+    path = join(basepath, test_name)
 
-    # Modify tracking branch
-    master.git.checkout(test_name)
-    update_file(master)
+    master.clone(path, b=test_name)
+    repo = Repo(path, odbt=GitCmdObjectDB)
+
+    # Rename test repo branch
+    repo.git.branch(test_name + '_renamed', m=True)
+
+    assert repo.working_dir == path
+
+    # Modify file in master
+    update_file(master, test_name)
 
 
-def test_local_tracking():
+def test_tracking():
     """ Run 'git up' with a local tracking branch """
     os.chdir(repo_path)
 

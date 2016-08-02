@@ -2,20 +2,13 @@
 import os
 from os.path import join
 
-# 3rd party libs
-from nose.tools import *
 from git import *
+from nose.tools import *
 
-# PyGitup imports
-from tests import basepath, write_file, init_master, update_file, testfile_name
+from PyGitUp.tests import basepath, init_master, update_file
 
-test_name = 'rebasing'
+test_name = 'diverged'
 repo_path = join(basepath, test_name + os.sep)
-
-
-def _read_file(path):
-    with open(path) as f:
-        return f.read()
 
 
 def setup():
@@ -32,21 +25,18 @@ def setup():
 
     assert repo.working_dir == path
 
+    # Set git-up.rebase.auto to false
+    repo.git.config('git-up.rebase.auto', 'false')
+
     # Modify file in master
-    master_file = update_file(master, test_name)
+    update_file(master, test_name)
 
     # Modify file in our repo
-    contents = _read_file(master_file)
-    contents = contents.replace('line 1', 'line x')
-    repo_file = join(path, testfile_name)
-
-    write_file(repo_file, contents)
-    repo.index.add([repo_file])
-    repo.index.commit(test_name)
+    update_file(repo, test_name)
 
 
-def test_rebasing():
-    """ Run 'git up' with result: rebasing """
+def test_diverged():
+    """ Run 'git up' with result: diverged """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
@@ -54,4 +44,4 @@ def test_rebasing():
     gitup.run()
 
     assert_equal(len(gitup.states), 1)
-    assert_equal(gitup.states[0], 'rebasing')
+    assert_equal(gitup.states[0], 'diverged')

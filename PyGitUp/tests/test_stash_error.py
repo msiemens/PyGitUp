@@ -2,13 +2,11 @@
 import os
 from os.path import join
 
-# 3rd party libs
-from nose.tools import *
 from git import *
+from nose.tools import *
 
-# PyGitup imports
-from PyGitUp.git_wrapper import GitError, StashError
-from tests import basepath, write_file, init_master, testfile_name
+from PyGitUp.git_wrapper import StashError
+from PyGitUp.tests import basepath, write_file, init_master, testfile_name
 
 test_name = 'stash_error'
 repo_path = join(basepath, test_name + os.sep)

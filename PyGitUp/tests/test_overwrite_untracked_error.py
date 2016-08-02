@@ -2,15 +2,13 @@
 import os
 from os.path import join
 
-# 3rd party libs
-from nose.tools import *
 from git import *
+from nose.tools import *
 
-# PyGitup imports
-from tests import basepath, init_master, update_file
-from PyGitUp.git_wrapper import GitError
+from PyGitUp.git_wrapper import RebaseError
+from PyGitUp.tests import basepath, init_master, update_file, write_file
 
-test_name = 'detached'
+test_name = 'overwrite_untracked_error'
 repo_path = join(basepath, test_name + os.sep)
 
 
@@ -29,21 +27,18 @@ def setup():
     assert repo.working_dir == path
 
     # Modify file in master
-    update_file(master, test_name)
+    update_file(master, test_name, filename='test1.txt')
 
-    # Modify file in our repo
-    update_file(repo, test_name)
-    update_file(repo, test_name)
-
-    # Check out parent commit
-    repo.git.checkout('HEAD~')
+    # Modify file in working directory
+    write_file(join(path, 'test1.txt'), 'Hello world!')
 
 
-@raises(GitError)
-def test_detached():
-    """ Run 'git up' with detached head """
+@raises(RebaseError)
+def test_fast_forwarded():
+    """ Fail correctly when a rebase would overwrite untracked files """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
     gitup = GitUp(testing=True)
+
     gitup.run()

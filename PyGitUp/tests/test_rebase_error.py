@@ -2,15 +2,13 @@
 import os
 from os.path import join
 
-# 3rd party libs
-from nose.tools import *
 from git import *
+from nose.tools import *
 
-# PyGitup imports
 from PyGitUp.git_wrapper import RebaseError
-from tests import basepath, init_master, update_file, write_file
+from PyGitUp.tests import basepath, write_file, init_master, update_file, testfile_name
 
-test_name = 'overwrite_untracked_error'
+test_name = 'rebase_error'
 repo_path = join(basepath, test_name + os.sep)
 
 
@@ -29,18 +27,25 @@ def setup():
     assert repo.working_dir == path
 
     # Modify file in master
-    update_file(master, test_name, filename='test1.txt')
+    update_file(master, test_name)
 
-    # Modify file in working directory
-    write_file(join(path, 'test1.txt'), 'Hello world!')
+    # Modify file in our repo
+    contents = 'completely changed!'
+    repo_file = join(path, testfile_name)
+
+    write_file(repo_file, contents)
+    repo.index.add([repo_file])
+    repo.index.commit(test_name)
+
+    # Modify file in master
+    update_file(master, test_name)
 
 
 @raises(RebaseError)
-def test_fast_forwarded():
-    """ Fail correctly when a rebase would overwrite untracked files """
+def test_rebase_error():
+    """ Run 'git up' with a failing rebase """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
     gitup = GitUp(testing=True)
-
     gitup.run()

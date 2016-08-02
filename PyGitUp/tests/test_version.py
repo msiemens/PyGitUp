@@ -1,12 +1,10 @@
 # System imports
 import socket
 
-# 3rd party libs
 from nose.plugins.skip import SkipTest
 from nose.tools import *
 
-# PyGitup imports
-from tests import capture
+from PyGitUp.tests import capture
 
 test_name = 'version'
 

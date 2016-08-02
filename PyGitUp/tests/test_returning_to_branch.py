@@ -2,14 +2,13 @@
 import os
 from os.path import join
 
-# 3rd party libs
-from nose.tools import *
 from git import *
+from nose.tools import *
 
-# PyGitup imports
-from tests import basepath, init_master, update_file
+from PyGitUp.tests import basepath, init_master, update_file
 
-test_name = 'up-to-date'
+test_name = 'returning-to-branch'
+new_branch_name = test_name + '.2'
 repo_path = join(basepath, test_name + os.sep)
 
 
@@ -27,15 +26,15 @@ def setup():
 
     assert repo.working_dir == path
 
+    # Create a new branch in repo
+    repo.git.checkout(b=new_branch_name)
+
     # Modify file in master
     update_file(master, test_name)
 
-    # Update repo
-    repo.remotes.origin.pull()
 
-
-def test_up_to_date():
-    """ Run 'git up' with result: up to date """
+def test_returning_to_branch():
+    """ Run 'git up': return to branch """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
@@ -43,4 +42,5 @@ def test_up_to_date():
     gitup.run()
 
     assert_equal(len(gitup.states), 1)
-    assert_equal(gitup.states[0], 'up to date')
+    assert_equal(gitup.states[0], 'fast-forwarding')
+    assert_equal(gitup.repo.head.ref.name, new_branch_name)

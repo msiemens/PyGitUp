@@ -2,15 +2,13 @@
 import os
 from os.path import join
 
-# 3rd party libs
-from nose.tools import *
 from git import *
+from nose.tools import *
 
-# PyGitup imports
-from tests import basepath, init_master, update_file
+from PyGitUp.git_wrapper import UnstashError
+from PyGitUp.tests import basepath, write_file, init_master, testfile_name
 
-test_name = 'returning-to-branch'
-new_branch_name = test_name + '.2'
+test_name = 'unstash_error'
 repo_path = join(basepath, test_name + os.sep)
 
 
@@ -28,21 +26,22 @@ def setup():
 
     assert repo.working_dir == path
 
-    # Create a new branch in repo
-    repo.git.checkout(b=new_branch_name)
-
     # Modify file in master
-    update_file(master, test_name)
+    master_path_file = join(master_path, testfile_name)
+    write_file(master_path_file, 'contents')
+    master.index.add([master_path_file])
+    master.index.commit(test_name)
+
+    # Modify file in repo
+    path_file = join(path, testfile_name)
+    os.unlink(path_file)
 
 
-def test_returning_to_branch():
-    """ Run 'git up': return to branch """
+@raises(UnstashError)
+def test_unstash_error():
+    """ Run 'git up' with an unclean unstash """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
     gitup = GitUp(testing=True)
     gitup.run()
-
-    assert_equal(len(gitup.states), 1)
-    assert_equal(gitup.states[0], 'fast-forwarding')
-    assert_equal(gitup.repo.head.ref.name, new_branch_name)

@@ -2,12 +2,10 @@
 import os
 from os.path import join
 
-# 3rd party libs
 from nose.tools import *
 
-# PyGitup imports
-from tests import basepath
 from PyGitUp.git_wrapper import GitError
+from PyGitUp.tests import basepath
 
 test_name = 'git-not-in-path'
 repo_path = join(basepath, test_name + os.sep)

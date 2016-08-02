@@ -2,15 +2,12 @@
 import os
 from os.path import join
 
-# 3rd party libs
-from nose.tools import *
 from git import *
+from nose.tools import *
 
-# PyGitup imports
-from tests import basepath, write_file, init_master, update_file, testfile_name
-from PyGitUp.git_wrapper import RebaseError
+from PyGitUp.tests import basepath, write_file, init_master, update_file, testfile_name
 
-test_name = 'rebase-arguments'
+test_name = 'rebasing'
 repo_path = join(basepath, test_name + os.sep)
 
 
@@ -45,14 +42,9 @@ def setup():
     repo.index.add([repo_file])
     repo.index.commit(test_name)
 
-    # Set git-up.rebase.arguments to '--abort', what results in an
-    # invalid cmd and thus git returning an error, that we look for.
-    repo.git.config('git-up.rebase.arguments', '--abort')
 
-
-@raises(RebaseError)
-def test_rebase_arguments():
-    """ Run 'git up' with rebasing.arguments """
+def test_rebasing():
+    """ Run 'git up' with result: rebasing """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp

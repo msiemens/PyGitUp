@@ -2,12 +2,10 @@
 import os
 from os.path import join
 
-# 3rd party libs
-from nose.tools import *
 from git import *
+from nose.tools import *
 
-# PyGitup imports
-from tests import basepath, write_file, init_master
+from PyGitUp.tests import basepath, write_file, init_master
 
 test_name = 'out-of-tree'
 testfile_name = 'file'
