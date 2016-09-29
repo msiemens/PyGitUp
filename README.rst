@@ -157,7 +157,7 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
-v1.4.1 (*2016-09-29*)
+v1.4.2 (*2016-09-29*)
 ~~~~~~~~~~~~~~~~~~~~~
 
 - Switched the command line argument parsing library (`#53 <https://github.com/msiemens/PyGitUp/issues/53>`__).
