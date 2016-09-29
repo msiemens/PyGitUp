@@ -1,33 +1,4 @@
 # coding=utf-8
-"""
-git up -- like 'git pull', but polite
-
-Usage: git up [-h | --version | --quiet | --no-fetch | --no-f]
-
-Options:
-  -h            Show this screen.
-  --version     Show version (and if there is a newer version).
-  --quiet       Be quiet, only print error messages.
-
-
-Why use git-up? `git pull` has two problems:
-  - It merges upstream changes by default, when it's really more polite to
-    rebase over them, unless your collaborators enjoy a commit graph that
-    looks like bedhead.
-  - It only updates the branch you're currently on, which means git push
-    will shout at you for being behind on branches you don't particularly
-    care about right now.
-(from the original git-up https://github.com/aanand/git-up/)
-
-
-For configuration options, please see
-https://github.com/msiemens/PyGitUp#readme or <path-to-PyGitUp>/README.rst.
-
-
-Python port of https://github.com/aanand/git-up/
-Project Author: Markus Siemens <markus@m-siemens.de>
-Project URL: https://github.com/msiemens/PyGitUp
-"""
 
 from __future__ import print_function
 
@@ -62,8 +33,8 @@ except ImportError:  # pragma: no cover
 else:  # pragma: no cover
     NO_DISTRIBUTE = False
 
+import click
 import colorama
-from docopt import docopt
 from git import Repo, GitCmdObjectDB
 from termcolor import colored
 
@@ -582,27 +553,51 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
 ###############################################################################
 
 
-def run():  # pragma: no cover
-    arguments = docopt(__doc__, ['up'] + sys.argv[1:])
-    if arguments['--version']:
+EPILOG = '''
+For configuration options, please see
+https://github.com/msiemens/PyGitUp#readme.
+
+\b
+Python port of https://github.com/aanand/git-up/
+Project Author: Markus Siemens <markus@m-siemens.de>
+Project URL: https://github.com/msiemens/PyGitUp
+\b
+'''
+
+
+@click.command(epilog=EPILOG)
+@click.option('--version', is_flag=True,
+              help='Show version (and if there is a newer version).')
+@click.option('--quiet', is_flag=True,
+              help='Be quiet, only print error messages.')
+@click.option('--no-fetch', '--no-f', is_flag=True,
+              help='Don\'t try to fetch from origin.')
+def run(version, quiet, no_f):  # pragma: no cover
+    """
+    A nicer `git pull`.
+    """
+
+    if version:
         if NO_DISTRIBUTE:
             print(colored('Please install \'git-up\' via pip in order to '
                           'get version information.', 'yellow'))
         else:
             GitUp(sparse=True).version_info()
+        return
+
+    if quiet:
+        sys.stdout = StringIO()
+
+    try:
+        gitup = GitUp()
+
+        # if arguments['--no-fetch'] or arguments['--no-f']:
+        if no_f:
+            gitup.should_fetch = False
+    except GitError:
+        sys.exit(1)  # Error in constructor
     else:
-        if arguments['--quiet']:
-            sys.stdout = StringIO()
-
-        try:
-            gitup = GitUp()
-
-            if arguments['--no-fetch'] or arguments['--no-f']:
-                gitup.should_fetch = False
-        except GitError:
-            sys.exit(1)  # Error in constructor
-        else:
-            gitup.run()
+        gitup.run()
 
 if __name__ == '__main__':  # pragma: no cover
-    run()
+    run(help_option_names=['-h'])
