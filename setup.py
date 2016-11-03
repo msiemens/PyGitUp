@@ -6,7 +6,7 @@ setup(
     version="1.4.2",
     packages=find_packages(),
     scripts=['PyGitUp/gitup.py'],
-    install_requires=['GitPython>=1.0.2', 'colorama>=0.3.7',
+    install_requires=['GitPython>2.0.0', 'colorama>=0.3.7',
                       'termcolor>=1.1.0', 'click>=6.0.0',
                       'six>=1.10.0'],
 

@@ -217,7 +217,7 @@ class GitWrapper(object):
 # GitError + subclasses
 ###############################################################################
 
-class GitError(GitCommandError):
+class GitError(Exception):
     """
     Extension of the GitCommandError class.
 
@@ -227,10 +227,12 @@ class GitError(GitCommandError):
     """
 
     def __init__(self, message=None, stderr=None, stdout=None, details=None):
-        super(GitError, self).__init__(None, None, stderr)
-        self.stdout = stdout
+        # super(GitError, self).__init__((), None, stderr)
         self.details = details
         self.message = message
+
+        self.stderr = stderr
+        self.stdout = stdout
 
     def __str__(self):  # pragma: no cover
         return self.message
