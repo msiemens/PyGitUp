@@ -157,6 +157,11 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.4.3 (*2016-11-22*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Fixed a bug with GitPython <= 2.0.8 (`#56 <https://github.com/msiemens/PyGitUp/issues/56>`__, `#57 <https://github.com/msiemens/PyGitUp/issues/57>`__).
+
 v1.4.2 (*2016-09-29*)
 ~~~~~~~~~~~~~~~~~~~~~
 
