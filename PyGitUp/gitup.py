@@ -116,7 +116,7 @@ class GitUp(object):
         # Check, if we're in a git repo
         try:
             repo_dir = get_git_dir()
-        except EnvironmentError as e:
+        except (EnvironmentError, OSError) as e:
             if e.errno == errno.ENOENT:
                 exc = GitError("The git executable could not be found")
                 raise exc
