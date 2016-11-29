@@ -2,6 +2,8 @@
 
 from __future__ import print_function
 
+from git import Git
+
 __all__ = ['GitUp']
 
 ###############################################################################
@@ -68,8 +70,10 @@ def get_git_dir():
 
     if os.path.isdir(git_dir):
         return abspath
-    else:
+    elif Git().version_info[:3] >= (2, 5, 1):
         return execute(['git', 'rev-parse', '--git-common-dir'])
+    else:
+        return execute(['git', 'rev-parse', '--show-toplevel'])
 
 
 class GitUp(object):

@@ -1,6 +1,7 @@
 # System imports
 import os
 from os.path import join
+from unittest import SkipTest
 
 from git import *
 from git.util import cygpath
@@ -15,6 +16,9 @@ worktree_path = join(basepath, worktree_dir)
 
 
 def setup():
+    if Git().version_info[:3] < (2, 5, 1):
+        return
+
     master_path, master = init_master(test_name)
 
     # Prepare master repo
@@ -38,6 +42,9 @@ def setup():
 
 def test_separate_worktree():
     """ Run 'git up' with separate work tree """
+    if Git().version_info[:3] < (2, 5, 1):
+        raise SkipTest('Skip this test on Travis CI :(')
+
     os.chdir(worktree_path)
 
     from PyGitUp.gitup import GitUp
