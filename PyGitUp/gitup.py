@@ -69,7 +69,7 @@ def get_git_dir():
     if os.path.isdir(git_dir):
         return abspath
     else:
-        return execute(['git', 'rev-parse', '--show-toplevel'])
+        return execute(['git', 'rev-parse', '--git-common-dir'])
 
 
 class GitUp(object):
