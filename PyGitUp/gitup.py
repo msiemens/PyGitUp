@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 
-from git import Git
+from git import Git, GitCommandNotFound
 
 __all__ = ['GitUp']
 
@@ -116,8 +116,8 @@ class GitUp(object):
         # Check, if we're in a git repo
         try:
             repo_dir = get_git_dir()
-        except (EnvironmentError, OSError) as e:
-            if e.errno == errno.ENOENT:
+        except (EnvironmentError, OSError, GitCommandNotFound) as e:
+            if e.errno == errno.ENOENT or isinstance(e, GitCommandNotFound):
                 exc = GitError("The git executable could not be found")
                 raise exc
             else:
