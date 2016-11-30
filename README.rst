@@ -157,6 +157,11 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.4.4 (*2016-11-30*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Fixed a bug when working with ``git worktree`` (`#58 <https://github.com/msiemens/PyGitUp/issues/58>`__).
+
 v1.4.3 (*2016-11-22*)
 ~~~~~~~~~~~~~~~~~~~~~
 
