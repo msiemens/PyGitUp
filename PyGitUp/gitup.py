@@ -67,14 +67,15 @@ PYPI_URL = 'https://pypi.python.org/pypi/git-up/json'
 def get_git_dir():
     toplevel_dir = execute(['git', 'rev-parse', '--show-toplevel'])
     dot_git_is_file = os.path.isfile(os.path.join(toplevel_dir, '.git'))
-    inside_worktree = execute(['git', 'rev-parse', '--is-inside-work-tree'],
-                              cwd=os.path.join(toplevel_dir, '..'))
 
     if toplevel_dir is not None and dot_git_is_file:
         # Not a normal git repo. Check if it's a submodule, then use
         # toplevel_dir. Otherwise it's a worktree, thus use  common_dir.
         # NOTE: git worktree support only comes with git v2.5.0 or
         # later, on earler versions toplevel_dir is the best we can do.
+
+        cmd = ['git', 'rev-parse', '--is-inside-work-tree']
+        inside_worktree = execute(cmd, cwd=os.path.join(toplevel_dir, '..'))
 
         if inside_worktree == 'true' or Git().version_info[:3] < (2, 5, 0):
             return toplevel_dir
