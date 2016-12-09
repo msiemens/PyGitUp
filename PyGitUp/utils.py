@@ -2,9 +2,15 @@
 """
 Some simple, generic usefull methods.
 """
-
+import os
 import subprocess
 import sys
+
+try:
+    from subprocess import DEVNULL  # py3k
+except ImportError:
+    import os
+    DEVNULL = open(os.devnull, 'wb')
 
 
 def find(seq, test):
@@ -24,7 +30,7 @@ def execute(cmd, cwd=None):
     """ Execute a command and return it's output. """
     try:
         lines = subprocess\
-            .check_output(cmd, cwd=cwd, stderr=subprocess.DEVNULL)\
+            .check_output(cmd, cwd=cwd, stderr=DEVNULL)\
             .splitlines()
     except subprocess.CalledProcessError:
         return None
