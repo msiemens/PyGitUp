@@ -23,7 +23,9 @@ def uniq(seq):
 def execute(cmd, cwd=None):
     """ Execute a command and return it's output. """
     try:
-        lines = subprocess.check_output(cmd, cwd=cwd).splitlines()
+        lines = subprocess\
+            .check_output(cmd, cwd=cwd, stderr=subprocess.DEVNULL)\
+            .splitlines()
     except subprocess.CalledProcessError:
         return None
     else:
