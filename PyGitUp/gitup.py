@@ -2,7 +2,8 @@
 
 from __future__ import print_function
 
-from git import Git, GitCommandNotFound
+from git import Git
+from git import GitCommandNotFound
 
 __all__ = ['GitUp']
 
@@ -28,7 +29,7 @@ from six.moves.urllib.request import urlopen
 
 # 3rd party libs
 try:
-    #noinspection PyUnresolvedReferences
+    # noinspection PyUnresolvedReferences
     import pkg_resources as pkg
 except ImportError:  # pragma: no cover
     NO_DISTRIBUTE = True
@@ -41,7 +42,7 @@ from git import Repo, GitCmdObjectDB
 from termcolor import colored
 
 # PyGitUp libs
-from PyGitUp.utils import execute, uniq, find, decode
+from PyGitUp.utils import execute, uniq, find
 from PyGitUp.git_wrapper import GitWrapper, GitError
 
 ON_WINDOWS = sys.platform in ('win32', 'cygwin')
@@ -51,7 +52,6 @@ ON_WINDOWS = sys.platform in ('win32', 'cygwin')
 ###############################################################################
 
 colorama.init(autoreset=True, convert=ON_WINDOWS)
-
 
 ###############################################################################
 # Setup constants
@@ -66,15 +66,22 @@ PYPI_URL = 'https://pypi.python.org/pypi/git-up/json'
 
 def get_git_dir():
     toplevel_dir = execute(['git', 'rev-parse', '--show-toplevel'])
+    dot_git_is_file = os.path.isfile(os.path.join(toplevel_dir, '.git'))
+    inside_worktree = execute(['git', 'rev-parse', '--is-inside-work-tree'],
+                              cwd=os.path.join(toplevel_dir, '..'))
 
-    if toplevel_dir is not None and os.path.isfile(os.path.join(toplevel_dir, '.git')):
-        # If submodule: Use toplevel_dir. Otherwise it's a worktree, thus use common_dir
-        if execute(['git', 'rev-parse', '--is-inside-work-tree'], cwd=os.path.join(toplevel_dir, '..')) == 'true':
+    if toplevel_dir is not None and dot_git_is_file:
+        # Not a normal git repo. Check if it's a submodule, then use
+        # toplevel_dir. Otherwise it's a worktree, thus use  common_dir.
+        # NOTE: git worktree support only comes with git v2.5.0 or
+        # later, on earler versions toplevel_dir is the best we can do.
+
+        if inside_worktree == 'true' or Git().version_info[:3] < (2, 5, 0):
             return toplevel_dir
         else:
             return execute(['git', 'rev-parse', '--git-common-dir'])
-    else:
-        return toplevel_dir
+
+    return toplevel_dir
 
 
 class GitUp(object):
@@ -244,7 +251,8 @@ class GitUp(object):
 
                 continue  # Do not do anything
 
-            base = self.git.merge_base(branch.name, target.name).decode('utf-8')
+            base = self.git.merge_base(branch.name, target.name).decode(
+                'utf-8')
 
             if base == target.commit.hexsha:
                 print(colored('ahead of upstream', 'cyan'))
@@ -386,7 +394,7 @@ class GitUp(object):
             recent = local_version >= pkg.parse_version(online_version)
 
         if not recent:
-            #noinspection PyUnboundLocalVariable
+            # noinspection PyUnboundLocalVariable
             print(
                 '\rRecent version is: '
                 + colored('v' + online_version, color='yellow', attrs=['bold'])
@@ -412,11 +420,11 @@ class GitUp(object):
         yield
 
         if (
-                self.repo.head.is_detached  # Only on Travis CI,
+                    self.repo.head.is_detached  # Only on Travis CI,
                 # we get a detached head after doing our rebase *confused*.
                 # Running self.repo.active_branch would fail.
-            or
-                not self.repo.active_branch.name == branch_name
+                or
+                    not self.repo.active_branch.name == branch_name
         ):
             print(colored('returning to {0}'.format(branch_name), 'magenta'))
             self.git.checkout(branch_name)
@@ -477,6 +485,7 @@ class GitUp(object):
         this case.
         :rtype : bool
         """
+
         def gemfile_exists():
             """
             Check, if a Gemfile exists in the current repo.
@@ -503,7 +512,7 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
             return gemfile_exists()
 
         if ('GIT_UP_BUNDLER_CHECK' in os.environ
-                and os.environ['GIT_UP_BUNDLER_CHECK'] == 'true'):
+            and os.environ['GIT_UP_BUNDLER_CHECK'] == 'true'):
             return gemfile_exists()
 
         return False
@@ -512,6 +521,7 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
         """
         Run the bundler check.
         """
+
         def get_config(name):
             return name if self.config('bundler.' + name) else ''
 
@@ -553,6 +563,7 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
             print("Here's what we know:", file=self.stderr)
             print(str(error.details), file=self.stderr)
             print(file=self.stderr)
+
 
 ###############################################################################
 
@@ -602,6 +613,7 @@ def run(version, quiet, no_f):  # pragma: no cover
         sys.exit(1)  # Error in constructor
     else:
         gitup.run()
+
 
 if __name__ == '__main__':  # pragma: no cover
     run(help_option_names=['-h'])
