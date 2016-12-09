@@ -11,7 +11,7 @@ test_name = 'out-of-tree'
 testfile_name = 'file'
 
 repo_path = join(basepath, test_name + os.sep)
-git_dir = join(repo_path, 'git-dir')
+git_dir = join(repo_path, 'git-dir', '.git')
 work_tree = join(repo_path, 'work-tree')
 
 

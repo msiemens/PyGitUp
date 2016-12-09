@@ -20,15 +20,15 @@ def uniq(seq):
     return [x for x in seq if str(x) not in seen and not seen.add(str(x))]
 
 
-def execute(cmd):
+def execute(cmd, cwd=None):
     """ Execute a command and return it's output. """
     try:
-        lines = subprocess.check_output(cmd).splitlines()
+        lines = subprocess.check_output(cmd, cwd=cwd).splitlines()
     except subprocess.CalledProcessError:
         return None
     else:
         if lines:
-            return lines[0].strip()
+            return decode(lines[0].strip())
         else:
             return None
 

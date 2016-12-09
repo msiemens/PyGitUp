@@ -65,15 +65,16 @@ PYPI_URL = 'https://pypi.python.org/pypi/git-up/json'
 ###############################################################################
 
 def get_git_dir():
-    abspath = os.path.abspath('.')
-    git_dir = os.path.join(abspath, '.git')
+    toplevel_dir = execute(['git', 'rev-parse', '--show-toplevel'])
 
-    if os.path.isdir(git_dir):
-        return abspath
-    elif Git().version_info[:3] >= (2, 5, 1):
-        return execute(['git', 'rev-parse', '--git-common-dir'])
+    if toplevel_dir is not None and os.path.isfile(os.path.join(toplevel_dir, '.git')):
+        # If submodule: Use toplevel_dir. Otherwise it's a worktree, thus use common_dir
+        if execute(['git', 'rev-parse', '--is-inside-work-tree'], cwd=os.path.join(toplevel_dir, '..')) == 'true':
+            return toplevel_dir
+        else:
+            return execute(['git', 'rev-parse', '--git-common-dir'])
     else:
-        return execute(['git', 'rev-parse', '--show-toplevel'])
+        return toplevel_dir
 
 
 class GitUp(object):
@@ -127,8 +128,7 @@ class GitUp(object):
                 exc = GitError("We don't seem to be in a git repository.")
                 raise exc
 
-            self.repo = Repo(decode(repo_dir),
-                             odbt=GitCmdObjectDB)
+            self.repo = Repo(repo_dir, odbt=GitCmdObjectDB)
 
         # Check for branch tracking informatino
         if not any(b.tracking_branch() for b in self.repo.branches):
@@ -171,8 +171,8 @@ class GitUp(object):
 
         # change_count: Number of unstaged changes
         self.change_count = len(
-            self.git.status(porcelain=True, untracked_files='no').split(
-                six.b('\n'))
+            self.git.status(porcelain=True, untracked_files='no')
+                .split(six.b('\n'))
         )
 
         # Load configuration
