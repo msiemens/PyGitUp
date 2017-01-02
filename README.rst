@@ -157,6 +157,14 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.4.5 (*2017-01-02*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Fixed problems when working with branches containing hash signs in their name
+  (`#55 <https://github.com/msiemens/PyGitUp/issues/55>`__).
+- No longer installs a now unneeded script on ``pip install``. Thanks `@ekohl <https://github.com/ekohl>`_
+  for `Pull Request #60 <https://github.com/msiemens/PyGitUp/pull/60>`_.
+
 v1.4.4 (*2016-11-30*)
 ~~~~~~~~~~~~~~~~~~~~~
 
