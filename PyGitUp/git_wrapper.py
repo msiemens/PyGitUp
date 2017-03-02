@@ -82,32 +82,19 @@ class GitWrapper(object):
 
         self.git.clear_cache()
 
-    def run(self, name, *args, **kwargs):
+    def _run(self, name, *args, **kwargs):
+
         """ Run a git command specified by name and args/kwargs. """
 
-        tostdout = kwargs.pop('tostdout', False)
         stdout = six.b('')
+        cmd = getattr(self.git, name)
+
+        # Ask cmd(...) to return a (status, stdout, stderr) tuple
+        kwargs['with_extended_output'] = True
 
         # Execute command
-        cmd = getattr(self.git, name)(as_process=True, *args, **kwargs)
-
-        # Capture output
-        while True:
-            output = cmd.stdout.read(1)
-
-            # Print to stdout
-            if tostdout:
-                sys.stdout.write(output.decode('utf-8'))
-                sys.stdout.flush()
-
-            stdout += output
-
-            if output == six.b(""):
-                break
-
-        # Wait for the process to quit
         try:
-            cmd.wait()
+            (_, stdout, _) = cmd(*args, **kwargs)
         except GitCommandError as error:
             # Add more meta-information to errors
             message = "'{0}' returned exit status {1}".format(
@@ -120,7 +107,7 @@ class GitWrapper(object):
         return stdout.strip()
 
     def __getattr__(self, name):
-        return lambda *args, **kwargs: self.run(name, *args, **kwargs)
+        return lambda *args, **kwargs: self._run(name, *args, **kwargs)
 
     ###########################################################################
     # Overwrite some methods and add new ones
@@ -144,7 +131,7 @@ class GitWrapper(object):
                 'magenta'
             ))
             try:
-                self.run('stash')
+                self._run('stash')
             except GitError as e:
                 raise StashError(stderr=e.stderr, stdout=e.stdout)
 
@@ -155,7 +142,7 @@ class GitWrapper(object):
         if stashed:
             print(colored('unstashing', 'magenta'))
             try:
-                self.run('stash', 'pop')
+                self._run('stash', 'pop')
             except GitError as e:
                 raise UnstashError(stderr=e.stderr, stdout=e.stdout)
 
@@ -177,10 +164,51 @@ class GitWrapper(object):
             [target_branch.name]
         )
         try:
-            self.run('rebase', *arguments)
+            self._run('rebase', *arguments)
         except GitError as e:
             raise RebaseError(current_branch.name, target_branch.name,
                               **e.__dict__)
+
+    def fetch(self, *args, **kwargs):
+        """ Fetch remote commits. """
+
+        # Unlike the other git commands, we want to output `git fetch`'s
+        # output in real time. Therefore we use a different implementation
+        # from `GitWrapper._run` which buffers all output.
+        # In theory this may deadlock if `git fetch` prints more than 8 KB
+        # to stderr which is here assumed to not happen in day-to-day use.
+
+        stdout = six.b('')
+
+        # Execute command
+        cmd = self.git.fetch(as_process=True, *args, **kwargs)
+
+        # Capture output
+        while True:
+            output = cmd.stdout.read(1)
+
+            sys.stdout.write(output.decode('utf-8'))
+            sys.stdout.flush()
+
+            stdout += output
+
+            # Check for EOF
+            if output == six.b(""):
+                break
+
+        # Wait for the process to quit
+        try:
+            cmd.wait()
+        except GitCommandError as error:
+            # Add more meta-information to errors
+            message = "'{0}' returned exit status {1}".format(
+                ' '.join(str(c) for c in error.command),
+                error.status
+            )
+
+            raise GitError(message, stderr=error.stderr, stdout=stdout)
+
+        return stdout.strip()
 
     def config(self, key):
         """ Return `git config key` output or None. """

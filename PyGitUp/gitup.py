@@ -311,7 +311,7 @@ class GitUp(object):
             fetch_args.append(self.remotes)
 
         try:
-            self.git.fetch(tostdout=True, *fetch_args, **fetch_kwargs)
+            self.git.fetch(*fetch_args, **fetch_kwargs)
         except GitError as error:
             error.message = "`git fetch` failed"
             raise error
