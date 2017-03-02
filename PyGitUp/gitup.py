@@ -179,8 +179,7 @@ class GitUp(object):
 
         # change_count: Number of unstaged changes
         self.change_count = len(
-            self.git.status(porcelain=True, untracked_files='no')
-                .split(six.b('\n'))
+            self.git.status(porcelain=True, untracked_files='no').split('\n')
         )
 
         # Load configuration
@@ -252,8 +251,7 @@ class GitUp(object):
 
                 continue  # Do not do anything
 
-            base = self.git.merge_base(branch.name, target.name).decode(
-                'utf-8')
+            base = self.git.merge_base(branch.name, target.name)
 
             if base == target.commit.hexsha:
                 print(colored('ahead of upstream', 'cyan'))
