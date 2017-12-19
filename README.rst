@@ -157,6 +157,11 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.4.6 (*2017-12-19*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- 3rd party dependencies have been updated (see `#65 <https://github.com/msiemens/PyGitUp/issues/65>`__).
+
 v1.4.5 (*2017-01-02*)
 ~~~~~~~~~~~~~~~~~~~~~
 
