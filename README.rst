@@ -1,10 +1,13 @@
 PyGitUp |Version| |Build Status| |Coverage Status|
 ==================================================
 
-``PyGitUp`` is a Python implementation of the great
-`aanand/git-up/ <https://github.com/aanand/git-up/>`__. It not only
+|PyGitUp|_ is a Python port of
+`aanand/git-up <https://github.com/aanand/git-up/>`__. It not only
 fully covers the abilities of git-up and should be a drop-in replacement,
 but also extends it slightly.
+
+.. |PyGitUp| replace:: ``PyGitUp``
+.. _PyGitUp: https://github.com/msiemens/PyGitUp
 
 Why use ``git up``?
 -------------------
