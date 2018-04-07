@@ -160,6 +160,11 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.4.7 (*2018-04-07*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Added shorthand commandline arguments (``-V, -q, -h``, see `#73 <https://github.com/msiemens/PyGitUp/issues/73>`__).
+
 v1.4.6 (*2017-12-19*)
 ~~~~~~~~~~~~~~~~~~~~~
 
