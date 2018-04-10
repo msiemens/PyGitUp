@@ -210,6 +210,40 @@ class GitWrapper(object):
 
         return stdout.strip()
 
+    def push(self, *args, **kwargs):
+        ''' Push commits to remote '''
+        stdout = six.b('')
+
+        # Execute command
+        cmd = self.git.push(as_process=True, *args, **kwargs)
+
+        # Capture output
+        while True:
+            output = cmd.stdout.read(1)
+
+            sys.stdout.write(output.decode('utf-8'))
+            sys.stdout.flush()
+
+            stdout += output
+
+            # Check for EOF
+            if output == six.b(""):
+                break
+
+        # Wait for the process to quit
+        try:
+            cmd.wait()
+        except GitCommandError as error:
+            # Add more meta-information to errors
+            message = "'{0}' returned exit status {1}".format(
+                ' '.join(str(c) for c in error.command),
+                error.status
+            )
+
+            raise GitError(message, stderr=error.stderr, stdout=stdout)
+
+        return stdout.strip()
+
     def config(self, key):
         """ Return `git config key` output or None. """
         try:
