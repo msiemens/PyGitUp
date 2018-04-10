@@ -616,14 +616,15 @@ Project URL: https://github.com/msiemens/PyGitUp
 
 
 @click.command(epilog=EPILOG)
-@click.option('--version', is_flag=True,
+@click.option('-V', '--version', is_flag=True,
               help='Show version (and if there is a newer version).')
-@click.option('--quiet', is_flag=True,
+@click.option('-q', '--quiet', is_flag=True,
               help='Be quiet, only print error messages.')
 @click.option('--no-fetch', '--no-f', is_flag=True,
               help='Don\'t try to fetch from origin.')
 @click.option('-p', '--push/--no-push', default=None,
               help='Push the changes after pulling successfully.')
+@click.help_option('-h', '--help')
 def run(version, quiet, no_f, push, **kwargs):  # pragma: no cover
     """
     A nicer `git pull`.
