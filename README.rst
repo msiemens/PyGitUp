@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmsiemens%2FPyGitUp.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmsiemens%2FPyGitUp?ref=badge_shield)
+
 PyGitUp |Version| |Build Status| |Coverage Status|
 ==================================================
 
@@ -349,3 +351,7 @@ v0.1 (*2013-03-14*)
 
 .. |Version| image:: http://img.shields.io/pypi/v/git-up.svg?style=flat-square
   :target: https://pypi.python.org/pypi/git-up
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmsiemens%2FPyGitUp.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmsiemens%2FPyGitUp?ref=badge_large)
