@@ -99,7 +99,10 @@ class GitUp(object):
         'rebase.arguments': None,
         'rebase.auto': True,
         'rebase.log-hook': None,
-        'updates.check': True
+        'updates.check': True,
+        'push.auto': False,
+        'push.tags': False,
+        'push.all': False,
     }
 
     def __init__(self, testing=False, sparse=False):
@@ -198,6 +201,9 @@ class GitUp(object):
 
             if self.with_bundler():
                 self.check_bundler()
+
+            if self.settings['push.auto']:
+                self.push()
 
         except GitError as error:
             self.print_error(error)
@@ -312,6 +318,36 @@ class GitUp(object):
             self.git.fetch(*fetch_args, **fetch_kwargs)
         except GitError as error:
             error.message = "`git fetch` failed"
+            raise error
+
+    def push(self):
+        '''
+        Push the changes back to the remote(s) after fetching
+        '''
+        print('pushing...')
+        push_kwargs = {}
+        push_args = []
+
+        if self.settings['push.tags']:
+            push_kwargs['push'] = True
+
+        if self.settings['push.all']:
+            push_kwargs['all'] = True
+        else:
+            if '.' in self.remotes:
+                self.remotes.remove('.')
+
+                if not self.remotes:
+                    # Only local target branches,
+                    # `git push` will fail
+                    return
+
+            push_args.append(self.remotes)
+
+        try:
+            self.git.push(*push_args, **push_kwargs)
+        except GitError as error:
+            error.message = "`git push` failed"
             raise error
 
     def log(self, branch, remote):
@@ -586,12 +622,13 @@ Project URL: https://github.com/msiemens/PyGitUp
               help='Be quiet, only print error messages.')
 @click.option('--no-fetch', '--no-f', is_flag=True,
               help='Don\'t try to fetch from origin.')
+@click.option('-p', '--push/--no-push', default=None,
+              help='Push the changes after pulling successfully.')
 @click.help_option('-h', '--help')
-def run(version, quiet, no_f):  # pragma: no cover
+def run(version, quiet, no_f, push, **kwargs):  # pragma: no cover
     """
     A nicer `git pull`.
     """
-
     if version:
         if NO_DISTRIBUTE:
             print(colored('Please install \'git-up\' via pip in order to '
@@ -606,9 +643,13 @@ def run(version, quiet, no_f):  # pragma: no cover
     try:
         gitup = GitUp()
 
+        if push is not None:
+            gitup.settings['push.auto'] = push
+
         # if arguments['--no-fetch'] or arguments['--no-f']:
         if no_f:
             gitup.should_fetch = False
+
     except GitError:
         sys.exit(1)  # Error in constructor
     else:
