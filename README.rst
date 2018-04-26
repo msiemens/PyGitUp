@@ -122,6 +122,13 @@ options:
    from all remotes, which is useful if e.g. you use a remote to push to
    your CI system but never check those branches out.
 
+- ``git-up.push.auto [true|*false*]``: Push the current branch after
+  rebasing and fast-forwarding.
+
+- ``git-up.push.all [true|*false*]``: Push all branches when auto-pushing.
+
+- ``git-up.push.tags [true|*false*]``: Push tags when auto-pushing.
+
 -  ``git-up.rebase.arguments [string]``: If set, ``PyGitUp`` will use
    this string as additional arguments when calling ``git rebase``.
    Example: ``--preserve-merges`` to recreate merge commits in the

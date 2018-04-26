@@ -21,6 +21,7 @@ def wip(f):
         except Exception as e:
             raise SkipTest("WIP test failed: " + str(e))
         raise AssertionError("Passing test marked as WIP")
+
     return attr('wip')(run_test)
 
 
@@ -49,7 +50,6 @@ def teardown():
     import stat
 
     def onerror(func, path, _):
-
         if not os.access(path, os.W_OK):
             os.chmod(path, stat.S_IWUSR)
             func(path)
@@ -65,7 +65,7 @@ def write_file(path, contents):
         f.write(contents)
 
 
-#noinspection PyDefaultArgument
+# noinspection PyDefaultArgument
 def update_file(repo, commit_message='', counter=[0], filename=testfile_name):
     """
     Update 'testfile_name' using an increasing counter and commit the changes.

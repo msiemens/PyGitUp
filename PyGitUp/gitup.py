@@ -124,6 +124,7 @@ class GitUp(object):
 
         self.states = []
         self.should_fetch = True
+        self.pushed = False
 
         # Check, if we're in a git repo
         try:
@@ -321,9 +322,9 @@ class GitUp(object):
             raise error
 
     def push(self):
-        '''
+        """
         Push the changes back to the remote(s) after fetching
-        '''
+        """
         print('pushing...')
         push_kwargs = {}
         push_args = []
@@ -346,6 +347,7 @@ class GitUp(object):
 
         try:
             self.git.push(*push_args, **push_kwargs)
+            self.pushed = True
         except GitError as error:
             error.message = "`git push` failed"
             raise error
@@ -455,11 +457,11 @@ class GitUp(object):
         yield
 
         if (
-                    self.repo.head.is_detached  # Only on Travis CI,
+                self.repo.head.is_detached  # Only on Travis CI,
                 # we get a detached head after doing our rebase *confused*.
                 # Running self.repo.active_branch would fail.
                 or
-                    not self.repo.active_branch.name == branch_name
+                not self.repo.active_branch.name == branch_name
         ):
             print(colored('returning to {0}'.format(branch_name), 'magenta'))
             self.git.checkout(branch_name)
@@ -547,7 +549,7 @@ Replace 'true' with 'false' to disable checking.''', 'yellow'))
             return gemfile_exists()
 
         if ('GIT_UP_BUNDLER_CHECK' in os.environ
-            and os.environ['GIT_UP_BUNDLER_CHECK'] == 'true'):
+                and os.environ['GIT_UP_BUNDLER_CHECK'] == 'true'):
             return gemfile_exists()
 
         return False
