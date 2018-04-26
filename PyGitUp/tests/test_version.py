@@ -30,5 +30,3 @@ def test_version():
     local_version_str = package.version
 
     assert_in(local_version_str, stdout)
-
-

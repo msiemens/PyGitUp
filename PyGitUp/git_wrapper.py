@@ -160,8 +160,8 @@ class GitWrapper(object):
         current_branch = self.repo.active_branch
 
         arguments = (
-            ([self.config('git-up.rebase.arguments')] or []) +
-            [target_branch.name]
+                ([self.config('git-up.rebase.arguments')] or []) +
+                [target_branch.name]
         )
         try:
             self._run('rebase', *arguments)
@@ -304,6 +304,7 @@ class StashError(GitError):
     """
     Error while stashing
     """
+
     def __init__(self, **kwargs):
         kwargs.pop('message', None)
         GitError.__init__(self, 'Stashing failed!', **kwargs)
@@ -313,6 +314,7 @@ class UnstashError(GitError):
     """
     Error while unstashing
     """
+
     def __init__(self, **kwargs):
         kwargs.pop('message', None)
         GitError.__init__(self, 'Unstashing failed!', **kwargs)
@@ -322,6 +324,7 @@ class CheckoutError(GitError):
     """
     Error during checkout
     """
+
     def __init__(self, branch_name, **kwargs):
         kwargs.pop('message', None)
         GitError.__init__(self, 'Failed to checkout ' + branch_name,
@@ -332,6 +335,7 @@ class RebaseError(GitError):
     """
     Error during rebase command
     """
+
     def __init__(self, current_branch, target_branch, **kwargs):
         # Remove kwargs we won't pass to GitError
         kwargs.pop('message', None)

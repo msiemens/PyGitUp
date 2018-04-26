@@ -5,7 +5,8 @@ from os.path import join
 from git import *
 from nose.tools import *
 
-from PyGitUp.tests import basepath, write_file, init_master, update_file, testfile_name
+from PyGitUp.tests import basepath, write_file, init_master, update_file, \
+    testfile_name
 
 test_name = 'rebasing'
 repo_path = join(basepath, test_name + os.sep)

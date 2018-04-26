@@ -10,6 +10,7 @@ try:
     from subprocess import DEVNULL  # py3k
 except ImportError:
     import os
+
     DEVNULL = open(os.devnull, 'wb')
 
 
@@ -29,8 +30,8 @@ def uniq(seq):
 def execute(cmd, cwd=None):
     """ Execute a command and return it's output. """
     try:
-        lines = subprocess\
-            .check_output(cmd, cwd=cwd, stderr=DEVNULL)\
+        lines = subprocess \
+            .check_output(cmd, cwd=cwd, stderr=DEVNULL) \
             .splitlines()
     except subprocess.CalledProcessError:
         return None
