@@ -8,7 +8,7 @@ from nose.tools import *
 from PyGitUp.tests import basepath, write_file, init_master, update_file, \
     testfile_name
 
-test_name = 'rebasing'
+test_name = 'push'
 repo_path = join(basepath, test_name + os.sep)
 
 
