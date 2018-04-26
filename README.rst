@@ -167,6 +167,12 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.5.0 (*2018-04-26*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Added auto-push support. Thanks `@WoLpH <https://github.com/WoLpH>`_
+  for `Pull Request #74 <https://github.com/msiemens/PyGitUp/pull/74>`_.
+
 v1.4.7 (*2018-04-07*)
 ~~~~~~~~~~~~~~~~~~~~~
 
