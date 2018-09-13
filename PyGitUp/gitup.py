@@ -45,7 +45,7 @@ from termcolor import colored
 from PyGitUp.utils import execute, uniq, find
 from PyGitUp.git_wrapper import GitWrapper, GitError
 
-ON_WINDOWS = sys.platform in ('win32', 'cygwin')
+ON_WINDOWS = sys.platform == 'win32'
 
 ###############################################################################
 # Setup of 3rd party libs
