@@ -167,6 +167,11 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.5.1 (*2018-09-13*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Fixed crash on Cygwin with rebase log hook enabled (`#80 <https://github.com/msiemens/PyGitUp/issues/80>`__).
+
 v1.5.0 (*2018-04-26*)
 ~~~~~~~~~~~~~~~~~~~~~
 
