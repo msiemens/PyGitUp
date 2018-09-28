@@ -167,6 +167,11 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.5.2 (*2018-09-28*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Fixed version requirement for Click dependency (`#82 <https://github.com/msiemens/PyGitUp/issues/82>`__).
+
 v1.5.1 (*2018-09-13*)
 ~~~~~~~~~~~~~~~~~~~~~
 
