@@ -266,9 +266,12 @@ class GitUp(object):
 
                 continue  # Do not do anything
 
+            fast_fastforward = False
             if base == branch.commit.hexsha:
                 print(colored('fast-forwarding...', 'yellow'), end='')
                 self.states.append('fast-forwarding')
+                # Don't fast fast-forward the currently checked-out branch
+                fast_fastforward = (branch.name != self.repo.active_branch.name)
 
             elif not self.settings['rebase.auto']:
                 print(colored('diverged', 'red'))
@@ -286,8 +289,11 @@ class GitUp(object):
                 print()
 
             self.log(branch, target)
-            self.git.checkout(branch.name)
-            self.git.rebase(target)
+            if fast_fastforward:
+                branch.commit = target.commit
+            else:
+                self.git.checkout(branch.name)
+                self.git.rebase(target)
 
     def fetch(self):
         """
