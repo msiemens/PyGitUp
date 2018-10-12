@@ -218,12 +218,13 @@ class GitUp(object):
     def rebase_all_branches(self):
         """ Rebase all branches, if possible. """
         col_width = max(len(b.name) for b in self.branches) + 1
+        original_branch = self.repo.active_branch
 
         for branch in self.branches:
             target = self.target_map[branch.name]
 
             # Print branch name
-            if branch.name == self.repo.active_branch.name:
+            if branch.name == original_branch.name:
                 attrs = ['bold']
             else:
                 attrs = []
