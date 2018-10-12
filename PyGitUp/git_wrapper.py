@@ -114,14 +114,21 @@ class GitWrapper(object):
     ###########################################################################
 
     @contextmanager
-    def stash(self):
+    def stasher(self):
         """
         A stashing contextmanager.
-        It  stashes all changes inside and unstashed when done.
         """
-        stashed = False
+        # nonlocal for python2
+        stashed = [False]
+        clean = [False]
 
-        if self.repo.is_dirty(submodules=False):
+        def stash():
+            if clean[0] or not self.repo.is_dirty(submodules=False):
+                clean[0] = True
+                return
+            if stashed[0]:
+                return
+
             if self.change_count > 1:
                 message = 'stashing {0} changes'
             else:
@@ -135,11 +142,11 @@ class GitWrapper(object):
             except GitError as e:
                 raise StashError(stderr=e.stderr, stdout=e.stdout)
 
-            stashed = True
+            stashed[0] = True
 
-        yield
+        yield stash
 
-        if stashed:
+        if stashed[0]:
             print(colored('unstashing', 'magenta'))
             try:
                 self._run('stash', 'pop')
