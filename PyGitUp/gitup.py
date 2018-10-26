@@ -196,9 +196,7 @@ class GitUp(object):
             if self.should_fetch:
                 self.fetch()
 
-            with self.git.stash():
-                with self.returning_to_current_branch():
-                    self.rebase_all_branches()
+            self.rebase_all_branches()
 
             if self.with_bundler():
                 self.check_bundler()
@@ -218,83 +216,97 @@ class GitUp(object):
     def rebase_all_branches(self):
         """ Rebase all branches, if possible. """
         col_width = max(len(b.name) for b in self.branches) + 1
+        if self.repo.head.is_detached:
+            raise GitError("You're not currently on a branch. I'm exiting"
+                           " in case you're in the middle of something.")
         original_branch = self.repo.active_branch
 
-        for branch in self.branches:
-            target = self.target_map[branch.name]
+        with self.git.stasher() as stasher:
+            for branch in self.branches:
+                target = self.target_map[branch.name]
 
-            # Print branch name
-            if branch.name == original_branch.name:
-                attrs = ['bold']
-            else:
-                attrs = []
-            print(colored(branch.name.ljust(col_width), attrs=attrs),
-                  end=' ')
-
-            # Check, if target branch exists
-            try:
-                if target.name.startswith('./'):
-                    # Check, if local branch exists
-                    self.git.rev_parse(target.name[2:])
+                # Print branch name
+                if branch.name == original_branch.name:
+                    attrs = ['bold']
                 else:
-                    # Check, if remote branch exists
-                    _ = target.commit
+                    attrs = []
+                print(colored(branch.name.ljust(col_width), attrs=attrs),
+                        end=' ')
 
-            except (ValueError, GitError):
-                # Remote branch doesn't exist!
-                print(colored('error: remote branch doesn\'t exist', 'red'))
-                self.states.append('remote branch doesn\'t exist')
+                # Check, if target branch exists
+                try:
+                    if target.name.startswith('./'):
+                        # Check, if local branch exists
+                        self.git.rev_parse(target.name[2:])
+                    else:
+                        # Check, if remote branch exists
+                        _ = target.commit
 
-                continue
+                except (ValueError, GitError):
+                    # Remote branch doesn't exist!
+                    print(colored('error: remote branch doesn\'t exist', 'red'))
+                    self.states.append('remote branch doesn\'t exist')
 
-            # Get tracking branch
-            if target.is_local:
-                target = find(self.repo.branches,
-                              lambda b: b.name == target.name[2:])
+                    continue
 
-            # Check status and act appropriately
-            if target.commit.hexsha == branch.commit.hexsha:
-                print(colored('up to date', 'green'))
-                self.states.append('up to date')
+                # Get tracking branch
+                if target.is_local:
+                    target = find(self.repo.branches,
+                                  lambda b: b.name == target.name[2:])
 
-                continue  # Do not do anything
+                # Check status and act appropriately
+                if target.commit.hexsha == branch.commit.hexsha:
+                    print(colored('up to date', 'green'))
+                    self.states.append('up to date')
 
-            base = self.git.merge_base(branch.name, target.name)
+                    continue  # Do not do anything
 
-            if base == target.commit.hexsha:
-                print(colored('ahead of upstream', 'cyan'))
-                self.states.append('ahead')
+                base = self.git.merge_base(branch.name, target.name)
 
-                continue  # Do not do anything
+                if base == target.commit.hexsha:
+                    print(colored('ahead of upstream', 'cyan'))
+                    self.states.append('ahead')
 
-            fast_fastforward = False
-            if base == branch.commit.hexsha:
-                print(colored('fast-forwarding...', 'yellow'), end='')
-                self.states.append('fast-forwarding')
-                # Don't fast fast-forward the currently checked-out branch
-                fast_fastforward = (branch.name != self.repo.active_branch.name)
+                    continue  # Do not do anything
 
-            elif not self.settings['rebase.auto']:
-                print(colored('diverged', 'red'))
-                self.states.append('diverged')
+                fast_fastforward = False
+                if base == branch.commit.hexsha:
+                    print(colored('fast-forwarding...', 'yellow'), end='')
+                    self.states.append('fast-forwarding')
+                    # Don't fast fast-forward the currently checked-out branch
+                    fast_fastforward = (branch.name !=
+                                        self.repo.active_branch.name)
 
-                continue  # Do not do anything
-            else:
-                print(colored('rebasing', 'yellow'), end='')
-                self.states.append('rebasing')
+                elif not self.settings['rebase.auto']:
+                    print(colored('diverged', 'red'))
+                    self.states.append('diverged')
 
-            if self.settings['rebase.show-hashes']:
-                print(' {}..{}'.format(base[0:7],
-                                       target.commit.hexsha[0:7]))
-            else:
-                print()
+                    continue  # Do not do anything
+                else:
+                    print(colored('rebasing', 'yellow'), end='')
+                    self.states.append('rebasing')
 
-            self.log(branch, target)
-            if fast_fastforward:
-                branch.commit = target.commit
-            else:
-                self.git.checkout(branch.name)
-                self.git.rebase(target)
+                if self.settings['rebase.show-hashes']:
+                    print(' {}..{}'.format(base[0:7],
+                                           target.commit.hexsha[0:7]))
+                else:
+                    print()
+
+                self.log(branch, target)
+                if fast_fastforward:
+                    branch.commit = target.commit
+                else:
+                    stasher()
+                    self.git.checkout(branch.name)
+                    self.git.rebase(target)
+
+            if (self.repo.head.is_detached  # Only on Travis CI,
+                    # we get a detached head after doing our rebase *confused*.
+                    # Running self.repo.active_branch would fail.
+                    or not self.repo.active_branch.name == original_branch.name):
+                print(colored('returning to {0}'.format(original_branch.name),
+                              'magenta'))
+                original_branch.checkout()
 
     def fetch(self):
         """
@@ -451,27 +463,6 @@ class GitUp(object):
     ###########################################################################
     # Helpers
     ###########################################################################
-
-    @contextmanager
-    def returning_to_current_branch(self):
-        """ A contextmanager returning to the current branch. """
-        if self.repo.head.is_detached:
-            raise GitError("You're not currently on a branch. I'm exiting"
-                           " in case you're in the middle of something.")
-
-        branch_name = self.repo.active_branch.name
-
-        yield
-
-        if (
-                self.repo.head.is_detached  # Only on Travis CI,
-                # we get a detached head after doing our rebase *confused*.
-                # Running self.repo.active_branch would fail.
-                or
-                not self.repo.active_branch.name == branch_name
-        ):
-            print(colored('returning to {0}'.format(branch_name), 'magenta'))
-            self.git.checkout(branch_name)
 
     def load_config(self):
         """
