@@ -167,6 +167,14 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.6.0 (*2018-10-26*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Skip stashing changes when possible. Thanks `@Chronial <https://github.com/Chronial>`_
+  for `Pull Request #86 <https://github.com/msiemens/PyGitUp/pull/86>`_.
+- Added faster fast-forward on branches that are not checked out. Thanks `@Chronial <https://github.com/Chronial>`_
+  for `Pull Request #83 <https://github.com/msiemens/PyGitUp/pull/83>`_.
+
 v1.5.2 (*2018-09-28*)
 ~~~~~~~~~~~~~~~~~~~~~
 
