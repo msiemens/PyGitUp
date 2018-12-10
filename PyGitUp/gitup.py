@@ -625,7 +625,7 @@ Project URL: https://github.com/msiemens/PyGitUp
 @click.option('-p', '--push/--no-push', default=None,
               help='Push the changes after pulling successfully.')
 @click.help_option('-h', '--help')
-def run(version, quiet, no_f, push, **kwargs):  # pragma: no cover
+def run(version, quiet, no_fetch, push, **kwargs):  # pragma: no cover
     """
     A nicer `git pull`.
     """
@@ -647,7 +647,7 @@ def run(version, quiet, no_f, push, **kwargs):  # pragma: no cover
             gitup.settings['push.auto'] = push
 
         # if arguments['--no-fetch'] or arguments['--no-f']:
-        if no_f:
+        if no_fetch:
             gitup.should_fetch = False
 
     except GitError:
