@@ -167,6 +167,12 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v1.6.1 (*2018-12-12*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Upgrade to click>=7.0.0. Thanks `@Chronial <https://github.com/no-preserve-root>`_
+  for `Pull Request #87 <https://github.com/msiemens/PyGitUp/pull/87>`_.
+
 v1.6.0 (*2018-10-26*)
 ~~~~~~~~~~~~~~~~~~~~~
 
