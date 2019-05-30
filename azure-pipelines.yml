@@ -46,3 +46,5 @@ steps:
 - script: |
     coveralls
   displayName: 'Upload test coverage'
+  env:
+    COVERALLS_REPO_TOKEN: $(token.coveralls)
