@@ -48,6 +48,7 @@ steps:
 - script: |
     git config --global user.email user@example.com
     git config --global user.name "Example User"
+    displayName: 'Configure git user/email'
 
 - script: |
     python -m pip install --upgrade pip
@@ -57,7 +58,7 @@ steps:
     pip install pytest pytest-azurepipelines pytest-cov coveralls
   displayName: 'Install dependencies'
 
-- script: |
+- bash: |
     pytest PyGitUp/tests --cov=PyGitUp --cov-report=html:$(pwd)/htmlcov
   displayName: 'Run tests'
 
