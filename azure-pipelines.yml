@@ -40,8 +40,7 @@ steps:
   displayName: 'Install dependencies'
 
 - script: |
-    pytest PyGitUp/tests --cov=PyGitUp --cov-report=html
-    pwd
+    pytest PyGitUp/tests --cov=PyGitUp --cov-report=html:~/htmlcov
   displayName: 'Run tests'
 
 - script: |
