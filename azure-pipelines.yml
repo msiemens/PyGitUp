@@ -36,10 +36,9 @@ steps:
     pip install -r dev-requirements.txt
     pip install -r requirements.txt
     python setup.py develop
-    pip install coveralls
+    pip install pytest pytest-azurepipelines pytest-cov coveralls
   displayName: 'Install dependencies'
 
 - script: |
-    pip install pytest pytest-azurepipelines coveralls
     pytest --cov=PyGitUp
   displayName: 'pytest'
