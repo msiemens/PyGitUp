@@ -2,7 +2,7 @@
 omit =
     */python?.?/*
     */site-packages/nose/*
-    tests/*
+    PyGitUp/tests/*
     __init__.py
 
 
