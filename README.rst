@@ -378,8 +378,8 @@ v0.1 (*2013-03-14*)
 
 - Initial Release
 
-.. |Build Status| image:: hhttps://img.shields.io/azure-devops/build/markus0889/3e5baa75-12ec-43ac-9728-89823ee8c7e2/1.svg?style=flat-square
-   :target: https://travis-ci.org/msiemens/PyGitUp
+.. |Build Status| image:: https://img.shields.io/azure-devops/build/markus0889/3e5baa75-12ec-43ac-9728-89823ee8c7e2/1.svg?style=flat-square
+   :target: https://dev.azure.com/markus0889/markus/_build?definitionId=1
 
 .. |Coverage Status| image:: http://img.shields.io/coveralls/msiemens/PyGitUp/master.svg?style=flat-square
   :target: https://coveralls.io/r/msiemens/PyGitUp
