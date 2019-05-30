@@ -41,4 +41,8 @@ steps:
 
 - script: |
     pytest --cov=PyGitUp
-  displayName: 'pytest'
+  displayName: 'Run tests'
+
+- script: |
+    coveralls
+  displayName: 'Upload test coverage'
