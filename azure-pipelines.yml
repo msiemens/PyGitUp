@@ -6,20 +6,38 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
 strategy:
   matrix:
     Python27:
       python.version: '2.7'
+      imageName: 'ubuntu-16.04'
     Python34:
       python.version: '3.4'
+      imageName: 'ubuntu-16.04'
     Python35:
       python.version: '3.5'
+      imageName: 'ubuntu-16.04'
     Python36:
       python.version: '3.6'
+      imageName: 'ubuntu-16.04'
     Python37:
       python.version: '3.7'
+      imageName: 'ubuntu-16.04'
+    Mac_Python27:
+      python.version: '2.7'
+      imageName: 'macos-10.13'
+    Mac_Python37:
+      python.version: '3.7'
+      imageName: 'macos-10.13'
+    Windows_Python27:
+      python.version: '2.7'
+      imageName: 'vs2017-win2016'
+    Windows_Python37:
+      python.version: '3.7'
+      imageName: 'vs2017-win2016'
+
+pool:
+  vmImage: $(imageName)
 
 steps:
 - task: UsePythonVersion@0
@@ -30,6 +48,7 @@ steps:
 - script: |
     git config --global user.email user@example.com
     git config --global user.name "Example User"
+  displayName: 'Configure git user/email'
 
 - script: |
     python -m pip install --upgrade pip
@@ -40,7 +59,7 @@ steps:
   displayName: 'Install dependencies'
 
 - script: |
-    pytest PyGitUp/tests --cov=PyGitUp --cov-report=html:$(pwd)/htmlcov
+    pytest PyGitUp/tests --cov=PyGitUp --cov-report=html:$(Build.SourcesDirectory)/htmlcov
   displayName: 'Run tests'
 
 - script: |
