@@ -59,7 +59,7 @@ steps:
   displayName: 'Install dependencies'
 
 - script: |
-    pytest PyGitUp/tests --cov=PyGitUp --cov-report=html:$PWD/htmlcov
+    pytest PyGitUp/tests --cov=PyGitUp --cov-report=html:$(PWD)/htmlcov
   displayName: 'Run tests'
   env:
     PWD: $(Agent.WorkFolder)
