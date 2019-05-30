@@ -41,7 +41,6 @@ steps:
 
 - script: |
     pytest PyGitUp/tests --cov=PyGitUp --cov-report=html:$(pwd)/htmlcov
-    realpath $(pwd)/htmlcov
   displayName: 'Run tests'
 
 - script: |
