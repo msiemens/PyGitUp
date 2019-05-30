@@ -58,8 +58,8 @@ steps:
     pip install pytest pytest-azurepipelines pytest-cov coveralls
   displayName: 'Install dependencies'
 
-- bash: |
-    pytest PyGitUp/tests --cov=PyGitUp --cov-report=html:$(pwd)/htmlcov
+- script: |
+    pytest PyGitUp/tests --cov=PyGitUp --cov-report=html:$(Build.SourcesDirectory)/htmlcov
   displayName: 'Run tests'
 
 - script: |
