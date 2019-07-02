@@ -6,7 +6,7 @@ setup(
     version="1.6.1",
     packages=find_packages(),
     install_requires=['GitPython>=2.1.8', 'colorama>=0.3.7',
-                      'termcolor>=1.1.0', 'click>=7.0.0',
+                      'termcolor>=1.1.0', 'click>=7.0',
                       'six>=1.10.0'],
 
     # Tests
