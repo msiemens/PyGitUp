@@ -70,3 +70,4 @@ steps:
     PATH=$HOME/.poetry/bin:$PATH poetry build
     twine check dist/*
   displayName: 'Check dist package format'
+  condition: ne(variables['Agent.OS'], 'Windows_NT')
