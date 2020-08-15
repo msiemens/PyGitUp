@@ -89,27 +89,6 @@ To configure ``PyGitUp``, you can set options in your git config. Run
 ``git config [--global] git-up.[name] [value]`` to set one of these
 options:
 
--  ``git-up.bundler.check [true|*false*]``: If set to
-   ``true``,\ ``PyGitUp`` will check your app for any new bundled gems
-   and suggest a ``bundle install`` if necessary.
-
--  ``git-up.bundler.autoinstall [true|*false*]``: If set to
-   ``true``,\ ``PyGitUp`` will run ``bundle install`` automatically.
-   Requires ``git-up.bundler.check`` to be true.
-
--  ``git-up.bundler.local [true|*false*]``: If you've ``bundle package``-ed
-   your  project gems, you can tell ``PyGitUp`` to run ``bundle install
-   --local`` for you if it finds missing gems. Much faster than just a plain
-   old ``bundle install``. Don't worry if you're missing gems, it will
-   backtrack to ``bundle install`` if anything goes wrong. Make sure
-   ``git-up.bundler.autoinstall`` is also set to ``true`` or it won't do
-   anything.
-
-- ``git-up.bundler.rbenv [true|*false*]``: If you have rbenv installed,
-  you can tell ``PyGitUp`` to run ``rbenv rehash`` for you after it installs
-  your gems so any binaries will be available right away. Make sure ``git-up
-  .bundler.autoinstall`` is also set to ``true`` or it won't do anything.
-
 -  ``git-up.fetch.prune [*true*|false]``: If set to ``true``,
    ``PyGitUp`` will append the ``--prune``\ option to ``git fetch`` and
    thus remove any remote tracking branches which no longer exist on
@@ -166,6 +145,13 @@ The original ``git-up`` has been written by aanand:
 
 Changelog
 ---------
+
+v2.0.0 (*2020-08-15*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Drop Python 2 support in order to fix `Issue 102 <https://github.com/msiemens/PyGitUp/issues/102>`_
+- Drop Ruby Bundler integration
+- Migrate tests to ``py.test``
 
 v1.6.1 (*2018-12-12*)
 ~~~~~~~~~~~~~~~~~~~~~
