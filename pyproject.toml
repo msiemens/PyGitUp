@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "git-up"
-version = "1.6.1"
+version = "2.0.0"
 description = "A python implementation of 'git up'"
 authors = ["Markus Siemens <markus@m-siemens.de>"]
 license = "MIT"
