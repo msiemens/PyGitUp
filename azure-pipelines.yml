@@ -55,12 +55,17 @@ steps:
 
 - script: |
     python -m pip install --upgrade pip
-    pip install -r dev-requirements.txt
-    pip install -r requirements.txt
-    python setup.py develop
-    pip install pytest pytest-azurepipelines pytest-cov coveralls
+    pip install -U twine
+    curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
+    PATH=$HOME/.poetry/bin:$PATH poetry self update
+    PATH=$HOME/.poetry/bin:$PATH poetry install
   displayName: 'Install dependencies'
 
 - script: |
     pytest PyGitUp/tests --cov=PyGitUp --cov-report=html:$(Build.SourcesDirectory)/htmlcov
   displayName: 'Run tests'
+
+- script: |
+    PATH=$HOME/.poetry/bin:$PATH poetry build
+    twine check dist/*
+  displayName: 'Check dist package format'

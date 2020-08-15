@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "git-up"
+version = "1.6.1"
+description = "A python implementation of 'git up'"
+authors = ["Markus Siemens <markus@m-siemens.de>"]
+license = "MIT"
+packages = [
+    { include = "PyGitUp" }
+]
+
+readme = "README.rst"
+
+homepage = "https://github.com/msiemens/PyGitUp"
+keywords = ["database", "nosql"]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Software Development :: Version Control",
+    "Topic :: Utilities",
+]
+
+[tool.poetry.dependencies]
+python = "^3.5"
+GitPython = "^3.0.0"
+click = "^7.0"
+colorama = "^0.3.7"
+six = "^1.10.0"
+termcolor = "^1.1.0"
+
+[tool.poetry.dev-dependencies]
+coveralls = "^1.8.2"
+pytest = "^5.2.2"
+pytest-azurepipelines = "^0.8.0"
+pytest-cov = "^2.8.1"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry.scripts]
+git-up = 'PyGitUp.gitup:run'
