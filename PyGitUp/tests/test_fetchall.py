@@ -3,8 +3,6 @@ import os
 from os.path import join
 
 from git import *
-from nose.tools import *
-
 from PyGitUp.tests import basepath, init_master, capture
 
 test_name = 'fetch-all'
@@ -45,5 +43,5 @@ def test_fetchall():
 
     stdout = stdout.getvalue()
 
-    assert_true('origin' in stdout)
-    assert_true(test_name in stdout)
+    assert 'origin' in stdout
+    assert test_name in stdout

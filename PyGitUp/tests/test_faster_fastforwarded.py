@@ -3,8 +3,6 @@ import os
 from os.path import join
 
 from git import *
-from nose.tools import *
-
 from PyGitUp.tests import basepath, init_master, update_file
 
 test_name = 'faster-forwarded'
@@ -35,19 +33,15 @@ def test_faster_forwarded():
     """ Run 'git up' with result: (fast) fast-forwarding """
     os.chdir(repo_path)
 
-    assert_not_equal(master.branches[test_name].commit,
-                     repo.branches[test_name].commit)
-    assert_not_equal(master.branches[test_name].commit, 
-                     repo.branches[test_name + '.2'].commit)
+    assert master.branches[test_name].commit != repo.branches[test_name].commit
+    assert master.branches[test_name].commit != repo.branches[test_name + '.2'].commit
 
     from PyGitUp.gitup import GitUp
     gitup = GitUp(testing=True)
     gitup.run()
 
-    assert_equal(len(gitup.states), 2)
-    assert_equal(gitup.states[0], 'fast-forwarding')
-    assert_equal(gitup.states[1], 'fast-forwarding')
-    assert_equal(master.branches[test_name].commit,
-                 repo.branches[test_name].commit)
-    assert_equal(master.branches[test_name].commit, 
-                 repo.branches[test_name + '.2'].commit)
+    assert len(gitup.states) == 2
+    assert gitup.states[0] == 'fast-forwarding'
+    assert gitup.states[1] == 'fast-forwarding'
+    assert master.branches[test_name].commit == repo.branches[test_name].commit
+    assert master.branches[test_name].commit == repo.branches[test_name + '.2'].commit

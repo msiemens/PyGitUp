@@ -3,8 +3,6 @@ import os
 from os.path import join
 
 from git import *
-from nose.tools import *
-
 from PyGitUp.tests import basepath, init_master, update_file, write_file
 
 test_name = 'submodule'
@@ -58,16 +56,16 @@ def test_submodules():
     gitup = GitUp(testing=True)
 
     # PyGitUp uses the submodule instead of the toplevel git repo
-    assert_equal(submod_head, gitup.git.repo.head.commit.hexsha)
+    assert submod_head == gitup.git.repo.head.commit.hexsha
 
     gitup.run()
 
     repo = Repo(repo_path)
 
-    assert_equal(len(gitup.states), 1)
-    assert_equal(gitup.states[0], 'fast-forwarding')
+    assert len(gitup.states) == 1
+    assert gitup.states[0] == 'fast-forwarding'
 
     # Repo itself is unchanged:
-    assert_equal(repo.head.commit.hexsha, repo_head)
+    assert repo.head.commit.hexsha, repo_head
     # Submodule is changed:
-    assert_not_equal(gitup.git.repo.head.commit.hexsha, submod_head)
+    assert gitup.git.repo.head.commit.hexsha != submod_head

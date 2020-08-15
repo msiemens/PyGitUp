@@ -2,7 +2,7 @@
 import os
 from os.path import join
 
-from nose.tools import *
+import pytest
 
 from PyGitUp.git_wrapper import GitError
 from PyGitUp.tests import basepath
@@ -22,11 +22,10 @@ def test_not_a_git_repo():
     os.environ['PATH'] = ''
 
     try:
-        with assert_raises(GitError) as e:
+        with pytest.raises(GitError, match="The git executable could not be "
+                                           "found"):
             from PyGitUp.gitup import GitUp
             GitUp(testing=True)
-
-        assert e.exception.message == "The git executable could not be found"
 
     finally:
         os.environ.update(environ)

@@ -1,8 +1,7 @@
 # System imports
 import socket
 
-from nose.plugins.skip import SkipTest
-from nose.tools import *
+import pytest
 
 from PyGitUp.tests import capture
 
@@ -14,12 +13,12 @@ def test_version():
     try:
         import pkg_resources as pkg
     except ImportError:
-        raise SkipTest('pip not installed')
+        pytest.skip('pip not installed')
 
     try:
         socket.gethostbyname('pypi.python.org')
     except socket.error:
-        raise SkipTest('Can\'t connect to PYPI')
+        pytest.skip('Can\'t connect to PYPI')
 
     from PyGitUp.gitup import GitUp
     with capture() as [stdout, _]:
@@ -29,4 +28,4 @@ def test_version():
     package = pkg.get_distribution('git-up')
     local_version_str = package.version
 
-    assert_in(local_version_str, stdout)
+    assert local_version_str in stdout

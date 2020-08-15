@@ -1,10 +1,8 @@
 # System imports
-import os
+import os.path
 from os.path import join
 
 from git import *
-from nose.tools import *
-
 from PyGitUp.tests import basepath, capture, update_file, init_master
 
 test_name = 'no-fetch'
@@ -45,7 +43,6 @@ def setup():
     repo.git.pull()
 
 
-
 def test_no_fetch():
     """ Run 'git up' with '--no-fetch' argument """
     os.chdir(repo_path)
@@ -59,10 +56,10 @@ def test_no_fetch():
 
     stdout = stdout.getvalue()
 
-    assert_false('Fetching' in stdout)
+    assert 'Fetching' not in stdout
 
-    assert_true('rebasing' in stdout)
-    assert_true('up to date' in stdout)
-    assert_true(test_name in stdout)
-    assert_true(new_branch_name in stdout)
+    assert 'rebasing' in stdout
+    assert 'up to date' in stdout
+    assert test_name in stdout
+    assert new_branch_name in stdout
 

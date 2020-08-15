@@ -3,8 +3,6 @@ import os
 from os.path import join
 
 from git import *
-from nose.tools import *
-
 from PyGitUp.tests import basepath, init_master, update_file, write_file
 
 test_name = 'submodule-dirty'
@@ -59,9 +57,9 @@ def test_submodules_dirty():
     gitup = GitUp(testing=True)
 
     # PyGitUp uses the main repo
-    assert_equal(repo_head, gitup.git.repo.head.commit.hexsha)
+    assert repo_head == gitup.git.repo.head.commit.hexsha
 
     gitup.run()
 
-    assert_equal(len(gitup.states), 1)
-    assert_equal(gitup.states[0], 'rebasing')
+    assert len(gitup.states) == 1
+    assert gitup.states[0] == 'rebasing'

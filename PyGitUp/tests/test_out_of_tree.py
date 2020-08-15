@@ -3,8 +3,6 @@ import os
 from os.path import join
 
 from git import *
-from nose.tools import *
-
 from PyGitUp.tests import basepath, write_file, init_master
 
 test_name = 'out-of-tree'
@@ -55,4 +53,4 @@ def test_out_of_tree():
     gitup = GitUp(testing=True)
     gitup.run()
 
-    assert_equal(gitup.states, ['fast-forwarding'])
+    assert gitup.states == ['fast-forwarding']

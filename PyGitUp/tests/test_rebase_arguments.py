@@ -2,9 +2,8 @@
 import os
 from os.path import join
 
+import pytest
 from git import *
-from nose.tools import *
-
 from PyGitUp.git_wrapper import RebaseError
 from PyGitUp.tests import basepath, write_file, init_master, update_file, testfile_name
 
@@ -48,14 +47,15 @@ def setup():
     repo.git.config('git-up.rebase.arguments', '--abort')
 
 
-@raises(RebaseError)
 def test_rebase_arguments():
     """ Run 'git up' with rebasing.arguments """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
     gitup = GitUp(testing=True)
-    gitup.run()
 
-    assert_equal(len(gitup.states), 1)
-    assert_equal(gitup.states[0], 'rebasing')
+    with pytest.raises(RebaseError):
+        gitup.run()
+
+    assert len(gitup.states) == 1
+    assert gitup.states[0] == 'rebasing'

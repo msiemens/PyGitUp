@@ -3,7 +3,6 @@ import os
 from os.path import join
 
 from git import *
-from nose.tools import *
 
 from PyGitUp.tests import basepath, write_file, init_master
 
@@ -42,5 +41,5 @@ def test_ahead_of_upstream():
     gitup = GitUp(testing=True)
     gitup.run()
 
-    assert_equal(len(gitup.states), 1)
-    assert_equal(gitup.states[0], 'ahead')
+    assert len(gitup.states) == 1
+    assert gitup.states[0] == 'ahead'

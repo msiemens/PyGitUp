@@ -2,9 +2,8 @@
 import os
 from os.path import join
 
+import pytest
 from git import *
-from nose.tools import *
-
 from PyGitUp.git_wrapper import GitError
 from PyGitUp.tests import basepath, init_master, update_file
 
@@ -37,11 +36,12 @@ def setup():
     repo.git.checkout('HEAD~')
 
 
-@raises(GitError)
 def test_detached():
     """ Run 'git up' with detached head """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
     gitup = GitUp(testing=True)
-    gitup.run()
+
+    with pytest.raises(GitError):
+        gitup.run()

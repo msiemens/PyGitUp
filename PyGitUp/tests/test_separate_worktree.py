@@ -5,8 +5,6 @@ from unittest import SkipTest
 
 from git import *
 from git.util import cygpath
-from nose.tools import *
-
 from PyGitUp.tests import basepath, init_master, update_file
 
 test_name = 'worktree'
@@ -51,5 +49,5 @@ def test_separate_worktree():
     gitup = GitUp(testing=True)
     gitup.run()
 
-    assert_equal(len(gitup.states), 1)
-    assert_equal(gitup.states[0], 'fast-forwarding')
+    assert len(gitup.states) == 1
+    assert gitup.states[0] == 'fast-forwarding'

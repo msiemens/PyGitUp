@@ -2,9 +2,8 @@
 import os
 from os.path import join
 
+import pytest
 from git import *
-from nose.tools import *
-
 from PyGitUp.git_wrapper import GitError
 from PyGitUp.tests import basepath, init_master, update_file
 
@@ -33,11 +32,12 @@ def setup():
     update_file(master, test_name)
 
 
-@raises(GitError)
 def test_fetch_fail():
     """ Run 'git up' with a non-existent remote """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
     gitup = GitUp(testing=True)
-    gitup.run()
+
+    with pytest.raises(GitError):
+        gitup.run()

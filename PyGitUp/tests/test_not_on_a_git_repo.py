@@ -2,7 +2,7 @@
 import os
 from os.path import join
 
-from nose.tools import *
+import pytest
 
 from PyGitUp.git_wrapper import GitError
 from PyGitUp.tests import basepath
@@ -15,10 +15,11 @@ def setup():
     os.makedirs(repo_path, 0o700)
 
 
-@raises(GitError)
 def test_not_a_git_repo():
     """ Run 'git up' being not on a git repo """
     os.chdir(repo_path)
 
     from PyGitUp.gitup import GitUp
-    GitUp(testing=True)
+
+    with pytest.raises(GitError):
+        GitUp(testing=True)

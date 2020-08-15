@@ -3,8 +3,6 @@ import os
 from os.path import join
 
 from git import *
-from nose.tools import *
-
 from PyGitUp.tests import basepath, init_master, update_file
 
 test_name = 'returning-to-branch'
@@ -41,6 +39,6 @@ def test_returning_to_branch():
     gitup = GitUp(testing=True)
     gitup.run()
 
-    assert_equal(len(gitup.states), 1)
-    assert_equal(gitup.states[0], 'fast-forwarding')
-    assert_equal(gitup.repo.head.ref.name, new_branch_name)
+    assert len(gitup.states) == 1
+    assert gitup.states[0] == 'fast-forwarding'
+    assert gitup.repo.head.ref.name == new_branch_name

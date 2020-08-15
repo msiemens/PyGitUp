@@ -3,8 +3,6 @@ import os
 from os.path import join
 
 from git import *
-from nose.tools import *
-
 from PyGitUp.tests import basepath, init_master, update_file
 
 test_name = 'multiple-remotes'
@@ -50,6 +48,6 @@ def test_fast_forwarded():
     gitup = GitUp(testing=True)
     gitup.run()
 
-    assert_equal(len(gitup.states), 2)
-    assert_equal(gitup.states[0], 'fast-forwarding')
-    assert_equal(gitup.states[1], 'fast-forwarding')
+    assert len(gitup.states) == 2
+    assert gitup.states[0] == 'fast-forwarding'
+    assert gitup.states[1] == 'fast-forwarding'

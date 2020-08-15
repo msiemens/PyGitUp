@@ -2,9 +2,8 @@
 import os
 from os.path import join
 
+import pytest
 from git import *
-from nose.tools import *
-
 from PyGitUp.git_wrapper import RebaseError
 from PyGitUp.tests import basepath, init_master, update_file, write_file
 
@@ -33,7 +32,6 @@ def setup():
     write_file(join(path, 'test1.txt'), 'Hello world!')
 
 
-@raises(RebaseError)
 def test_fast_forwarded():
     """ Fail correctly when a rebase would overwrite untracked files """
     os.chdir(repo_path)
@@ -41,4 +39,5 @@ def test_fast_forwarded():
     from PyGitUp.gitup import GitUp
     gitup = GitUp(testing=True)
 
-    gitup.run()
+    with pytest.raises(RebaseError):
+        gitup.run()
