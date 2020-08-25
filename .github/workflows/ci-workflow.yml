@@ -26,6 +26,10 @@ jobs:
         python -m pip install --upgrade pip twine
         pip install poetry
         poetry install
+    - name: Configure Git user/email
+      run: |
+        git config --global user.email user@example.com
+        git config --global user.name "Example User"
     - name: Run test suite
       run: |
         poetry run py.test -v --cov=PyGitUp
