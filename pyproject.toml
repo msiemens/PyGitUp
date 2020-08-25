@@ -38,7 +38,6 @@ termcolor = "^1.1.0"
 [tool.poetry.dev-dependencies]
 coveralls = "^1.8.2"
 pytest = "^5.2.2"
-pytest-azurepipelines = "^0.8.0"
 pytest-cov = "^2.8.1"
 
 [build-system]
