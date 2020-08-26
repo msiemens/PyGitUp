@@ -146,6 +146,11 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v2.0.1 (*2020-08-26*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Update dependencies
+
 v2.0.0 (*2020-08-15*)
 ~~~~~~~~~~~~~~~~~~~~~
 
