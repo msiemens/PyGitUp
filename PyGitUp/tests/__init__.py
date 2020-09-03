@@ -3,6 +3,7 @@ from os.path import join
 from tempfile import mkdtemp
 
 import contextlib
+import os
 from git import *
 
 basepath = mkdtemp(prefix='PyGitUp.')
