@@ -1,7 +1,3 @@
-# coding=utf-8
-
-from __future__ import print_function
-
 from git import Git
 from git import GitCommandNotFound
 
@@ -85,7 +81,7 @@ def get_git_dir():
     return toplevel_dir
 
 
-class GitUp(object):
+class GitUp:
     """ Conainter class for GitUp methods """
 
     default_settings = {
@@ -125,7 +121,7 @@ class GitUp(object):
         # Check, if we're in a git repo
         try:
             repo_dir = get_git_dir()
-        except (EnvironmentError, OSError, GitCommandNotFound) as e:
+        except (OSError, GitCommandNotFound) as e:
             if isinstance(e, GitCommandNotFound) or e.errno == errno.ENOENT:
                 exc = GitError("The git executable could not be found")
                 raise exc
@@ -297,7 +293,7 @@ class GitUp(object):
                     # we get a detached head after doing our rebase *confused*.
                     # Running self.repo.active_branch would fail.
                     or not self.repo.active_branch.name == original_branch.name):
-                print(colored('returning to {0}'.format(original_branch.name),
+                print(colored('returning to {}'.format(original_branch.name),
                               'magenta'))
                 original_branch.checkout()
 
@@ -477,7 +473,7 @@ class GitUp(object):
 
     def config(self, key):
         """ Get a git-up-specific config value. """
-        return self.git.config('git-up.{0}'.format(key))
+        return self.git.config('git-up.{}'.format(key))
 
     def is_prune(self):
         """
@@ -495,7 +491,7 @@ class GitUp(object):
             if config_value == 'true':
                 print(colored(
                     "Warning: fetch.prune is set to 'true' but your git"
-                    "version doesn't seem to support it ({0} < {1})."
+                    "version doesn't seem to support it ({} < {})."
                     "Defaulting to 'false'.".format(self.git.version,
                                                     required_version),
                     'yellow'

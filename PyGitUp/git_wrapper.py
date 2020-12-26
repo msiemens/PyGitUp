@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 A wrapper extending GitPython's repo.git.
 
@@ -8,7 +7,6 @@ original repo.git are shadowed by custom methods providing functionality
 needed for `git up`.
 """
 
-from __future__ import print_function
 
 __all__ = ['GitWrapper', 'GitError']
 
@@ -37,7 +35,7 @@ from PyGitUp.utils import find
 # GitWrapper
 ###############################################################################
 
-class GitWrapper(object):
+class GitWrapper:
     """
     A wrapper for repo.git providing better stdout handling + better exeptions.
 
@@ -72,11 +70,11 @@ class GitWrapper(object):
             # tried running old code, but the once working code failed).
             # Thus, we kill it  manually here.
             if self.git.cat_file_header is not None:
-                subprocess.call(("TASKKILL /F /T /PID {0} 2>nul 1>nul".format(
+                subprocess.call(("TASKKILL /F /T /PID {} 2>nul 1>nul".format(
                     str(self.git.cat_file_header.proc.pid)
                 )), shell=True)
             if self.git.cat_file_all is not None:
-                subprocess.call(("TASKKILL /F /T /PID {0} 2>nul 1>nul".format(
+                subprocess.call(("TASKKILL /F /T /PID {} 2>nul 1>nul".format(
                     str(self.git.cat_file_all.proc.pid)
                 )), shell=True)
 
@@ -86,7 +84,7 @@ class GitWrapper(object):
 
         """ Run a git command specified by name and args/kwargs. """
 
-        stdout = six.b('')
+        stdout = b''
         cmd = getattr(self.git, name)
 
         # Ask cmd(...) to return a (status, stdout, stderr) tuple
@@ -97,7 +95,7 @@ class GitWrapper(object):
             (_, stdout, _) = cmd(*args, **kwargs)
         except GitCommandError as error:
             # Add more meta-information to errors
-            message = "'{0}' returned exit status {1}".format(
+            message = "'{}' returned exit status {}".format(
                 ' '.join(str(c) for c in error.command),
                 error.status
             )
@@ -185,7 +183,7 @@ class GitWrapper(object):
         # In theory this may deadlock if `git fetch` prints more than 8 KB
         # to stderr which is here assumed to not happen in day-to-day use.
 
-        stdout = six.b('')
+        stdout = b''
 
         # Execute command
         cmd = self.git.fetch(as_process=True, *args, **kwargs)
@@ -200,7 +198,7 @@ class GitWrapper(object):
             stdout += output
 
             # Check for EOF
-            if output == six.b(""):
+            if output == b"":
                 break
 
         # Wait for the process to quit
@@ -208,7 +206,7 @@ class GitWrapper(object):
             cmd.wait()
         except GitCommandError as error:
             # Add more meta-information to errors
-            message = "'{0}' returned exit status {1}".format(
+            message = "'{}' returned exit status {}".format(
                 ' '.join(str(c) for c in error.command),
                 error.status
             )
@@ -219,7 +217,7 @@ class GitWrapper(object):
 
     def push(self, *args, **kwargs):
         ''' Push commits to remote '''
-        stdout = six.b('')
+        stdout = b''
 
         # Execute command
         cmd = self.git.push(as_process=True, *args, **kwargs)
@@ -234,7 +232,7 @@ class GitWrapper(object):
             stdout += output
 
             # Check for EOF
-            if output == six.b(""):
+            if output == b"":
                 break
 
         # Wait for the process to quit
@@ -242,7 +240,7 @@ class GitWrapper(object):
             cmd.wait()
         except GitCommandError as error:
             # Add more meta-information to errors
-            message = "'{0}' returned exit status {1}".format(
+            message = "'{}' returned exit status {}".format(
                 ' '.join(str(c) for c in error.command),
                 error.status
             )

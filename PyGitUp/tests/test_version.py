@@ -17,7 +17,7 @@ def test_version():
 
     try:
         socket.gethostbyname('pypi.python.org')
-    except socket.error:
+    except OSError:
         pytest.skip('Can\'t connect to PYPI')
 
     from PyGitUp.gitup import GitUp
