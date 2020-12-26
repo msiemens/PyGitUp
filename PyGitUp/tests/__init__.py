@@ -12,7 +12,7 @@ testfile_name = 'file.txt'
 @contextlib.contextmanager
 def capture():
     import sys
-    from six.moves import cStringIO as StringIO
+    from io import StringIO
     oldout, olderr = sys.stdout, sys.stderr
     out = None
     try:

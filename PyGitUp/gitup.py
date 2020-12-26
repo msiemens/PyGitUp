@@ -15,13 +15,10 @@ import os
 import re
 import json
 import subprocess
-from contextlib import contextmanager
+from io import StringIO
 from tempfile import NamedTemporaryFile
-
-import six
-from six.moves import cStringIO as StringIO
-from six.moves.urllib.error import HTTPError, URLError
-from six.moves.urllib.request import urlopen
+from urllib.error import HTTPError, URLError
+from urllib.request import urlopen
 
 # 3rd party libs
 try:

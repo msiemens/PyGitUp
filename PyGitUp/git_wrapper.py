@@ -21,8 +21,6 @@ import subprocess
 import platform
 from contextlib import contextmanager
 
-import six
-
 # 3rd party libs
 from termcolor import colored  # Assume, colorama is already initialized
 from git import GitCommandError, CheckoutError as OrigCheckoutError, Git
