@@ -1,17 +1,10 @@
-# coding=utf-8
 """
-Some simple, generic usefull methods.
+Some simple, generic useful methods.
 """
-import os
 import subprocess
 import sys
 
-try:
-    from subprocess import DEVNULL  # py3k
-except ImportError:
-    import os
-
-    DEVNULL = open(os.devnull, 'wb')
+from subprocess import DEVNULL
 
 
 def find(seq, test):

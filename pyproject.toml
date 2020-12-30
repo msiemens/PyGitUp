@@ -32,7 +32,6 @@ python = "^3.5"
 GitPython = "^3.0.0"
 click = "^7.0"
 colorama = "^0.4.0"
-six = "^1.10.0"
 termcolor = "^1.1.0"
 
 [tool.poetry.dev-dependencies]
