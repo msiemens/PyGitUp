@@ -146,6 +146,12 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v2.0.2 (*2020-12-30*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Remove old Python 2 code. Thanks `@hugovk <https://github.com/hugovk>`_
+  for `Pull Request #104 <https://github.com/msiemens/PyGitUp/pull/104>`_.
+
 v2.0.1 (*2020-08-26*)
 ~~~~~~~~~~~~~~~~~~~~~
 
