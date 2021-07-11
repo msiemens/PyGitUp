@@ -241,7 +241,7 @@ v1.4.0 (*2016-02-29*)
 - Added an command line argument to turn of fetching (``--no-fetch``). Thanks `@buoto <https://github.com/buoto>`_
   for `Pull Request #46 <https://github.com/msiemens/PyGitUp/pull/46>`_.
 - Don't show a stacktrace anymore when stashing fails (`#35 <https://github.com/msiemens/PyGitUp/issues/35>`_).
-- Fixed a bug that cuased problems with submodules if the submodule had unstashed changes/ Thanks
+- Fixed a bug that caused problems with submodules if the submodule had unstashed changes/ Thanks
   `@Javex <https://github.com/Javex>`_ for `Pull Request #27 <https://github.com/msiemens/PyGitUp/pull/27>`_.
 
 v1.3.1 (*2015-08-31*)
@@ -318,7 +318,7 @@ v1.1.0 (*2013-10-07*)
   (``git up`` doesn't work with local only branches).
 
   **Note:**
-  This change may break setups, where a local branch accidently has
+  This change may break setups, where a local branch accidentally has
   the same name as a remote branch without any tracking information set. Prior
   to v1.1.0, ``git up`` would still fetch and rebase from the remote branch.
   If you run into troubles with such a setup, setting tracking information
