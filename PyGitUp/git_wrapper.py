@@ -35,7 +35,7 @@ from PyGitUp.utils import find
 
 class GitWrapper:
     """
-    A wrapper for repo.git providing better stdout handling + better exeptions.
+    A wrapper for repo.git providing better stdout handling + better exceptions.
 
     It is preferred to repo.git because it doesn't print to stdout
     in real time. In addition, this wrapper provides better error

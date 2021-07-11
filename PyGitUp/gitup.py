@@ -65,7 +65,7 @@ def get_git_dir():
         # Not a normal git repo. Check if it's a submodule, then use
         # toplevel_dir. Otherwise it's a worktree, thus use  common_dir.
         # NOTE: git worktree support only comes with git v2.5.0 or
-        # later, on earler versions toplevel_dir is the best we can do.
+        # later, on earlier versions toplevel_dir is the best we can do.
 
         cmd = ['git', 'rev-parse', '--is-inside-work-tree']
         inside_worktree = execute(cmd, cwd=os.path.join(toplevel_dir, '..'))
@@ -131,7 +131,7 @@ class GitUp:
 
             self.repo = Repo(repo_dir, odbt=GitCmdObjectDB)
 
-        # Check for branch tracking informatino
+        # Check for branch tracking information
         if not any(b.tracking_branch() for b in self.repo.branches):
             exc = GitError("Can\'t update your repo because it doesn\'t has "
                            "any branches with tracking information.")
@@ -368,9 +368,9 @@ class GitUp:
                 # using multiple statements or things like 'echo'. Therefore,
                 # we write the string to a bat file and execute it.
 
-                # In addition, we replace occurences of $1 with %1 and so forth
+                # In addition, we replace occurrences of $1 with %1 and so forth
                 # in case the user is used to Bash or sh.
-                # If there are occurences of %something, we'll replace it with
+                # If there are occurrences of %something, we'll replace it with
                 # %%something. This is the case when running something like
                 # 'git log --pretty=format:"%Cred%h..."'.
                 # Also, we replace a semicolon with a newline, because if you
