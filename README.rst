@@ -65,7 +65,7 @@ Otherwise pip will refuse to install ``git-up`` due to ``Access denied`` errors.
 Python version compatibility:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Python 3.5-3.9 are supported :)
+Python 3.6 and upwards are supported :)
 
 Options and Configuration
 -------------------------

@@ -19,7 +19,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.5",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
@@ -29,7 +28,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.5"
+python = "^3.6"
 GitPython = "^3.0.0"
 click = "^7.0"
 colorama = "^0.4.0"
@@ -39,6 +38,7 @@ termcolor = "^1.1.0"
 coveralls = "^2.0.0"
 pytest = "^6.0.0"
 pytest-cov = "^2.8.1"
+twine = "^3.4.1"
 
 [build-system]
 requires = ["poetry>=0.12"]

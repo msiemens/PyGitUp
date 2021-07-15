@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [3.5, 3.6, 3.7, 3.8, 3.9]
+        python-version: [3.6, 3.7, 3.8, 3.9]
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
@@ -23,7 +23,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip twine
+        python -m pip install --upgrade pip
         pip install poetry
         poetry install
     - name: Configure Git user/email
@@ -37,7 +37,7 @@ jobs:
     - name: Verify dist package format
       run: |
         poetry build
-        twine check dist/*
+        poetry run twine check dist/*
       if: matrix.os != 'windows-latest'
     - name: Upload coverage result
       env:
