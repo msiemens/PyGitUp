@@ -40,6 +40,7 @@ jobs:
         poetry run twine check dist/*
       if: matrix.os != 'windows-latest'
     - name: Upload coverage result
+      if: github.repository_owner == 'msiemens'
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
