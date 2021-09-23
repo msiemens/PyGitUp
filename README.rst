@@ -146,6 +146,15 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v2.0.3 (*2021-09-23*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Drop support for Python 3.6 (following GitPython)
+- Update PyGitUp's CLI argument parser `Click <https://click.palletsprojects.com/en/8.0.x/>`_
+  to version 8.0. Thanks `@hugovk <https://github.com/hugovk>`_
+  for `Pull Request #109 <https://github.com/msiemens/PyGitUp/pull/109>`_.
+- Update other dependencies
+
 v2.0.2 (*2020-12-30*)
 ~~~~~~~~~~~~~~~~~~~~~
 
