@@ -47,6 +47,8 @@ How do I install it?
 2. ``cd`` to your project's directory.
 3. Run ``git up`` and enjoy!
 
+Homebrew users can also use ``brew``: ``brew install pygitup``
+
 Note for Windows users:
 ~~~~~~~~~~~~~~~~~~~~~~~
 
