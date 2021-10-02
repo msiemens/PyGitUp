@@ -146,6 +146,13 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v2.1.0 (*2021-10-02*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Switch to Python's ``argparse`` for CLI argument parsing. Thanks
+  `@ekohl <https://github.com/ekohl>`_ for `Pull Request #96
+  <https://github.com/msiemens/PyGitUp/pull/96>`_.
+
 v2.0.3 (*2021-09-23*)
 ~~~~~~~~~~~~~~~~~~~~~
 
