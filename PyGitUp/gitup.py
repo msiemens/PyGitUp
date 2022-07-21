@@ -198,6 +198,8 @@ class GitUp:
                 raise
             else:  # pragma: no cover
                 sys.exit(1)
+        except KeyboardInterrupt:
+            sys.exit(1)
 
     def rebase_all_branches(self):
         """ Rebase all branches, if possible. """
