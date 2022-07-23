@@ -49,6 +49,18 @@ How do I install it?
 
 Homebrew users can also use ``brew``: ``brew install pygitup``
 
+How to run it locally?
+----------------------
+
+Could also checkout the **Makefile** and **.github/workflows/ci-workflow.yml**
+
+1. clone repo and ``cd`` to repo directory.
+2. Install ``poetry`` as guided by `poetry installation doc <https://python-poetry.org/docs/#installation>`__
+3. Run ``poetry install``
+4. Run program with ``poetry run git-up``
+5. Run all tests with ``poetry run pytest -v --cov=PyGitUp`` or ``poetry run pytest -v --cov=PyGitUp --cov-report html``
+6. Run one test with ``poetry run pytest -q PyGitUp/tests/test_version.py -v --cov=PyGitUp``
+
 Note for Windows users:
 ~~~~~~~~~~~~~~~~~~~~~~~
 
