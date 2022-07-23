@@ -65,15 +65,6 @@ def update_file(repo, commit_message='', counter=[0], filename=testfile_name):
 
     return path_file
 
-
-def init_git(path):
-    """
-    Create a git repo in the given dir.
-    """
-    os.chdir(path)
-    os.popen('git init').read()
-
-
 def mkrepo(path):
     """
     Make a repository in 'path', create the the dir, if it doesn't exist.
