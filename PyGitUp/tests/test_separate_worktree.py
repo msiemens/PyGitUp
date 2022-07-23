@@ -9,7 +9,7 @@ from PyGitUp.tests import basepath, init_master, update_file
 
 test_name = 'worktree'
 repo_path = join(basepath, test_name + os.sep)
-worktree_dir = '{}_worktree'.format(test_name)
+worktree_dir = f'{test_name}_worktree'
 worktree_path = join(basepath, worktree_dir)
 
 

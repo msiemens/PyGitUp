@@ -290,7 +290,7 @@ class GitUp:
                     # we get a detached head after doing our rebase *confused*.
                     # Running self.repo.active_branch would fail.
                     or not self.repo.active_branch.name == original_branch.name):
-                print(colored('returning to {}'.format(original_branch.name),
+                print(colored(f'returning to {original_branch.name}',
                               'magenta'))
                 original_branch.checkout()
 
@@ -470,7 +470,7 @@ class GitUp:
 
     def config(self, key):
         """ Get a git-up-specific config value. """
-        return self.git.config('git-up.{}'.format(key))
+        return self.git.config(f'git-up.{key}')
 
     def is_prune(self):
         """

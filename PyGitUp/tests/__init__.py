@@ -57,7 +57,7 @@ def update_file(repo, commit_message='', counter=[0], filename=testfile_name):
     counter[0] += 1  # See: http://stackoverflow.com/a/279592/997063
 
     path_file = join(repo.working_dir, filename)
-    contents = 'line 1\nline 2\ncounter: {}'.format(counter[0])
+    contents = f'line 1\nline 2\ncounter: {counter[0]}'
     write_file(path_file, contents)
 
     repo.index.add([path_file])
