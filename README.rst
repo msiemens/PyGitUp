@@ -52,7 +52,7 @@ Homebrew users can also use ``brew``: ``brew install pygitup``
 How to run it locally?
 ----------------------
 
-Could also checkout the **Makefile** and **.github/workflows/ci-workflow.yml**
+Could also checkout the **.github/workflows/ci-workflow.yml**
 
 1. clone repo and ``cd`` to repo directory.
 2. Install ``poetry`` as guided by `poetry installation doc <https://python-poetry.org/docs/#installation>`__
