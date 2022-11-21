@@ -160,6 +160,13 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v2.2.0 (*2022-11-21*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Add support for Python 3.11. Thanks
+  `@hugovk <https://github.com/hugovk>`_ for `Pull Request #118
+  <https://github.com/msiemens/PyGitUp/pull/118>`_.
+
 v2.1.0 (*2021-10-02*)
 ~~~~~~~~~~~~~~~~~~~~~
 
