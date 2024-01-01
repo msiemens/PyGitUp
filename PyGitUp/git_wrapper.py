@@ -20,10 +20,14 @@ import re
 import subprocess
 import platform
 from contextlib import contextmanager
+from io import BufferedReader
+from threading import Thread
+from typing import IO, Optional
 
 # 3rd party libs
 from termcolor import colored  # Assume, colorama is already initialized
 from git import GitCommandError, CheckoutError as OrigCheckoutError, Git
+from git.cmd import Git as GitCmd
 
 # PyGitUp libs
 from PyGitUp.utils import find
@@ -135,8 +139,8 @@ class GitWrapper:
             ))
             try:
                 self._run('stash')
-            except GitError as e:
-                raise StashError(stderr=e.stderr, stdout=e.stdout)
+            except GitError as git_error:
+                raise StashError(stderr=git_error.stderr, stdout=git_error.stdout)
 
             stashed[0] = True
 
@@ -175,67 +179,51 @@ class GitWrapper:
     def fetch(self, *args, **kwargs):
         """ Fetch remote commits. """
 
-        # Unlike the other git commands, we want to output `git fetch`'s
-        # output in real time. Therefore we use a different implementation
-        # from `GitWrapper._run` which buffers all output.
-        # In theory this may deadlock if `git fetch` prints more than 8 KB
-        # to stderr which is here assumed to not happen in day-to-day use.
-
-        stdout = b''
-
         # Execute command
         cmd = self.git.fetch(as_process=True, *args, **kwargs)
 
-        # Capture output
-        while True:
-            output = cmd.stdout.read(1)
-
-            sys.stdout.write(output.decode('utf-8'))
-            sys.stdout.flush()
-
-            stdout += output
-
-            # Check for EOF
-            if output == b"":
-                break
-
-        # Wait for the process to quit
-        try:
-            cmd.wait()
-        except GitCommandError as error:
-            # Add more meta-information to errors
-            message = "'{}' returned exit status {}".format(
-                ' '.join(str(c) for c in error.command),
-                error.status
-            )
-
-            raise GitError(message, stderr=error.stderr, stdout=stdout)
-
-        return stdout.strip()
+        return self.run_cmd(cmd)
 
     def push(self, *args, **kwargs):
-        ''' Push commits to remote '''
-        stdout = b''
-
+        """ Push commits to remote """
         # Execute command
         cmd = self.git.push(as_process=True, *args, **kwargs)
 
-        # Capture output
+        return self.run_cmd(cmd)
+
+    @staticmethod
+    def stream_reader(input_stream: BufferedReader, output_stream: Optional[IO], result_list: list) -> None:
+        """
+        Helper method to read from a stream and write to another stream.
+        """
+        captured_bytes = b""
         while True:
-            output = cmd.stdout.read(1)
-
-            sys.stdout.write(output.decode('utf-8'))
-            sys.stdout.flush()
-
-            stdout += output
-
-            # Check for EOF
-            if output == b"":
+            read_byte = input_stream.read(1)
+            captured_bytes += read_byte
+            if output_stream is not None:
+                output_stream.write(read_byte.decode('utf-8'))
+                output_stream.flush()
+            if read_byte == b"":
                 break
+        result_list.append(captured_bytes)
+
+    @staticmethod
+    def run_cmd(cmd: GitCmd.AutoInterrupt) -> bytes:
+        """ Run a command and return stdout. """
+        std_outs = []
+        std_errs = []
+        stdout_thread = Thread(target=GitWrapper.stream_reader,
+                               args=(cmd.stdout, sys.stdout, std_outs))
+        stderr_thread = Thread(target=GitWrapper.stream_reader,
+                               args=(cmd.stderr, None, std_errs))
 
         # Wait for the process to quit
         try:
+            stdout_thread.start()
+            stderr_thread.start()
             cmd.wait()
+            stdout_thread.join()
+            stderr_thread.join()
         except GitCommandError as error:
             # Add more meta-information to errors
             message = "'{}' returned exit status {}".format(
@@ -243,9 +231,8 @@ class GitWrapper:
                 error.status
             )
 
-            raise GitError(message, stderr=error.stderr, stdout=stdout)
-
-        return stdout.strip()
+            raise GitError(message, stderr=error.stderr, stdout=std_outs[0])
+        return std_outs[0].strip()
 
     def config(self, key):
         """ Return `git config key` output or None. """

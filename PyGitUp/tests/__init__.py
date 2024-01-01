@@ -65,9 +65,10 @@ def update_file(repo, commit_message='', counter=[0], filename=testfile_name):
 
     return path_file
 
+
 def mkrepo(path):
     """
-    Make a repository in 'path', create the the dir, if it doesn't exist.
+    Make a repository in 'path', create the dir, if it doesn't exist.
     """
     return Repo.init(path)
 
