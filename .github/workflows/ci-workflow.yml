@@ -37,6 +37,7 @@ jobs:
     - name: Verify dist package format
       run: |
         poetry build
+        poetry run pip install twine
         poetry run twine check dist/*
       if: matrix.os != 'windows-latest'
     - name: Upload coverage result
