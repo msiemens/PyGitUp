@@ -235,8 +235,9 @@ class GitWrapper:
                 error.status
             )
 
-            raise GitError(message, stderr=error.stderr, stdout=std_outs[0])
-        return std_outs[0].strip()
+            raise GitError(message, stderr=error.stderr, stdout=std_outs[0] if std_outs else None)
+
+        return std_outs[0].strip() if std_outs else bytes()
 
     def config(self, key):
         """ Return `git config key` output or None. """
