@@ -160,6 +160,14 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v2.3.0 (*2024-10-05*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Improve logging when updating large repositories. Thanks
+  `@bdmartin <https://github.com/bdmartin>`_ for `Pull Request #132
+  <https://github.com/msiemens/PyGitUp/pull/132>`_.
+- Drop support for Python 3.7
+
 v2.2.0 (*2022-11-21*)
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -412,7 +420,7 @@ v0.1 (*2013-03-14*)
 
 - Initial Release
 
-.. |Build Status| image:: https://img.shields.io/azure-devops/build/msiemens/3e5baa75-12ec-43ac-9728-89823ee8c7e2/1.svg?style=flat-square
+.. |Build Status| image:: https://img.shields.io/github/actions/workflow/status/msiemens/PyGitUp/ci-workflow.yml?style=flat-square
    :target: https://dev.azure.com/msiemens/github/_build?definitionId=1
 
 .. |Coverage Status| image:: http://img.shields.io/coveralls/msiemens/PyGitUp/master.svg?style=flat-square

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "git-up"
-version = "2.2.0"
+version = "2.3.0"
 description = "A python implementation of 'git up'"
 authors = ["Markus Siemens <markus@m-siemens.de>"]
 license = "MIT"
@@ -19,7 +19,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
