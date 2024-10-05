@@ -22,7 +22,7 @@ import platform
 from contextlib import contextmanager
 from io import BufferedReader
 from threading import Thread
-from typing import IO, Optional
+from typing import IO, Optional, List
 
 # 3rd party libs
 from termcolor import colored  # Assume, colorama is already initialized
@@ -192,9 +192,13 @@ class GitWrapper:
         return self.run_cmd(cmd)
 
     @staticmethod
-    def stream_reader(input_stream: BufferedReader, output_stream: Optional[IO], result_list: list) -> None:
+    def stream_reader(input_stream: BufferedReader, output_stream: Optional[IO], result_list: List[str]) -> None:
         """
         Helper method to read from a stream and write to another stream.
+
+        We use a list to store results because they are mutable and allow
+        for passing data back to the caller from the thread without additional
+        machinery.
         """
         captured_bytes = b""
         while True:
