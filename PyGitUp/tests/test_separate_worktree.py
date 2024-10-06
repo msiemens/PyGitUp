@@ -13,7 +13,7 @@ worktree_dir = f'{test_name}_worktree'
 worktree_path = join(basepath, worktree_dir)
 
 
-def setup():
+def setup_function():
     if Git().version_info[:3] < (2, 5, 1):
         return
 

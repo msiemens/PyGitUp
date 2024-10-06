@@ -11,7 +11,7 @@ test_name = 'git-not-in-path'
 repo_path = join(basepath, test_name + os.sep)
 
 
-def setup():
+def setup_function():
     os.makedirs(repo_path, 0o700)
 
 

@@ -9,7 +9,7 @@ test_name = 'issue-55'
 repo_path = join(basepath, test_name + os.sep)
 
 
-def setup():
+def setup_function():
     master_path, master = init_master(test_name)
 
     branch_name = 'feature/#11772-replace-api-url'

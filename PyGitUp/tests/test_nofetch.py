@@ -14,7 +14,7 @@ origin_test_name = 'origin/' + test_name
 repo_path = join(basepath, test_name + os.sep)
 
 
-def setup():
+def setup_function():
     master_path, master = init_master(test_name)
 
     # Prepare master repo

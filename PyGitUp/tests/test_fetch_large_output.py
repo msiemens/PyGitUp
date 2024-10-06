@@ -11,7 +11,7 @@ TEST_NAME = 'fetch-large-output'
 REPO_PATH = join(basepath, TEST_NAME + sep)
 
 
-def setup():
+def setup_function():
     master_path, master = init_master(TEST_NAME)
 
     # Prepare master repo
