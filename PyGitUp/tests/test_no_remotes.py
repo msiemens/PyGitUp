@@ -9,7 +9,7 @@ from PyGitUp.tests import init_master
 test_name = 'no_remotes'
 
 
-def setup():
+def setup_function():
     global master_path
     master_path, master = init_master(test_name)
 

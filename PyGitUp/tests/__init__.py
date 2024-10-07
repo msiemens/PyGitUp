@@ -26,7 +26,7 @@ def capture():
             out[1] = out[1].getvalue()
 
 
-def teardown():
+def teardown_function():
     """
      Cleanup created files and directories
     """
