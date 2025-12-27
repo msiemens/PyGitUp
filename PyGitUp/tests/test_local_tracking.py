@@ -13,7 +13,7 @@ def _read_file(path):
         return f.read()
 
 
-def setup_function():
+def setup_module():
     global repo_path
     master_path, master = init_master(test_name)
 

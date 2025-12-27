@@ -11,7 +11,7 @@ test_name = 'not-on-a-repo'
 repo_path = join(basepath, test_name + os.sep)
 
 
-def setup_function():
+def setup_module():
     os.makedirs(repo_path, 0o700)
 
 

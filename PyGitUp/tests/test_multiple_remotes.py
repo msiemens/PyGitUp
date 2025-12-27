@@ -9,7 +9,7 @@ test_name = 'multiple-remotes'
 repo_path = join(basepath, test_name + os.sep)
 
 
-def setup_function():
+def setup_module():
     master1_path, master1 = init_master(test_name + '.1')
 
     # Prepare master repo

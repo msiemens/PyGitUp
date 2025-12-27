@@ -9,7 +9,7 @@ test_name = 'faster-forwarded'
 repo_path = join(basepath, test_name + os.sep)
 
 
-def setup_function():
+def setup_module():
     global master, repo
     master_path, master = init_master(test_name)
 

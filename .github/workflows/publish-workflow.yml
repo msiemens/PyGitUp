@@ -16,16 +16,19 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.x'
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        enable-cache: true
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install poetry
-        poetry install
+        uv sync --locked
     - name: Publish package
       env:
-        POETRY_PYPI_TOKEN_PYPI: ${{ secrets.POETRY_PYPI_TOKEN_PYPI }}
+        UV_PUBLISH_TOKEN: ${{ secrets.POETRY_PYPI_TOKEN_PYPI }}
       run: |
-        poetry publish --build
+        uv build
+        uv publish
     - name: Create Release
       uses: actions/create-release@v1
       env:

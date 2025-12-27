@@ -14,7 +14,7 @@ def _read_file(path):
         return f.read()
 
 
-def setup_function():
+def setup_module():
     master_path, master = init_master(test_name)
 
     # Prepare master repo

@@ -1,16 +1,11 @@
-[tool.poetry]
+[project]
 name = "git-up"
 version = "2.3.0"
 description = "A python implementation of 'git up'"
-authors = ["Markus Siemens <markus@m-siemens.de>"]
-license = "MIT"
-packages = [
-    { include = "PyGitUp" }
-]
-
+authors = [{ name = "Markus Siemens", email = "markus@m-siemens.de" }]
+requires-python = ">=3.10,<4"
 readme = "README.rst"
-
-homepage = "https://github.com/msiemens/PyGitUp"
+license = "MIT"
 keywords = ["database", "nosql"]
 
 classifiers = [
@@ -19,30 +14,39 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Software Development :: Version Control",
     "Topic :: Utilities",
 ]
+dependencies = [
+    "GitPython~=3.1",
+    "colorama~=0.4",
+    "termcolor~=3.2",
+]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-GitPython = "^3.0.0"
-colorama = "^0.4.0"
-termcolor = "^2.0.0"
+[project.urls]
+Homepage = "https://github.com/msiemens/PyGitUp"
 
-[tool.poetry.dev-dependencies]
-coveralls = "^3.0.0"
-pytest = "^8.3.3"
-pytest-cov = "^4.0.0"
+[project.scripts]
+git-up = "PyGitUp.gitup:run"
+
+[dependency-groups]
+dev = [
+    "coveralls~=4.0",
+    "pytest~=9.0",
+    "pytest-cov~=7.0",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["PyGitUp"]
+
+[tool.hatch.build.targets.wheel]
+include = ["PyGitUp"]
 
 [build-system]
-requires = ["poetry-core>=1.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-git-up = 'PyGitUp.gitup:run'
+requires = ["hatchling"]
+build-backend = "hatchling.build"

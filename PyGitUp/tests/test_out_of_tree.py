@@ -13,7 +13,7 @@ git_dir = join(repo_path, 'git-dir', '.git')
 work_tree = join(repo_path, 'work-tree')
 
 
-def setup_function():
+def setup_module():
     master_path, master = init_master(test_name)
 
     os.makedirs(git_dir)

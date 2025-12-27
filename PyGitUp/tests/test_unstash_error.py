@@ -11,7 +11,7 @@ test_name = 'unstash_error'
 repo_path = join(basepath, test_name + os.sep)
 
 
-def setup_function():
+def setup_module():
     master_path, master = init_master(test_name)
 
     # Prepare master repo
