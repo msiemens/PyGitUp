@@ -35,6 +35,7 @@ jobs:
         git config --global user.name "Example User"
     - name: Run test suite
       run: |
+        uv run pip install .
         uv run pytest -v --cov=PyGitUp
       shell: bash
     - name: Verify dist package format

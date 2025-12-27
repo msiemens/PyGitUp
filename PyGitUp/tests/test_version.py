@@ -11,7 +11,7 @@ test_name = 'version'
 def test_version():
     """ Run 'git up': Check version """
     try:
-        import pkg_resources as pkg
+        from importlib import metadata
     except ImportError:
         pytest.skip('pip not installed')
 
@@ -25,7 +25,6 @@ def test_version():
         GitUp(sparse=True).version_info()
     stdout = stdout.getvalue()
 
-    package = pkg.get_distribution('git-up')
-    local_version_str = package.version
+    local_version_str = metadata.version('git-up')
 
     assert local_version_str in stdout

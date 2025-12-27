@@ -252,6 +252,7 @@ source = { editable = "." }
 dependencies = [
     { name = "colorama" },
     { name = "gitpython" },
+    { name = "packaging" },
     { name = "termcolor" },
 ]
 
@@ -266,6 +267,7 @@ dev = [
 requires-dist = [
     { name = "colorama", specifier = "~=0.4" },
     { name = "gitpython", specifier = "~=3.1" },
+    { name = "packaging", specifier = "~=25.0" },
     { name = "termcolor", specifier = "~=3.2" },
 ]
 

@@ -23,12 +23,14 @@ from urllib.request import urlopen
 
 # 3rd party libs
 try:
-    # noinspection PyUnresolvedReferences
-    import pkg_resources as pkg
+    from importlib import metadata
 except ImportError:  # pragma: no cover
+    metadata = None
     NO_DISTRIBUTE = True
 else:  # pragma: no cover
     NO_DISTRIBUTE = False
+
+from packaging.version import InvalidVersion, Version
 
 import colorama
 from git import Repo, GitCmdObjectDB
@@ -59,7 +61,7 @@ PYPI_URL = 'https://pypi.python.org/pypi/git-up/json'
 
 def get_git_dir():
     toplevel_dir = execute(['git', 'rev-parse', '--show-toplevel'])
-    if ON_WINDOWS and toplevel_dir[0] == '/':
+    if ON_WINDOWS and toplevel_dir and toplevel_dir[0] == '/':
         toplevel_dir = execute(['cygpath', '-m', toplevel_dir])
 
     if toplevel_dir is not None \
@@ -417,9 +419,22 @@ class GitUp:
         """ Tell, what version we're running at and if it's up to date. """
 
         # Retrive and show local version info
-        package = pkg.get_distribution('git-up')
-        local_version_str = package.version
-        local_version = package.parsed_version
+        try:
+            local_version_str = metadata.version('git-up')
+        except (AttributeError, metadata.PackageNotFoundError):
+            print(
+                colored(
+                    "Please install 'git-up' via pip in order to get version information.",
+                    'yellow',
+                )
+            )
+            return
+
+        try:
+            local_version = Version(local_version_str)
+        except InvalidVersion:
+            print('GitUp version is: ' + colored('v' + local_version_str, 'green'))
+            return
 
         print('GitUp version is: ' + colored('v' + local_version_str, 'green'))
 
@@ -437,7 +452,10 @@ class GitUp:
         except (HTTPError, URLError, ValueError):
             recent = True  # To not disturb the user with HTTP/parsing errors
         else:
-            recent = local_version >= pkg.parse_version(online_version)
+            try:
+                recent = local_version >= Version(online_version)
+            except InvalidVersion:
+                recent = True
 
         if not recent:
             # noinspection PyUnboundLocalVariable
