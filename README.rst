@@ -27,7 +27,7 @@ Why use ``git up``?
 Demonstration
 -------------
 
-.. image:: http://i.imgur.com/EC3pvYu.gif
+.. image:: demo.gif
 
 Why use the Python port?
 ------------------------
@@ -43,7 +43,7 @@ and using this port are:
 How do I install it?
 --------------------
 
-1. Install ``git-up`` via `pip <https://pip.pypa.io/en/latest/installing.html>`__: ``$ pip install git-up``
+1. Install ``git-up`` via `pip <https://pip.pypa.io/en/latest/installing.html>`__: ``$ uv tool install git-up``
 2. ``cd`` to your project's directory.
 3. Run ``git up`` and enjoy!
 
