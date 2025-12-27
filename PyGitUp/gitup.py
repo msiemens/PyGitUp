@@ -59,6 +59,8 @@ PYPI_URL = 'https://pypi.python.org/pypi/git-up/json'
 
 def get_git_dir():
     toplevel_dir = execute(['git', 'rev-parse', '--show-toplevel'])
+    if ON_WINDOWS and toplevel_dir[0] == '/':
+        toplevel_dir = execute(['cygpath', '-m', toplevel_dir])
 
     if toplevel_dir is not None \
             and os.path.isfile(os.path.join(toplevel_dir, '.git')):
