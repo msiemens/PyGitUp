@@ -1,6 +1,6 @@
 [project]
 name = "git-up"
-version = "2.3.0"
+version = "2.4.0"
 description = "A python implementation of 'git up'"
 authors = [{ name = "Markus Siemens", email = "markus@m-siemens.de" }]
 requires-python = ">=3.10,<4"

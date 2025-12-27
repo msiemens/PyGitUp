@@ -160,6 +160,13 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v2.4.0 (*2025-12-27*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Switch to ``packaging`` instead of ``pkg_resources``. Closes `#139 <https://github.com/msiemens/PyGitUp/issues/139>`__.
+- Fix top-level directory detection on MinGW.
+- Update dependencies and switch to the uv package manager.
+
 v2.3.0 (*2024-10-05*)
 ~~~~~~~~~~~~~~~~~~~~~
 
