@@ -374,6 +374,13 @@ class GitUp:
         log_hook = self.settings['rebase.log-hook']
 
         if log_hook:
+            def _escape_positional(value):
+                # Neutralize command substitution/backticks in branch names
+                return value.replace('$', r'\$').replace('`', r'\`')
+
+            branch_safe = _escape_positional(branch.name)
+            remote_safe = _escape_positional(remote.name)
+
             if ON_WINDOWS:  # pragma: no cover
                 # Running a string in CMD from Python is not that easy on
                 # Windows. Running 'cmd /C log_hook' produces problems when
@@ -413,9 +420,10 @@ class GitUp:
                 os.remove(bat_file.name)
             else:  # pragma: no cover
                 # Run log_hook via 'shell -c'
+                # Disable globbing and word-splitting to keep $1/$2 safe
                 state = subprocess.call(
-                    [log_hook, 'git-up', branch.name, remote.name],
-                    shell=True
+                    ['sh', '-c', 'set -f; IFS=; ' + log_hook,
+                     'git-up', branch_safe, remote_safe]
                 )
 
             if self.testing:
