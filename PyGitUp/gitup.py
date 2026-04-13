@@ -38,7 +38,7 @@ from termcolor import colored
 
 # PyGitUp libs
 from PyGitUp.utils import execute, uniq, find
-from PyGitUp.git_wrapper import GitWrapper, GitError
+from PyGitUp.git_wrapper import GitWrapper, GitError, RebaseError
 
 ON_WINDOWS = sys.platform == 'win32'
 
@@ -185,6 +185,9 @@ class GitUp:
             self.git.status(porcelain=True, untracked_files='no').split('\n')
         )
 
+        # Build worktree map: branch name -> worktree path
+        self.worktree_map = self._build_worktree_map()
+
         # Load configuration
         self.settings = self.default_settings.copy()
         self.load_config()
@@ -291,7 +294,12 @@ class GitUp:
                     print()
 
                 self.log(branch, target)
-                if fast_fastforward:
+                worktree_path = self.worktree_map.get(branch.name)
+                if worktree_path:
+                    self._rebase_in_worktree(
+                        branch, target, worktree_path, fast_fastforward
+                    )
+                elif fast_fastforward:
                     branch.commit = target.commit
                 else:
                     stasher()
@@ -305,6 +313,76 @@ class GitUp:
                 print(colored(f'returning to {original_branch.name}',
                               'magenta'))
                 original_branch.checkout()
+
+    def _build_worktree_map(self):
+        """
+        Build a map of branch names to worktree paths.
+
+        This allows us to detect branches that are checked out in
+        separate worktrees, so we can rebase them in-place instead of
+        failing on checkout.
+        """
+        worktree_map = {}
+        try:
+            output = self.git._run('worktree', 'list', '--porcelain')
+        except GitError:
+            return worktree_map
+
+        current_path = None
+        main_worktree = os.path.realpath(self.repo.working_dir)
+
+        for line in output.split('\n'):
+            if line.startswith('worktree '):
+                current_path = line[len('worktree '):]
+            elif line.startswith('branch refs/heads/'):
+                branch_name = line[len('branch refs/heads/'):]
+                if current_path and \
+                        os.path.realpath(current_path) != main_worktree:
+                    worktree_map[branch_name] = current_path
+
+        return worktree_map
+
+    def _rebase_in_worktree(self, branch, target, worktree_path,
+                            fast_forward):
+        """
+        Rebase or fast-forward a branch checked out in a worktree.
+
+        Instead of checking out the branch (which would fail), we operate
+        directly in the worktree directory where the branch is already
+        checked out.
+        """
+        worktree_repo = Repo(worktree_path, odbt=GitCmdObjectDB)
+        worktree_git = GitWrapper(worktree_repo)
+
+        if fast_forward:
+            worktree_git._run('merge', '--ff-only', target.name)
+        else:
+            # Stash worktree changes if needed
+            stashed = worktree_repo.is_dirty(submodules=False)
+            if stashed:
+                change_count = worktree_git.change_count
+                if change_count > 1:
+                    msg = f'stashing {change_count} changes in worktree'
+                else:
+                    msg = f'stashing {change_count} change in worktree'
+                print(colored(msg, 'magenta'))
+                worktree_git._run('stash')
+
+            try:
+                rebase_args = self.settings['rebase.arguments']
+                arguments = (
+                    ([rebase_args] if rebase_args else []) +
+                    [target.name]
+                )
+                try:
+                    worktree_git._run('rebase', *arguments)
+                except GitError as e:
+                    raise RebaseError(branch.name, target.name,
+                                      **e.__dict__)
+            finally:
+                if stashed:
+                    print(colored('unstashing in worktree', 'magenta'))
+                    worktree_git._run('stash', 'pop')
 
     def fetch(self):
         """
