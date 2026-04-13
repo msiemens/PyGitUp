@@ -8,7 +8,7 @@ needed for `git up`.
 """
 
 
-__all__ = ['GitWrapper', 'GitError']
+__all__ = ['GitWrapper', 'GitError', 'UnresolvedConflictError']
 
 ###############################################################################
 # IMPORTS
@@ -344,5 +344,21 @@ class RebaseError(GitError):
 
         message = "Failed to rebase {1} onto {0}".format(
             current_branch, target_branch
+        )
+        GitError.__init__(self, message, **kwargs)
+
+
+class UnresolvedConflictError(GitError):
+    """
+    Rebase conflict could not be resolved. Repo left in conflicted state.
+    """
+
+    def __init__(self, branch_name, target_branch, repo_path, **kwargs):
+        kwargs.pop('message', None)
+        message = (
+            f"Failed to resolve rebase conflicts for {branch_name} "
+            f"onto {target_branch}.\n"
+            f"The repo at {repo_path} is left in a conflicted state.\n"
+            f"Resolve manually, then run: git rebase --continue"
         )
         GitError.__init__(self, message, **kwargs)

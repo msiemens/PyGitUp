@@ -15,6 +15,7 @@ import sys
 import os
 import re
 import json
+import shlex
 import subprocess
 from io import StringIO
 from tempfile import NamedTemporaryFile
@@ -38,7 +39,8 @@ from termcolor import colored
 
 # PyGitUp libs
 from PyGitUp.utils import execute, uniq, find
-from PyGitUp.git_wrapper import GitWrapper, GitError, RebaseError
+from PyGitUp.git_wrapper import GitWrapper, GitError, RebaseError, \
+    UnresolvedConflictError
 
 ON_WINDOWS = sys.platform == 'win32'
 
@@ -124,6 +126,7 @@ class GitUp:
         'rebase.arguments': None,
         'rebase.auto': True,
         'rebase.log-hook': None,
+        'rebase.conflict-resolver': None,
         'updates.check': True,
         'push.auto': False,
         'push.tags': False,
@@ -336,7 +339,16 @@ class GitUp:
                 else:
                     stasher()
                     self.git.checkout(branch.name)
-                    self.git.rebase(target)
+                    try:
+                        self.git.rebase(target)
+                    except RebaseError:
+                        if self._try_resolve_conflicts(
+                            branch.name, target.name,
+                            self.repo.working_dir
+                        ):
+                            continue
+                        stasher.suppress_pop = True
+                        raise
 
             if (self.repo.head.is_detached  # Only on Travis CI,
                     # we get a detached head after doing our rebase *confused*.
@@ -466,6 +478,84 @@ class GitUp:
                 except RebaseError:
                     stash.suppress_pop = True
                     raise
+
+    def _build_resolver_prompt(self, branch_name, target_name, repo_path):
+        """Build the default prompt with conflict context."""
+        try:
+            result = subprocess.run(
+                ['git', 'diff', '--name-only', '--diff-filter=U'],
+                cwd=repo_path, capture_output=True, text=True
+            )
+            conflicted = result.stdout.strip()
+        except Exception:
+            conflicted = '(unable to determine)'
+
+        return (
+            f"Resolve the git rebase conflicts in this repository.\n\n"
+            f"Branch '{branch_name}' is being rebased onto "
+            f"'{target_name}'.\n\n"
+            f"Conflicted files:\n{conflicted}\n\n"
+            f"Steps:\n"
+            f"1. Read each conflicted file and resolve the conflict "
+            f"markers\n"
+            f"2. Stage resolved files with `git add`\n"
+            f"3. Run `git rebase --continue`\n"
+            f"4. If further conflicts arise, repeat steps 1-3\n"
+            f"5. Exit when the rebase is fully complete"
+        )
+
+    def _try_resolve_conflicts(self, branch_name, target_name, repo_path):
+        """
+        Invoke the configured conflict resolver command.
+
+        Returns True if the resolver succeeded and rebase completed.
+        Returns False if no resolver is configured.
+        Raises UnresolvedConflictError if the resolver failed.
+        """
+        resolver_template = self.settings['rebase.conflict-resolver']
+        if not resolver_template:
+            return False
+
+        print(colored('invoking conflict resolver...', 'yellow'))
+
+        prompt = self._build_resolver_prompt(
+            branch_name, target_name, repo_path
+        )
+        command = resolver_template.replace(
+            '{prompt}', shlex.quote(prompt)
+        )
+
+        env = os.environ.copy()
+        env['GITUP_BRANCH'] = branch_name
+        env['GITUP_TARGET'] = target_name
+        env['GITUP_REPO_PATH'] = repo_path
+
+        result = subprocess.run(
+            command, shell=True, cwd=repo_path, env=env
+        )
+
+        if result.returncode != 0:
+            raise UnresolvedConflictError(
+                branch_name, target_name, repo_path
+            )
+
+        # Verify rebase completed
+        git_dir = subprocess.run(
+            ['git', 'rev-parse', '--git-dir'],
+            cwd=repo_path, capture_output=True, text=True
+        ).stdout.strip()
+
+        if not os.path.isabs(git_dir):
+            git_dir = os.path.join(repo_path, git_dir)
+
+        if (os.path.isdir(os.path.join(git_dir, 'rebase-merge')) or
+                os.path.isdir(os.path.join(git_dir, 'rebase-apply'))):
+            raise UnresolvedConflictError(
+                branch_name, target_name, repo_path
+            )
+
+        print(colored('conflict resolved', 'green'))
+        return True
 
     def fetch(self):
         """
