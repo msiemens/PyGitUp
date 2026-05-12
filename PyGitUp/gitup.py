@@ -186,7 +186,7 @@ class GitUp:
         )
 
         # Build worktree map: branch name -> worktree path
-        self.worktree_map = self._build_worktree_map()
+        self.worktree_map, self.mid_rebase_branches = self._build_worktree_map()
 
         # Load configuration
         self.settings = self.default_settings.copy()
@@ -248,6 +248,12 @@ class GitUp:
                     print(colored('error: remote branch doesn\'t exist', 'red'))
                     self.states.append('remote branch doesn\'t exist')
 
+                    continue
+
+                # Skip branches whose worktree is mid-rebase
+                if branch.name in self.mid_rebase_branches:
+                    print(colored('rebase in progress', 'yellow'))
+                    self.states.append('rebase in progress')
                     continue
 
                 # Get tracking branch
@@ -323,15 +329,17 @@ class GitUp:
         failing on checkout.
         """
         worktree_map = {}
+        mid_rebase_branches = set()
         try:
             output = self.git._run('worktree', 'list', '--porcelain')
         except GitError:
-            return worktree_map
+            return worktree_map, mid_rebase_branches
 
         current_path = None
         main_worktree = os.path.realpath(self.repo.working_dir)
 
         for line in output.split('\n'):
+            line = line.rstrip('\r')
             if line.startswith('worktree '):
                 current_path = line[len('worktree '):]
             elif line.startswith('branch refs/heads/'):
@@ -339,8 +347,36 @@ class GitUp:
                 if current_path and \
                         os.path.realpath(current_path) != main_worktree:
                     worktree_map[branch_name] = current_path
+            elif line == 'detached' and current_path:
+                if os.path.realpath(current_path) != main_worktree:
+                    branch_name = self._get_rebase_branch(current_path)
+                    if branch_name:
+                        worktree_map[branch_name] = current_path
+                        mid_rebase_branches.add(branch_name)
 
-        return worktree_map
+        return worktree_map, mid_rebase_branches
+
+    def _get_rebase_branch(self, worktree_path):
+        """Return the branch name if a rebase is in progress in the worktree."""
+        git_file = os.path.join(worktree_path, '.git')
+        if not os.path.isfile(git_file):
+            return None
+        with open(git_file, 'r') as f:
+            content = f.read().strip()
+        if not content.startswith('gitdir: '):
+            return None
+        meta_dir = content[len('gitdir: '):]
+        if not os.path.isabs(meta_dir):
+            meta_dir = os.path.join(worktree_path, meta_dir)
+        meta_dir = os.path.realpath(meta_dir)
+        for subdir in ('rebase-merge', 'rebase-apply'):
+            head_name_file = os.path.join(meta_dir, subdir, 'head-name')
+            if os.path.isfile(head_name_file):
+                with open(head_name_file, 'r') as f:
+                    ref = f.read().strip()
+                if ref.startswith('refs/heads/'):
+                    return ref[len('refs/heads/'):]
+        return None
 
     def _rebase_in_worktree(self, branch, target, worktree_path,
                             fast_forward):
