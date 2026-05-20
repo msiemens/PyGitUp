@@ -3,7 +3,7 @@ name: Python CI
 on:
   push:
     branches: [ master ]
-  pull_request_target:
+  pull_request:
     branches: [ master ]
 
 jobs:
@@ -44,7 +44,7 @@ jobs:
         uv tool run twine check dist/*
       if: matrix.os != 'windows-latest'
     - name: Upload coverage result
-      if: github.repository_owner == 'msiemens'
+      if: github.repository_owner == 'msiemens' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
