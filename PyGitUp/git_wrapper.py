@@ -144,9 +144,11 @@ class GitWrapper:
 
             stashed[0] = True
 
+        stash.suppress_pop = False
+
         yield stash
 
-        if stashed[0]:
+        if stashed[0] and not stash.suppress_pop:
             print(colored('unstashing', 'magenta'))
             try:
                 self._run('stash', 'pop')

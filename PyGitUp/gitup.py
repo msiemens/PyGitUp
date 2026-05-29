@@ -186,7 +186,7 @@ class GitUp:
         )
 
         # Build worktree map: branch name -> worktree path
-        self.worktree_map, self.mid_rebase_branches = self._build_worktree_map()
+        self.worktree_map, self.in_progress_branches = self._build_worktree_map()
 
         # Load configuration
         self.settings = self.default_settings.copy()
@@ -250,10 +250,10 @@ class GitUp:
 
                     continue
 
-                # Skip branches whose worktree is mid-rebase
-                if branch.name in self.mid_rebase_branches:
-                    print(colored('rebase in progress', 'yellow'))
-                    self.states.append('rebase in progress')
+                # Skip branches whose worktree has an in-progress operation
+                if branch.name in self.in_progress_branches:
+                    print(colored('operation in progress', 'yellow'))
+                    self.states.append('operation in progress')
                     continue
 
                 # Get tracking branch
@@ -329,11 +329,11 @@ class GitUp:
         failing on checkout.
         """
         worktree_map = {}
-        mid_rebase_branches = set()
+        in_progress_branches = set()
         try:
             output = self.git._run('worktree', 'list', '--porcelain')
         except GitError:
-            return worktree_map, mid_rebase_branches
+            return worktree_map, in_progress_branches
 
         current_path = None
         main_worktree = os.path.realpath(self.repo.working_dir)
@@ -347,17 +347,19 @@ class GitUp:
                 if current_path and \
                         os.path.realpath(current_path) != main_worktree:
                     worktree_map[branch_name] = current_path
+                    if self._worktree_has_in_progress_op(current_path):
+                        in_progress_branches.add(branch_name)
             elif line == 'detached' and current_path:
                 if os.path.realpath(current_path) != main_worktree:
                     branch_name = self._get_rebase_branch(current_path)
                     if branch_name:
                         worktree_map[branch_name] = current_path
-                        mid_rebase_branches.add(branch_name)
+                        in_progress_branches.add(branch_name)
 
-        return worktree_map, mid_rebase_branches
+        return worktree_map, in_progress_branches
 
-    def _get_rebase_branch(self, worktree_path):
-        """Return the branch name if a rebase is in progress in the worktree."""
+    def _get_worktree_meta_dir(self, worktree_path):
+        """Return the git metadata directory for a worktree."""
         git_file = os.path.join(worktree_path, '.git')
         if not os.path.isfile(git_file):
             return None
@@ -368,7 +370,23 @@ class GitUp:
         meta_dir = content[len('gitdir: '):]
         if not os.path.isabs(meta_dir):
             meta_dir = os.path.join(worktree_path, meta_dir)
-        meta_dir = os.path.realpath(meta_dir)
+        return os.path.realpath(meta_dir)
+
+    def _worktree_has_in_progress_op(self, worktree_path):
+        """Return True if the worktree has a cherry-pick, merge, or bisect in progress."""
+        meta_dir = self._get_worktree_meta_dir(worktree_path)
+        if not meta_dir:
+            return False
+        for marker in ('CHERRY_PICK_HEAD', 'MERGE_HEAD', 'BISECT_LOG'):
+            if os.path.isfile(os.path.join(meta_dir, marker)):
+                return True
+        return False
+
+    def _get_rebase_branch(self, worktree_path):
+        """Return the branch name if a rebase is in progress in the worktree."""
+        meta_dir = self._get_worktree_meta_dir(worktree_path)
+        if not meta_dir:
+            return None
         for subdir in ('rebase-merge', 'rebase-apply'):
             head_name_file = os.path.join(meta_dir, subdir, 'head-name')
             if os.path.isfile(head_name_file):
@@ -393,32 +411,13 @@ class GitUp:
         if fast_forward:
             worktree_git._run('merge', '--ff-only', target.name)
         else:
-            # Stash worktree changes if needed
-            stashed = worktree_repo.is_dirty(submodules=False)
-            if stashed:
-                change_count = worktree_git.change_count
-                if change_count > 1:
-                    msg = f'stashing {change_count} changes in worktree'
-                else:
-                    msg = f'stashing {change_count} change in worktree'
-                print(colored(msg, 'magenta'))
-                worktree_git._run('stash')
-
-            try:
-                rebase_args = self.settings['rebase.arguments']
-                arguments = (
-                    ([rebase_args] if rebase_args else []) +
-                    [target.name]
-                )
+            with worktree_git.stasher() as stash:
+                stash()
                 try:
-                    worktree_git._run('rebase', *arguments)
-                except GitError as e:
-                    raise RebaseError(branch.name, target.name,
-                                      **e.__dict__)
-            finally:
-                if stashed:
-                    print(colored('unstashing in worktree', 'magenta'))
-                    worktree_git._run('stash', 'pop')
+                    worktree_git.rebase(target)
+                except RebaseError:
+                    stash.suppress_pop = True
+                    raise
 
     def fetch(self):
         """
