@@ -182,7 +182,7 @@ class GitWrapper:
         # Execute command
         cmd = self.git.fetch(as_process=True, *args, **kwargs)
 
-        return self.run_cmd(cmd)
+        return self.run_cmd(cmd, stderr_output_stream=sys.stderr)
 
     def push(self, *args, **kwargs):
         """ Push commits to remote """
@@ -212,14 +212,14 @@ class GitWrapper:
         result_list.append(captured_bytes)
 
     @staticmethod
-    def run_cmd(cmd: GitCmd.AutoInterrupt) -> bytes:
+    def run_cmd(cmd: GitCmd.AutoInterrupt, stderr_output_stream=None) -> bytes:
         """ Run a command and return stdout. """
         std_outs = []
         std_errs = []
         stdout_thread = Thread(target=GitWrapper.stream_reader,
                                args=(cmd.stdout, sys.stdout, std_outs))
         stderr_thread = Thread(target=GitWrapper.stream_reader,
-                               args=(cmd.stderr, None, std_errs))
+                               args=(cmd.stderr, stderr_output_stream, std_errs))
 
         # Wait for the process to quit
         try:
