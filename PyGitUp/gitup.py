@@ -38,7 +38,7 @@ from termcolor import colored
 
 # PyGitUp libs
 from PyGitUp.utils import execute, uniq, find
-from PyGitUp.git_wrapper import GitWrapper, GitError
+from PyGitUp.git_wrapper import GitWrapper, GitError, RebaseError
 
 ON_WINDOWS = sys.platform == 'win32'
 
@@ -211,6 +211,9 @@ class GitUp:
             self.git.status(porcelain=True, untracked_files='no').split('\n')
         )
 
+        # Build worktree map: branch name -> worktree path
+        self.worktree_map, self.in_progress_branches = self._build_worktree_map()
+
         # Load configuration
         self.settings = self.default_settings.copy()
         self.load_config()
@@ -273,6 +276,12 @@ class GitUp:
 
                     continue
 
+                # Skip branches whose worktree has an in-progress operation
+                if branch.name in self.in_progress_branches:
+                    print(colored('operation in progress', 'yellow'))
+                    self.states.append('operation in progress')
+                    continue
+
                 # Get tracking branch
                 if target.is_local:
                     target = find(self.repo.branches,
@@ -317,7 +326,12 @@ class GitUp:
                     print()
 
                 self.log(branch, target)
-                if fast_fastforward:
+                worktree_path = self.worktree_map.get(branch.name)
+                if worktree_path:
+                    self._rebase_in_worktree(
+                        branch, target, worktree_path, fast_fastforward
+                    )
+                elif fast_fastforward:
                     branch.commit = target.commit
                 else:
                     stasher()
@@ -331,6 +345,105 @@ class GitUp:
                 print(colored(f'returning to {original_branch.name}',
                               'magenta'))
                 original_branch.checkout()
+
+    def _build_worktree_map(self):
+        """
+        Build a map of branch names to worktree paths.
+
+        This allows us to detect branches that are checked out in
+        separate worktrees, so we can rebase them in-place instead of
+        failing on checkout.
+        """
+        worktree_map = {}
+        in_progress_branches = set()
+        try:
+            output = self.git._run('worktree', 'list', '--porcelain')
+        except GitError:
+            return worktree_map, in_progress_branches
+
+        current_path = None
+        main_worktree = os.path.realpath(self.repo.working_dir)
+
+        for line in output.split('\n'):
+            line = line.rstrip('\r')
+            if line.startswith('worktree '):
+                current_path = line[len('worktree '):]
+            elif line.startswith('branch refs/heads/'):
+                branch_name = line[len('branch refs/heads/'):]
+                if current_path and \
+                        os.path.realpath(current_path) != main_worktree:
+                    worktree_map[branch_name] = current_path
+                    if self._worktree_has_in_progress_op(current_path):
+                        in_progress_branches.add(branch_name)
+            elif line == 'detached' and current_path:
+                if os.path.realpath(current_path) != main_worktree:
+                    branch_name = self._get_rebase_branch(current_path)
+                    if branch_name:
+                        worktree_map[branch_name] = current_path
+                        in_progress_branches.add(branch_name)
+
+        return worktree_map, in_progress_branches
+
+    def _get_worktree_meta_dir(self, worktree_path):
+        """Return the git metadata directory for a worktree."""
+        git_file = os.path.join(worktree_path, '.git')
+        if not os.path.isfile(git_file):
+            return None
+        with open(git_file, 'r') as f:
+            content = f.read().strip()
+        if not content.startswith('gitdir: '):
+            return None
+        meta_dir = content[len('gitdir: '):]
+        if not os.path.isabs(meta_dir):
+            meta_dir = os.path.join(worktree_path, meta_dir)
+        return os.path.realpath(meta_dir)
+
+    def _worktree_has_in_progress_op(self, worktree_path):
+        """Return True if the worktree has a cherry-pick, merge, or bisect in progress."""
+        meta_dir = self._get_worktree_meta_dir(worktree_path)
+        if not meta_dir:
+            return False
+        for marker in ('CHERRY_PICK_HEAD', 'MERGE_HEAD', 'BISECT_LOG'):
+            if os.path.isfile(os.path.join(meta_dir, marker)):
+                return True
+        return False
+
+    def _get_rebase_branch(self, worktree_path):
+        """Return the branch name if a rebase is in progress in the worktree."""
+        meta_dir = self._get_worktree_meta_dir(worktree_path)
+        if not meta_dir:
+            return None
+        for subdir in ('rebase-merge', 'rebase-apply'):
+            head_name_file = os.path.join(meta_dir, subdir, 'head-name')
+            if os.path.isfile(head_name_file):
+                with open(head_name_file, 'r') as f:
+                    ref = f.read().strip()
+                if ref.startswith('refs/heads/'):
+                    return ref[len('refs/heads/'):]
+        return None
+
+    def _rebase_in_worktree(self, branch, target, worktree_path,
+                            fast_forward):
+        """
+        Rebase or fast-forward a branch checked out in a worktree.
+
+        Instead of checking out the branch (which would fail), we operate
+        directly in the worktree directory where the branch is already
+        checked out.
+        """
+        worktree_repo = Repo(worktree_path, odbt=GitCmdObjectDB)
+        worktree_git = GitWrapper(worktree_repo)
+
+        if fast_forward:
+            worktree_git._run('merge', '--ff-only', target.name)
+        else:
+            with worktree_git.stasher() as stash:
+                stash()
+                try:
+                    worktree_git.rebase(target)
+                except RebaseError:
+                    stash.suppress_pop = True
+                    raise
 
     def fetch(self):
         """
