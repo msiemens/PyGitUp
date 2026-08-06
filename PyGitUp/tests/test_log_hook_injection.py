@@ -3,8 +3,16 @@ import os
 import platform
 from os.path import join
 
+import pytest
+
 from git import Repo, GitCmdObjectDB
 from PyGitUp.tests import basepath, init_master, update_file
+
+pytestmark = pytest.mark.skipif(
+    platform.system() == 'Windows',
+    reason="branch name contains <> (invalid on NTFS); "
+           "escaping applies only to the POSIX sh code path",
+)
 
 test_name = 'log-hook-injection'
 repo_path = join(basepath, test_name + os.sep)
@@ -28,10 +36,7 @@ def setup_module():
     assert repo.working_dir == path
 
     # Set git-up.rebase.log-hook with unquoted $1 to mirror risky usage
-    if platform.system() == 'Windows':
-        hook = f'echo %1 > {captured_arg_path}'
-    else:
-        hook = f'printf %s \"$1\" > {captured_arg_path}'
+    hook = f'printf %s \"$1\" > {captured_arg_path}'
     repo.git.config('git-up.rebase.log-hook', hook)
 
     # Modify file in master to force a fast-forward in the clone
