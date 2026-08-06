@@ -56,12 +56,15 @@ def test_worktree():
             repo.branches[test_name + '-wt'].commit)
 
     # --- Rebase case ---
-    # Make a local commit on the worktree branch so it diverges
-    wt_repo = Repo(worktree_path, odbt=GitCmdObjectDB)
+    # Make a local commit on the worktree branch so it diverges. Go through
+    # the git CLI instead of GitPython's index API: GitPython can't access
+    # the worktree's git dir directly when MSYS2 git writes POSIX-style
+    # paths into the worktree's .git file.
+    wt_git = Git(worktree_path)
     wt_file = join(worktree_path, 'worktree_file.txt')
     write_file(wt_file, 'worktree change')
-    wt_repo.index.add([wt_file])
-    wt_repo.index.commit('worktree commit')
+    wt_git.add('worktree_file.txt')
+    wt_git.commit(m='worktree commit')
 
     # Make another commit on master so the branch diverges
     update_file(master, test_name + ' second update')
@@ -72,8 +75,7 @@ def test_worktree():
     assert 'rebasing' in gitup2.states
 
     # The worktree branch should contain the master commit
-    wt_repo = Repo(worktree_path, odbt=GitCmdObjectDB)
     master_commit = master.branches[test_name].commit.hexsha
     # Walk the worktree branch history to verify the master commit is there
-    wt_commits = [c.hexsha for c in wt_repo.iter_commits()]
+    wt_commits = Git(worktree_path).rev_list('HEAD').splitlines()
     assert master_commit in wt_commits

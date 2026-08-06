@@ -357,32 +357,54 @@ class GitUp:
         worktree_map = {}
         in_progress_branches = set()
         try:
-            output = self.git._run('worktree', 'list', '--porcelain')
+            output = self.git.worktree('list', '--porcelain')
         except GitError:
             return worktree_map, in_progress_branches
 
-        current_path = None
-        main_worktree = os.path.realpath(self.repo.working_dir)
+        # The branch checked out in the current worktree is handled via the
+        # regular checkout path. Exclude it by name instead of comparing
+        # paths: a branch can only be checked out in one worktree, and the
+        # paths reported by git may not be resolvable by Python (MSYS2 git
+        # reports POSIX-style paths).
+        active_branch = None
+        if not self.repo.head.is_detached:
+            active_branch = self.repo.active_branch.name
 
+        current_path = None
         for line in output.split('\n'):
             line = line.rstrip('\r')
             if line.startswith('worktree '):
-                current_path = line[len('worktree '):]
+                current_path = self._normalize_git_path(
+                    line[len('worktree '):]
+                )
             elif line.startswith('branch refs/heads/'):
                 branch_name = line[len('branch refs/heads/'):]
-                if current_path and \
-                        os.path.realpath(current_path) != main_worktree:
+                if current_path and branch_name != active_branch:
                     worktree_map[branch_name] = current_path
                     if self._worktree_has_in_progress_op(current_path):
                         in_progress_branches.add(branch_name)
             elif line == 'detached' and current_path:
-                if os.path.realpath(current_path) != main_worktree:
-                    branch_name = self._get_rebase_branch(current_path)
-                    if branch_name:
-                        worktree_map[branch_name] = current_path
-                        in_progress_branches.add(branch_name)
+                branch_name = self._get_rebase_branch(current_path)
+                if branch_name and branch_name != active_branch:
+                    worktree_map[branch_name] = current_path
+                    in_progress_branches.add(branch_name)
 
         return worktree_map, in_progress_branches
+
+    @staticmethod
+    def _normalize_git_path(path):
+        """
+        Convert a POSIX-style path reported by MSYS2 git into a path
+        usable by a native Windows Python.
+        """
+        if ON_WINDOWS and path.startswith('/'):
+            try:
+                path = subprocess.check_output(
+                    ['cygpath', '-m', path], text=True
+                ).strip()
+            except (OSError, subprocess.CalledProcessError):
+                pass
+        return path
 
     def _get_worktree_meta_dir(self, worktree_path):
         """Return the git metadata directory for a worktree."""
@@ -393,7 +415,7 @@ class GitUp:
             content = f.read().strip()
         if not content.startswith('gitdir: '):
             return None
-        meta_dir = content[len('gitdir: '):]
+        meta_dir = self._normalize_git_path(content[len('gitdir: '):])
         if not os.path.isabs(meta_dir):
             meta_dir = os.path.join(worktree_path, meta_dir)
         return os.path.realpath(meta_dir)
