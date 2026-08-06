@@ -39,5 +39,7 @@ def test_fetch_fail():
     from PyGitUp.gitup import GitUp
     gitup = GitUp(testing=True)
 
-    with pytest.raises(GitError):
+    with pytest.raises(GitError) as exc_info:
         gitup.run()
+
+    assert b'does-not-exist' in exc_info.value.stderr

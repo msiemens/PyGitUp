@@ -179,10 +179,12 @@ class GitWrapper:
     def fetch(self, *args, **kwargs):
         """ Fetch remote commits. """
 
+        stderr_output_stream = kwargs.pop('stderr_output_stream', None)
+
         # Execute command
         cmd = self.git.fetch(as_process=True, *args, **kwargs)
 
-        return self.run_cmd(cmd, stderr_output_stream=sys.stderr)
+        return self.run_cmd(cmd, stderr_output_stream=stderr_output_stream)
 
     def push(self, *args, **kwargs):
         """ Push commits to remote """
@@ -229,13 +231,20 @@ class GitWrapper:
             stdout_thread.join()
             stderr_thread.join()
         except GitCommandError as error:
+            stdout_thread.join()
+            stderr_thread.join()
+
             # Add more meta-information to errors
             message = "'{}' returned exit status {}".format(
                 ' '.join(str(c) for c in error.command),
                 error.status
             )
 
-            raise GitError(message, stderr=error.stderr, stdout=std_outs[0] if std_outs else None)
+            raise GitError(
+                message,
+                stderr=std_errs[0] if std_errs else error.stderr,
+                stdout=std_outs[0] if std_outs else None,
+            )
 
         return std_outs[0].strip() if std_outs else bytes()
 
