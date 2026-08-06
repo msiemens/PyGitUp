@@ -347,7 +347,6 @@ class GitUp:
                             self.repo.working_dir
                         ):
                             continue
-                        stasher.suppress_pop = True
                         raise
 
             if (self.repo.head.is_detached  # Only on Travis CI,
@@ -473,11 +472,7 @@ class GitUp:
         else:
             with worktree_git.stasher() as stash:
                 stash()
-                try:
-                    worktree_git.rebase(target)
-                except RebaseError:
-                    stash.suppress_pop = True
-                    raise
+                worktree_git.rebase(target)
 
     def _build_resolver_prompt(self, branch_name, target_name, repo_path):
         """Build the default prompt with conflict context."""
