@@ -66,6 +66,8 @@ jobs:
           git
     - name: Install dependencies
       shell: msys2 {0}
+      env:
+        PIP_BREAK_SYSTEM_PACKAGES: "1"
       run: |
         python -m pip install -U pip
         pip install -e .

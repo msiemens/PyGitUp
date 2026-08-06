@@ -48,6 +48,32 @@ def normalize_path(path):
 
     return path
 
+
+def prepare_windows_log_hook(log_hook):
+    """ Turn a log hook into the body of a batch file.
+
+    Positional arguments become delayed-expansion reads of the GITUP_ARG*
+    environment variables. cmd substitutes %1 and %VAR% into a line before
+    parsing it, so a branch name containing '&' or '|' would be parsed as
+    syntax rather than data; !VAR! is expanded after the line is parsed.
+    """
+    # Accept $1 and $2 as well, in case the user is used to Bash or sh
+    log_hook = re.sub(r'\$(\d+)', r'%\1', log_hook)
+
+    # Escape a lone percent sign, as in 'git log --pretty=format:"%Cred%h"'
+    log_hook = re.sub(r'%(?!\d)', '%%', log_hook)
+
+    # Keep literal exclamation marks literal now that delayed expansion is on
+    log_hook = log_hook.replace('!', '^!')
+
+    log_hook = re.sub(r'%(\d+)', r'!GITUP_ARG\1!', log_hook)
+
+    # Starting a line with 'echo' would echo a semicolon instead of treating
+    # it as a command separator
+    log_hook = re.sub(r'; ?', r'\n', log_hook)
+
+    return log_hook
+
 ###############################################################################
 # Setup of 3rd party libs
 ###############################################################################
@@ -487,33 +513,11 @@ class GitUp:
         log_hook = self.settings['rebase.log-hook']
 
         if log_hook:
-            def _escape_positional(value):
-                # Neutralize command substitution/backticks in branch names
-                return value.replace('$', r'\$').replace('`', r'\`')
-
-            branch_safe = _escape_positional(branch.name)
-            remote_safe = _escape_positional(remote.name)
-
             if ON_WINDOWS:  # pragma: no cover
                 # Running a string in CMD from Python is not that easy on
                 # Windows. Running 'cmd /C log_hook' produces problems when
                 # using multiple statements or things like 'echo'. Therefore,
                 # we write the string to a bat file and execute it.
-
-                # In addition, we replace occurrences of $1 with %1 and so forth
-                # in case the user is used to Bash or sh.
-                # If there are occurrences of %something, we'll replace it with
-                # %%something. This is the case when running something like
-                # 'git log --pretty=format:"%Cred%h..."'.
-                # Also, we replace a semicolon with a newline, because if you
-                # start with 'echo' on Windows, it will simply echo the
-                # semicolon and the commands behind instead of echoing and then
-                # running other commands
-
-                # Prepare log_hook
-                log_hook = re.sub(r'\$(\d+)', r'%\1', log_hook)
-                log_hook = re.sub(r'%(?!\d)', '%%', log_hook)
-                log_hook = re.sub(r'; ?', r'\n', log_hook)
 
                 # Write log_hook to an temporary file and get it's path
                 with NamedTemporaryFile(
@@ -521,22 +525,36 @@ class GitUp:
                 ) as bat_file:
                     # Don't echo all commands
                     bat_file.file.write(b'@echo off\n')
+                    # Required by the !GITUP_ARG*! reads in the prepared hook
+                    bat_file.file.write(b'setlocal enabledelayedexpansion\n')
                     # Run log_hook
-                    bat_file.file.write(log_hook.encode('utf-8'))
+                    bat_file.file.write(
+                        prepare_windows_log_hook(log_hook).encode('utf-8')
+                    )
 
-                # Run bat_file
-                state = subprocess.call(
-                    [bat_file.name, branch.name, remote.name]
-                )
+                # Pass the branch and remote name through the environment
+                # rather than as arguments, so they never reach a command line
+                # cmd parses.
+                env = os.environ.copy()
+                env['GITUP_ARG1'] = branch.name
+                env['GITUP_ARG2'] = remote.name
 
-                # Clean up file
-                os.remove(bat_file.name)
+                try:
+                    state = subprocess.call([bat_file.name], env=env)
+                finally:
+                    # Clean up file
+                    os.remove(bat_file.name)
             else:  # pragma: no cover
+                def _escape_positional(value):
+                    # Neutralize command substitution/backticks in branch names
+                    return value.replace('$', r'\$').replace('`', r'\`')
+
                 # Run log_hook via 'shell -c'
                 # Disable globbing and word-splitting to keep $1/$2 safe
                 state = subprocess.call(
                     ['sh', '-c', 'set -f; IFS=; ' + log_hook,
-                     'git-up', branch_safe, remote_safe]
+                     'git-up', _escape_positional(branch.name),
+                     _escape_positional(remote.name)]
                 )
 
             if self.testing:
