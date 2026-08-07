@@ -145,9 +145,11 @@ class GitWrapper:
 
             stashed[0] = True
 
+        stash.suppress_pop = False
+
         yield stash
 
-        if stashed[0]:
+        if stashed[0] and not stash.suppress_pop:
             print(colored('unstashing', 'magenta'))
             try:
                 self._run('stash', 'pop')
@@ -165,7 +167,10 @@ class GitWrapper:
 
     def rebase(self, target_branch):
         """ Rebase to target branch. """
-        current_branch = self.repo.active_branch
+        # Resolve the branch name via git instead of GitPython: for repos in
+        # linked worktrees, GitPython may not be able to read HEAD directly
+        # (MSYS2 git writes POSIX-style paths into the worktree's .git file).
+        current_branch_name = self._run('rev-parse', '--abbrev-ref', 'HEAD')
 
         arguments = (
                 ([self.config('git-up.rebase.arguments')] or []) +
@@ -174,7 +179,7 @@ class GitWrapper:
         try:
             self._run('rebase', *arguments)
         except GitError as e:
-            raise RebaseError(current_branch.name, target_branch.name,
+            raise RebaseError(current_branch_name, target_branch.name,
                               **e.__dict__)
 
     def fetch(self, *args, **kwargs):

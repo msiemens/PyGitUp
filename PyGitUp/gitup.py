@@ -38,7 +38,7 @@ from termcolor import colored
 
 # PyGitUp libs
 from PyGitUp.utils import execute, uniq, find
-from PyGitUp.git_wrapper import GitWrapper, GitError
+from PyGitUp.git_wrapper import GitWrapper, GitError, RebaseError
 
 ON_WINDOWS = sys.platform == 'win32'
 
@@ -47,6 +47,32 @@ def normalize_path(path):
         return execute(['cygpath', '-m', path])
 
     return path
+
+
+def prepare_windows_log_hook(log_hook):
+    """ Turn a log hook into the body of a batch file.
+
+    Positional arguments become delayed-expansion reads of the GITUP_ARG*
+    environment variables. cmd substitutes %1 and %VAR% into a line before
+    parsing it, so a branch name containing '&' or '|' would be parsed as
+    syntax rather than data; !VAR! is expanded after the line is parsed.
+    """
+    # Accept $1 and $2 as well, in case the user is used to Bash or sh
+    log_hook = re.sub(r'\$(\d+)', r'%\1', log_hook)
+
+    # Escape a lone percent sign, as in 'git log --pretty=format:"%Cred%h"'
+    log_hook = re.sub(r'%(?!\d)', '%%', log_hook)
+
+    # Keep literal exclamation marks literal now that delayed expansion is on
+    log_hook = log_hook.replace('!', '^!')
+
+    log_hook = re.sub(r'%(\d+)', r'!GITUP_ARG\1!', log_hook)
+
+    # Starting a line with 'echo' would echo a semicolon instead of treating
+    # it as a command separator
+    log_hook = re.sub(r'; ?', r'\n', log_hook)
+
+    return log_hook
 
 ###############################################################################
 # Setup of 3rd party libs
@@ -188,6 +214,9 @@ class GitUp:
             self.git.status(porcelain=True, untracked_files='no').split('\n')
         )
 
+        # Build worktree map: branch name -> worktree path
+        self.worktree_map, self.in_progress_branches = self._build_worktree_map()
+
         # Load configuration
         self.settings = self.default_settings.copy()
         self.load_config()
@@ -250,6 +279,12 @@ class GitUp:
 
                     continue
 
+                # Skip branches whose worktree has an in-progress operation
+                if branch.name in self.in_progress_branches:
+                    print(colored('operation in progress', 'yellow'))
+                    self.states.append('operation in progress')
+                    continue
+
                 # Get tracking branch
                 if target.is_local:
                     target = find(self.repo.branches,
@@ -294,7 +329,12 @@ class GitUp:
                     print()
 
                 self.log(branch, target)
-                if fast_fastforward:
+                worktree_path = self.worktree_map.get(branch.name)
+                if worktree_path:
+                    self._rebase_in_worktree(
+                        branch, target, worktree_path, fast_fastforward
+                    )
+                elif fast_fastforward:
                     branch.commit = target.commit
                 else:
                     stasher()
@@ -308,6 +348,127 @@ class GitUp:
                 print(colored(f'returning to {original_branch.name}',
                               'magenta'))
                 original_branch.checkout()
+
+    def _build_worktree_map(self):
+        """
+        Build a map of branch names to worktree paths.
+
+        This allows us to detect branches that are checked out in
+        separate worktrees, so we can rebase them in-place instead of
+        failing on checkout.
+        """
+        worktree_map = {}
+        in_progress_branches = set()
+        try:
+            output = self.git.worktree('list', '--porcelain')
+        except GitError:
+            return worktree_map, in_progress_branches
+
+        # The branch checked out in the current worktree is handled via the
+        # regular checkout path. Exclude it by name instead of comparing
+        # paths: a branch can only be checked out in one worktree, and the
+        # paths reported by git may not be resolvable by Python (MSYS2 git
+        # reports POSIX-style paths).
+        active_branch = None
+        if not self.repo.head.is_detached:
+            active_branch = self.repo.active_branch.name
+
+        current_path = None
+        for line in output.split('\n'):
+            line = line.rstrip('\r')
+            if line.startswith('worktree '):
+                current_path = self._normalize_git_path(
+                    line[len('worktree '):]
+                )
+            elif line.startswith('branch refs/heads/'):
+                branch_name = line[len('branch refs/heads/'):]
+                if current_path and branch_name != active_branch:
+                    worktree_map[branch_name] = current_path
+                    if self._worktree_has_in_progress_op(current_path):
+                        in_progress_branches.add(branch_name)
+            elif line == 'detached' and current_path:
+                branch_name = self._get_rebase_branch(current_path)
+                if branch_name and branch_name != active_branch:
+                    worktree_map[branch_name] = current_path
+                    in_progress_branches.add(branch_name)
+
+        return worktree_map, in_progress_branches
+
+    @staticmethod
+    def _normalize_git_path(path):
+        """
+        Convert a POSIX-style path reported by MSYS2 git into a path
+        usable by a native Windows Python.
+        """
+        if ON_WINDOWS and path.startswith('/'):
+            try:
+                path = subprocess.check_output(
+                    ['cygpath', '-m', path], text=True
+                ).strip()
+            except (OSError, subprocess.CalledProcessError):
+                pass
+        return path
+
+    def _get_worktree_meta_dir(self, worktree_path):
+        """Return the git metadata directory for a worktree."""
+        git_file = os.path.join(worktree_path, '.git')
+        if not os.path.isfile(git_file):
+            return None
+        with open(git_file, 'r') as f:
+            content = f.read().strip()
+        if not content.startswith('gitdir: '):
+            return None
+        meta_dir = self._normalize_git_path(content[len('gitdir: '):])
+        if not os.path.isabs(meta_dir):
+            meta_dir = os.path.join(worktree_path, meta_dir)
+        return os.path.realpath(meta_dir)
+
+    def _worktree_has_in_progress_op(self, worktree_path):
+        """Return True if the worktree has a cherry-pick, merge, or bisect in progress."""
+        meta_dir = self._get_worktree_meta_dir(worktree_path)
+        if not meta_dir:
+            return False
+        for marker in ('CHERRY_PICK_HEAD', 'MERGE_HEAD', 'BISECT_LOG'):
+            if os.path.isfile(os.path.join(meta_dir, marker)):
+                return True
+        return False
+
+    def _get_rebase_branch(self, worktree_path):
+        """Return the branch name if a rebase is in progress in the worktree."""
+        meta_dir = self._get_worktree_meta_dir(worktree_path)
+        if not meta_dir:
+            return None
+        for subdir in ('rebase-merge', 'rebase-apply'):
+            head_name_file = os.path.join(meta_dir, subdir, 'head-name')
+            if os.path.isfile(head_name_file):
+                with open(head_name_file, 'r') as f:
+                    ref = f.read().strip()
+                if ref.startswith('refs/heads/'):
+                    return ref[len('refs/heads/'):]
+        return None
+
+    def _rebase_in_worktree(self, branch, target, worktree_path,
+                            fast_forward):
+        """
+        Rebase or fast-forward a branch checked out in a worktree.
+
+        Instead of checking out the branch (which would fail), we operate
+        directly in the worktree directory where the branch is already
+        checked out.
+        """
+        worktree_repo = Repo(worktree_path, odbt=GitCmdObjectDB)
+        worktree_git = GitWrapper(worktree_repo)
+
+        if fast_forward:
+            worktree_git._run('merge', '--ff-only', target.name)
+        else:
+            with worktree_git.stasher() as stash:
+                stash()
+                try:
+                    worktree_git.rebase(target)
+                except RebaseError:
+                    stash.suppress_pop = True
+                    raise
 
     def fetch(self):
         """
@@ -380,33 +541,11 @@ class GitUp:
         log_hook = self.settings['rebase.log-hook']
 
         if log_hook:
-            def _escape_positional(value):
-                # Neutralize command substitution/backticks in branch names
-                return value.replace('$', r'\$').replace('`', r'\`')
-
-            branch_safe = _escape_positional(branch.name)
-            remote_safe = _escape_positional(remote.name)
-
             if ON_WINDOWS:  # pragma: no cover
                 # Running a string in CMD from Python is not that easy on
                 # Windows. Running 'cmd /C log_hook' produces problems when
                 # using multiple statements or things like 'echo'. Therefore,
                 # we write the string to a bat file and execute it.
-
-                # In addition, we replace occurrences of $1 with %1 and so forth
-                # in case the user is used to Bash or sh.
-                # If there are occurrences of %something, we'll replace it with
-                # %%something. This is the case when running something like
-                # 'git log --pretty=format:"%Cred%h..."'.
-                # Also, we replace a semicolon with a newline, because if you
-                # start with 'echo' on Windows, it will simply echo the
-                # semicolon and the commands behind instead of echoing and then
-                # running other commands
-
-                # Prepare log_hook
-                log_hook = re.sub(r'\$(\d+)', r'%\1', log_hook)
-                log_hook = re.sub(r'%(?!\d)', '%%', log_hook)
-                log_hook = re.sub(r'; ?', r'\n', log_hook)
 
                 # Write log_hook to an temporary file and get it's path
                 with NamedTemporaryFile(
@@ -414,22 +553,36 @@ class GitUp:
                 ) as bat_file:
                     # Don't echo all commands
                     bat_file.file.write(b'@echo off\n')
+                    # Required by the !GITUP_ARG*! reads in the prepared hook
+                    bat_file.file.write(b'setlocal enabledelayedexpansion\n')
                     # Run log_hook
-                    bat_file.file.write(log_hook.encode('utf-8'))
+                    bat_file.file.write(
+                        prepare_windows_log_hook(log_hook).encode('utf-8')
+                    )
 
-                # Run bat_file
-                state = subprocess.call(
-                    [bat_file.name, branch.name, remote.name]
-                )
+                # Pass the branch and remote name through the environment
+                # rather than as arguments, so they never reach a command line
+                # cmd parses.
+                env = os.environ.copy()
+                env['GITUP_ARG1'] = branch.name
+                env['GITUP_ARG2'] = remote.name
 
-                # Clean up file
-                os.remove(bat_file.name)
+                try:
+                    state = subprocess.call([bat_file.name], env=env)
+                finally:
+                    # Clean up file
+                    os.remove(bat_file.name)
             else:  # pragma: no cover
+                def _escape_positional(value):
+                    # Neutralize command substitution/backticks in branch names
+                    return value.replace('$', r'\$').replace('`', r'\`')
+
                 # Run log_hook via 'shell -c'
                 # Disable globbing and word-splitting to keep $1/$2 safe
                 state = subprocess.call(
                     ['sh', '-c', 'set -f; IFS=; ' + log_hook,
-                     'git-up', branch_safe, remote_safe]
+                     'git-up', _escape_positional(branch.name),
+                     _escape_positional(remote.name)]
                 )
 
             if self.testing:
