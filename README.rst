@@ -115,6 +115,10 @@ options:
    from all remotes, which is useful if e.g. you use a remote to push to
    your CI system but never check those branches out.
 
+-  ``git-up.fetch.progress [true|*false*]``: If set to ``true``, show
+   progress and ref updates reported by ``git fetch``. This output is
+   suppressed when using ``git up --quiet``.
+
 - ``git-up.push.auto [true|*false*]``: Push the current branch after
   rebasing and fast-forwarding.
 

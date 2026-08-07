@@ -120,6 +120,7 @@ class GitUp:
     default_settings = {
         'fetch.prune': True,
         'fetch.all': False,
+        'fetch.progress': False,
         'rebase.show-hashes': False,
         'rebase.arguments': None,
         'rebase.auto': True,
@@ -130,7 +131,9 @@ class GitUp:
         'push.all': False,
     }
 
-    def __init__(self, testing=False, sparse=False):
+    def __init__(self, testing=False, sparse=False, quiet=False):
+        self.quiet = quiet
+
         # Sparse init: config only
         if sparse:
             self.git = GitWrapper(None)
@@ -493,6 +496,9 @@ class GitUp:
 
             fetch_args.append(self.remotes)
 
+        if self.settings['fetch.progress'] and not self.quiet:
+            fetch_kwargs['stderr_output_stream'] = self.stderr
+
         try:
             self.git.fetch(*fetch_args, **fetch_kwargs)
         except GitError as error:
@@ -691,15 +697,17 @@ class GitUp:
         """
         print(colored(error.message, 'red'), file=self.stderr)
 
-        if error.stdout or error.stderr:
+        stderr = None if error.stderr_already_output else error.stderr
+
+        if error.stdout or stderr:
             print(file=self.stderr)
             print("Here's what git said:", file=self.stderr)
             print(file=self.stderr)
 
             if error.stdout:
                 print(error.stdout, file=self.stderr)
-            if error.stderr:
-                print(error.stderr, file=self.stderr)
+            if stderr:
+                print(stderr, file=self.stderr)
 
         if error.details:
             print(file=self.stderr)
@@ -752,7 +760,7 @@ def run():  # pragma: no cover
         sys.stdout = StringIO()
 
     try:
-        gitup = GitUp()
+        gitup = GitUp(quiet=args.quiet)
         gitup.settings['push.auto'] = args.push
         gitup.should_fetch = args.fetch
     except GitError:
