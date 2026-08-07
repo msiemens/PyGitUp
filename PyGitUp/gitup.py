@@ -544,15 +544,17 @@ class GitUp:
         """
         print(colored(error.message, 'red'), file=self.stderr)
 
-        if error.stdout or error.stderr:
+        stderr = None if error.stderr_already_output else error.stderr
+
+        if error.stdout or stderr:
             print(file=self.stderr)
             print("Here's what git said:", file=self.stderr)
             print(file=self.stderr)
 
             if error.stdout:
                 print(error.stdout, file=self.stderr)
-            if error.stderr:
-                print(error.stderr, file=self.stderr)
+            if stderr:
+                print(stderr, file=self.stderr)
 
         if error.details:
             print(file=self.stderr)

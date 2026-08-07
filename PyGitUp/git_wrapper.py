@@ -19,6 +19,7 @@ import sys
 import re
 import subprocess
 import platform
+import codecs
 from contextlib import contextmanager
 from io import BufferedReader
 from threading import Thread
@@ -194,7 +195,7 @@ class GitWrapper:
         return self.run_cmd(cmd)
 
     @staticmethod
-    def stream_reader(input_stream: BufferedReader, output_stream: Optional[IO], result_list: List[str]) -> None:
+    def stream_reader(input_stream: BufferedReader, output_stream: Optional[IO], result_list: List[bytes]) -> None:
         """
         Helper method to read from a stream and write to another stream.
 
@@ -203,15 +204,25 @@ class GitWrapper:
         machinery.
         """
         captured_bytes = b""
+        decoder = codecs.getincrementaldecoder('utf-8')(errors='replace')
         while True:
             read_byte = input_stream.read(1)
             captured_bytes += read_byte
             if output_stream is not None:
-                output_stream.write(read_byte.decode('utf-8'))
-                output_stream.flush()
+                decoded_text = decoder.decode(read_byte, final=not read_byte)
+                if decoded_text:
+                    output_stream.write(decoded_text)
+                    output_stream.flush()
             if read_byte == b"":
                 break
         result_list.append(captured_bytes)
+
+    @staticmethod
+    def decode_output(output):
+        """Decode captured command output for display in error messages."""
+        if isinstance(output, bytes):
+            return output.decode('utf-8', errors='replace')
+        return output
 
     @staticmethod
     def run_cmd(cmd: GitCmd.AutoInterrupt, stderr_output_stream=None) -> bytes:
@@ -240,10 +251,14 @@ class GitWrapper:
                 error.status
             )
 
+            stderr = std_errs[0] if std_errs and std_errs[0] else error.stderr
+            stdout = std_outs[0] if std_outs and std_outs[0] else error.stdout
+
             raise GitError(
                 message,
-                stderr=std_errs[0] if std_errs else error.stderr,
-                stdout=std_outs[0] if std_outs else None,
+                stderr=GitWrapper.decode_output(stderr),
+                stdout=GitWrapper.decode_output(stdout),
+                stderr_already_output=stderr_output_stream is not None,
             )
 
         return std_outs[0].strip() if std_outs else bytes()
@@ -292,13 +307,15 @@ class GitError(Exception):
     - details: a 'nested' exception with more details
     """
 
-    def __init__(self, message=None, stderr=None, stdout=None, details=None):
+    def __init__(self, message=None, stderr=None, stdout=None, details=None,
+                 stderr_already_output=False):
         # super(GitError, self).__init__((), None, stderr)
         self.details = details
         self.message = message
 
         self.stderr = stderr
         self.stdout = stdout
+        self.stderr_already_output = stderr_already_output
 
     def __str__(self):  # pragma: no cover
         return self.message
