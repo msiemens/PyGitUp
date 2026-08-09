@@ -144,23 +144,23 @@ options:
   where the rebase starts) and the target commit like ``git pull`` does.
 
 -  ``git-up.rebase.conflict-resolver [cmd]``: If set, ``PyGitUp`` will
-   invoke this command when a rebase conflict occurs. The command should
-   contain a ``{prompt}`` placeholder, which will be replaced with a
-   shell-escaped prompt containing conflict context (branch names,
-   conflicted files, and resolution steps). The command is expected to
-   resolve all conflicts, stage the files, and run
-   ``git rebase --continue``. If it exits with code 0 and the rebase is
-   complete, ``git up`` continues to the next branch. If it fails, the
-   repo is left in the conflicted state for manual resolution.
+   run this command when a rebase conflict occurs. It runs in the
+   repository's working directory while the rebase is still in progress,
+   so the command can inspect the conflict itself (e.g. via
+   ``git status``, ``git diff``) and is expected to resolve all
+   conflicts, stage the files, and run ``git rebase --continue``. If it
+   exits with code 0 and the rebase is complete, ``git up`` continues to
+   the next branch. If it fails, the repo is left in the conflicted
+   state for manual resolution.
 
    Environment variables ``GITUP_BRANCH``, ``GITUP_TARGET``, and
    ``GITUP_REPO_PATH`` are also set for the resolver process.
 
    Examples::
 
-     git config git-up.rebase.conflict-resolver "claude -p {prompt}"
-     git config git-up.rebase.conflict-resolver "claude -p {prompt} --dangerously-skip-permissions"
-     git config git-up.rebase.conflict-resolver "aider --message {prompt}"
+     git config git-up.rebase.conflict-resolver "claude -p 'Resolve the current git rebase conflicts, then run git rebase --continue'"
+     git config git-up.rebase.conflict-resolver "claude -p 'Resolve the current git rebase conflicts, then run git rebase --continue' --dangerously-skip-permissions"
+     git config git-up.rebase.conflict-resolver "aider --message 'Resolve the current git rebase conflicts, then run git rebase --continue'"
 
    Note: AI agents like ``claude`` may prompt for tool approvals by
    default. Use ``--dangerously-skip-permissions`` to run fully

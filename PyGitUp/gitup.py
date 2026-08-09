@@ -15,7 +15,6 @@ import sys
 import os
 import re
 import json
-import shlex
 import subprocess
 from io import StringIO
 from tempfile import NamedTemporaryFile
@@ -472,32 +471,14 @@ class GitUp:
         else:
             with worktree_git.stasher() as stash:
                 stash()
-                worktree_git.rebase(target)
-
-    def _build_resolver_prompt(self, branch_name, target_name, repo_path):
-        """Build the default prompt with conflict context."""
-        try:
-            result = subprocess.run(
-                ['git', 'diff', '--name-only', '--diff-filter=U'],
-                cwd=repo_path, capture_output=True, text=True
-            )
-            conflicted = result.stdout.strip()
-        except Exception:
-            conflicted = '(unable to determine)'
-
-        return (
-            f"Resolve the git rebase conflicts in this repository.\n\n"
-            f"Branch '{branch_name}' is being rebased onto "
-            f"'{target_name}'.\n\n"
-            f"Conflicted files:\n{conflicted}\n\n"
-            f"Steps:\n"
-            f"1. Read each conflicted file and resolve the conflict "
-            f"markers\n"
-            f"2. Stage resolved files with `git add`\n"
-            f"3. Run `git rebase --continue`\n"
-            f"4. If further conflicts arise, repeat steps 1-3\n"
-            f"5. Exit when the rebase is fully complete"
-        )
+                try:
+                    worktree_git.rebase(target)
+                except RebaseError:
+                    if self._try_resolve_conflicts(
+                        branch.name, target.name, worktree_path
+                    ):
+                        return
+                    raise
 
     def _try_resolve_conflicts(self, branch_name, target_name, repo_path):
         """
@@ -507,18 +488,11 @@ class GitUp:
         Returns False if no resolver is configured.
         Raises UnresolvedConflictError if the resolver failed.
         """
-        resolver_template = self.settings['rebase.conflict-resolver']
-        if not resolver_template:
+        resolver_command = self.settings['rebase.conflict-resolver']
+        if not resolver_command:
             return False
 
         print(colored('invoking conflict resolver...', 'yellow'))
-
-        prompt = self._build_resolver_prompt(
-            branch_name, target_name, repo_path
-        )
-        command = resolver_template.replace(
-            '{prompt}', shlex.quote(prompt)
-        )
 
         env = os.environ.copy()
         env['GITUP_BRANCH'] = branch_name
@@ -526,7 +500,7 @@ class GitUp:
         env['GITUP_REPO_PATH'] = repo_path
 
         result = subprocess.run(
-            command, shell=True, cwd=repo_path, env=env
+            resolver_command, shell=True, cwd=repo_path, env=env
         )
 
         if result.returncode != 0:
