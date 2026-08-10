@@ -147,6 +147,40 @@ options:
   ``PyGitUp`` will show the hashes of the current commit (or the point
   where the rebase starts) and the target commit like ``git pull`` does.
 
+-  ``git-up.rebase.conflict-resolver [cmd]``: If set, ``PyGitUp`` will
+   run this command when a rebase conflict occurs. It runs in the
+   repository's working directory while the rebase is still in progress,
+   so the command can inspect the conflict itself (e.g. via
+   ``git status``, ``git diff``) and is expected to resolve all
+   conflicts, stage the files, and run ``git rebase --continue``.
+
+   Afterwards ``git up`` checks that the branch actually contains the
+   target commit. Only then does it continue to the next branch. If the
+   command exits non-zero, or exits 0 without completing the rebase (for
+   example because it gave up and ran ``git rebase --abort``), ``git up``
+   reports the branch as unresolved and stops, leaving it for manual
+   resolution.
+
+   The command is only run for genuine conflicts. Rebases that fail for
+   other reasons — untracked files that would be overwritten, an invalid
+   ``git-up.rebase.arguments`` — report their original error instead.
+
+   Environment variables ``GITUP_BRANCH``, ``GITUP_TARGET``, and
+   ``GITUP_REPO_PATH`` are also set for the resolver process. Note that
+   the command is run through the system shell, which is ``cmd.exe`` on
+   Windows — the single-quoted examples below need double quotes there.
+
+   Examples::
+
+     git config git-up.rebase.conflict-resolver "claude -p 'Resolve the current git rebase conflicts, then run git rebase --continue'"
+     git config git-up.rebase.conflict-resolver "claude -p 'Resolve the current git rebase conflicts, then run git rebase --continue' --dangerously-skip-permissions"
+     git config git-up.rebase.conflict-resolver "aider --message 'Resolve the current git rebase conflicts, then run git rebase --continue'"
+
+   Note: AI agents like ``claude`` may prompt for tool approvals by
+   default. Use ``--dangerously-skip-permissions`` to run fully
+   autonomously, or ``--allowedTools 'Edit,Read,Bash,Write,Glob,Grep'``
+   to scope the permissions.
+
 New in v1.0.0:
 ~~~~~~~~~~~~~~
 

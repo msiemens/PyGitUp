@@ -38,6 +38,7 @@ def test_fast_forwarded():
 
     from PyGitUp.gitup import GitUp
     gitup = GitUp(testing=True)
+    gitup.settings['rebase.conflict-resolver'] = None
 
     with pytest.raises(RebaseError):
         gitup.run()

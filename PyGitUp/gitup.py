@@ -38,7 +38,8 @@ from termcolor import colored
 
 # PyGitUp libs
 from PyGitUp.utils import execute, uniq, find
-from PyGitUp.git_wrapper import GitWrapper, GitError, RebaseError
+from PyGitUp.git_wrapper import GitWrapper, GitError, RebaseError, \
+    UnresolvedConflictError
 
 ON_WINDOWS = sys.platform == 'win32'
 
@@ -125,6 +126,7 @@ class GitUp:
         'rebase.arguments': None,
         'rebase.auto': True,
         'rebase.log-hook': None,
+        'rebase.conflict-resolver': None,
         'updates.check': True,
         'push.auto': False,
         'push.tags': False,
@@ -339,7 +341,13 @@ class GitUp:
                 else:
                     stasher()
                     self.git.checkout(branch.name)
-                    self.git.rebase(target)
+                    try:
+                        self.git.rebase(target)
+                    except RebaseError:
+                        if not self._try_resolve_conflicts(
+                            branch, target, self.repo.working_dir
+                        ):
+                            raise
 
             if (self.repo.head.is_detached  # Only on Travis CI,
                     # we get a detached head after doing our rebase *confused*.
@@ -467,8 +475,90 @@ class GitUp:
                 try:
                     worktree_git.rebase(target)
                 except RebaseError:
-                    stash.suppress_pop = True
-                    raise
+                    if not self._try_resolve_conflicts(
+                        branch, target, worktree_path
+                    ):
+                        raise
+
+    @staticmethod
+    def _rebase_in_progress(repo_path):
+        """
+        Return True if a rebase is in progress in the given work tree.
+
+        Unlike `_get_rebase_branch`, this works for the main work tree as
+        well as for linked worktrees.
+        """
+        result = subprocess.run(
+            ['git', 'rev-parse',
+             '--git-path', 'rebase-merge', '--git-path', 'rebase-apply'],
+            cwd=repo_path, capture_output=True, text=True
+        )
+        if result.returncode != 0:
+            return False
+
+        for path in result.stdout.split('\n'):
+            path = path.strip()
+            if not path:
+                continue
+            if not os.path.isabs(path):
+                path = os.path.join(repo_path, path)
+            if os.path.isdir(path):
+                return True
+
+        return False
+
+    def _try_resolve_conflicts(self, branch, target, repo_path):
+        """
+        Invoke the configured conflict resolver command.
+
+        Returns True if the resolver ran and the rebase completed.
+        Returns False if no resolver is configured, or if the rebase
+        failed without leaving a conflict for the resolver to fix.
+        Raises UnresolvedConflictError if the resolver ran but the rebase
+        did not complete.
+        """
+        resolver_command = self.settings['rebase.conflict-resolver']
+        if not resolver_command:
+            return False
+
+        # `git rebase` also fails for reasons that have nothing to do with
+        # conflicts (untracked files that would be overwritten, a bogus
+        # git-up.rebase.arguments, ...). Firing the resolver at those would
+        # only bury the original error, so leave them to the caller.
+        if not self._rebase_in_progress(repo_path):
+            return False
+
+        print(colored('invoking conflict resolver...', 'yellow'))
+
+        env = os.environ.copy()
+        env['GITUP_BRANCH'] = branch.name
+        env['GITUP_TARGET'] = target.name
+        env['GITUP_REPO_PATH'] = repo_path
+
+        result = subprocess.run(
+            resolver_command, shell=True, cwd=repo_path, env=env
+        )
+
+        if result.returncode != 0:
+            raise UnresolvedConflictError(
+                branch.name, target.name, repo_path,
+                reason=f'The resolver exited with status {result.returncode}.'
+            )
+
+        # Don't take the exit status as proof: check that the branch now
+        # actually contains the target. Merely looking for a leftover
+        # rebase-merge/rebase-apply directory would also accept a resolver
+        # that gave up by running `git rebase --abort` and exiting 0.
+        base = self.git.merge_base(branch.name, target.name)
+        if base != target.commit.hexsha:
+            raise UnresolvedConflictError(
+                branch.name, target.name, repo_path,
+                reason=(f'The resolver exited successfully, but '
+                        f'{branch.name} does not contain {target.name}.')
+            )
+
+        print(colored('conflict resolved', 'green'))
+        return True
 
     def fetch(self):
         """

@@ -8,7 +8,7 @@ needed for `git up`.
 """
 
 
-__all__ = ['GitWrapper', 'GitError']
+__all__ = ['GitWrapper', 'GitError', 'UnresolvedConflictError']
 
 ###############################################################################
 # IMPORTS
@@ -145,11 +145,9 @@ class GitWrapper:
 
             stashed[0] = True
 
-        stash.suppress_pop = False
-
         yield stash
 
-        if stashed[0] and not stash.suppress_pop:
+        if stashed[0]:
             print(colored('unstashing', 'magenta'))
             try:
                 self._run('stash', 'pop')
@@ -370,5 +368,26 @@ class RebaseError(GitError):
 
         message = "Failed to rebase {1} onto {0}".format(
             current_branch, target_branch
+        )
+        GitError.__init__(self, message, **kwargs)
+
+
+class UnresolvedConflictError(GitError):
+    """
+    The conflict resolver did not complete the rebase.
+    """
+
+    def __init__(self, branch_name, target_branch, repo_path, reason=None,
+                 **kwargs):
+        kwargs.pop('message', None)
+        message = (
+            f"Failed to resolve rebase conflicts for {branch_name} "
+            f"onto {target_branch}.\n"
+        )
+        if reason:
+            message += reason + '\n'
+        message += (
+            f"The repo at {repo_path} may be left in a conflicted state.\n"
+            f"Check `git status` and resolve manually."
         )
         GitError.__init__(self, message, **kwargs)
