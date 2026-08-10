@@ -851,7 +851,10 @@ def run():  # pragma: no cover
 
     try:
         gitup = GitUp(quiet=args.quiet)
-        gitup.settings['push.auto'] = args.push
+        # Only turn pushing on, never off: not passing `--push` must leave
+        # git-up.push.auto from the git config alone.
+        if args.push:
+            gitup.settings['push.auto'] = True
         gitup.should_fetch = args.fetch
     except GitError:
         sys.exit(1)  # Error in constructor

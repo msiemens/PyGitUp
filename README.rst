@@ -27,7 +27,7 @@ Why use ``git up``?
 Demonstration
 -------------
 
-.. image:: demo.gif
+.. image:: https://raw.githubusercontent.com/msiemens/PyGitUp/master/demo.gif
 
 Why use the Python port?
 ------------------------
@@ -43,7 +43,10 @@ and using this port are:
 How do I install it?
 --------------------
 
-1. Install ``git-up`` via `pip <https://pip.pypa.io/en/latest/installing.html>`__: ``$ uv tool install git-up``
+1. Install ``git-up`` via `uv <https://docs.astral.sh/uv/>`__:
+   ``$ uv tool install git-up`` (or via
+   `pip <https://pip.pypa.io/en/latest/installing.html>`__:
+   ``$ pip install git-up``)
 2. ``cd`` to your project's directory.
 3. Run ``git up`` and enjoy!
 
@@ -52,34 +55,32 @@ Homebrew users can also use ``brew``: ``brew install pygitup``
 How to run it locally?
 ----------------------
 
-Could also checkout the **.github/workflows/ci-workflow.yml**
+1. Clone the repository and ``cd`` into it.
+2. Install `uv <https://docs.astral.sh/uv/getting-started/installation/>`__.
+3. Run ``uv sync`` to set up the development environment.
+4. Run your working copy with ``uv run git-up``.
+5. Run the tests with ``uv run pytest``. Add ``--cov=PyGitUp`` for a coverage
+   report, or name a file such as ``PyGitUp/tests/test_version.py`` to run a
+   single test module.
 
-1. clone repo and ``cd`` to repo directory.
-2. Install ``poetry`` as guided by `poetry installation doc <https://python-poetry.org/docs/#installation>`__
-3. Run ``poetry install``
-4. Run program with ``poetry run git-up``
-5. Run all tests with ``poetry run pytest -v --cov=PyGitUp`` or ``poetry run pytest -v --cov=PyGitUp --cov-report html``
-6. Run one test with ``poetry run pytest -q PyGitUp/tests/test_version.py -v --cov=PyGitUp``
+For everything else about contributing, see `CONTRIBUTING.md
+<https://github.com/msiemens/PyGitUp/blob/master/CONTRIBUTING.md>`__. The
+exact commands CI runs are in ``.github/workflows/ci-workflow.yml``.
 
 Note for Windows users:
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-See `these instructions <http://stackoverflow.com/q/4750806/997063>`__
-for installing pip, if you haven't already installed it. And don't forget
-to either:
+``uv tool install git-up`` installs into a per-user location and puts
+``git-up`` on your ``%PATH%``, so it needs no special privileges.
 
-- make your ``Python/Scripts`` and ``Python/Lib/site-packages`` writable for
-  you,
-- run ``pip`` with admin privileges
-- or use ``pip install --user git-up`` and add ``%APPDATA%/Python/Scripts``
-  to ``%PATH%``.
-
-Otherwise pip will refuse to install ``git-up`` due to ``Access denied`` errors.
+If you install with ``pip`` instead and get ``Access denied`` errors, use
+``pip install --user git-up`` and make sure the user scripts directory
+(``%APPDATA%\Python\Scripts``) is on your ``%PATH%``.
 
 Python version compatibility:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Python 3.7 and upwards are supported :)
+Python 3.10 and upwards are supported :)
 
 Options and Configuration
 -------------------------
@@ -89,12 +90,17 @@ Command Line Arguments
 
 - ``git up -h`` shows a help message.
 
-- ``git up --quiet`` suppresses all output except for error messages.
+- ``git up -q``/``git up --quiet`` suppresses all output except for error
+  messages.
 
-- ``git up --no-fetch`` skips fetching the remote and rebases all local branches.
+- ``git up --no-fetch`` skips fetching the remote and rebases all local
+  branches.
 
-- ``git up --version`` shows the current version and optionally checks for
-  updates (see below).
+- ``git up -p``/``git up --push`` pushes the changes after pulling
+  successfully, like ``git-up.push.auto`` does.
+
+- ``git up -V``/``git up --version`` shows the current version and optionally
+  checks for updates (see ``git-up.updates.check`` below).
 
 Configuration
 ~~~~~~~~~~~~~
@@ -128,7 +134,7 @@ options:
 
 -  ``git-up.rebase.arguments [string]``: If set, ``PyGitUp`` will use
    this string as additional arguments when calling ``git rebase``.
-   Example: ``--preserve-merges`` to recreate merge commits in the
+   Example: ``--rebase-merges`` to recreate merge commits in the
    rebased branch.
 
 -  ``git-up.rebase.auto [*true*|false]``: If set to ``false``,
@@ -138,9 +144,11 @@ options:
    update other branches.
 
 -  ``git-up.rebase.log-hook [cmd]``: Runs ``cmd`` every time a branch
-   is rebased or fast-forwarded, with the old head as ``$1`` and the new
-   head as ``$2``. This can be used to view logs or diffs of incoming
-   changes. Example:
+   is rebased or fast-forwarded, with the name of the branch being
+   updated as ``$1`` and the name of the branch it is updated to as
+   ``$2``. The hook runs before the update, so ``$1`` still resolves to
+   the old head while ``$2`` resolves to the new one. This can be used
+   to view logs or diffs of incoming changes. Example:
    ``echo "changes on $1:"; git log --oneline --decorate $1..$2``.
 
 - ``git-up.rebase.show-hashes [true|*false*]``: If set to ``true``,
@@ -181,9 +189,6 @@ options:
    autonomously, or ``--allowedTools 'Edit,Read,Bash,Write,Glob,Grep'``
    to scope the permissions.
 
-New in v1.0.0:
-~~~~~~~~~~~~~~
-
 - ``git-up.updates.check [*true*|false]``: When running ``git up --version``,
   it shows the version number and checks for updates. If you feel
   uncomfortable with it, just set it to ``false`` to turn off the checks.
@@ -197,6 +202,28 @@ The original ``git-up`` has been written by aanand:
 
 Changelog
 ---------
+
+v2.5.0 (*2026-08-10*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Support rebasing branches that are checked out in worktrees. Branches whose
+  worktree has an operation in progress are skipped. Thanks
+  `@abersnaze <https://github.com/abersnaze>`_ for `Pull Request #145
+  <https://github.com/msiemens/PyGitUp/pull/145>`_.
+- Add ``git-up.rebase.conflict-resolver`` to run a command when a rebase
+  conflict occurs. Thanks `@abersnaze <https://github.com/abersnaze>`_ for
+  `Pull Request #146 <https://github.com/msiemens/PyGitUp/pull/146>`_.
+- Add ``git-up.fetch.progress`` to make ``git fetch`` more verbose. Thanks
+  `@agido-malter <https://github.com/agido-malter>`_ for `Pull Request #148
+  <https://github.com/msiemens/PyGitUp/pull/148>`_.
+- Fix a command injection in ``git-up.rebase.log-hook``: branch and remote
+  names are now passed to the hook through the environment instead of a
+  command line, so names containing shell metacharacters are no longer
+  executed as commands. This affects both the ``cmd.exe`` and the ``sh``
+  code path.
+- Fix a crash on ``git`` output that is not valid UTF-8.
+- Fix worktree detection on MinGW.
+- Update dependencies.
 
 v2.4.0 (*2025-12-27*)
 ~~~~~~~~~~~~~~~~~~~~~
@@ -466,10 +493,10 @@ v0.1 (*2013-03-14*)
 - Initial Release
 
 .. |Build Status| image:: https://img.shields.io/github/actions/workflow/status/msiemens/PyGitUp/ci-workflow.yml?style=flat-square
-   :target: https://dev.azure.com/msiemens/github/_build?definitionId=1
+   :target: https://github.com/msiemens/PyGitUp/actions/workflows/ci-workflow.yml
 
-.. |Coverage Status| image:: http://img.shields.io/coveralls/msiemens/PyGitUp/master.svg?style=flat-square
+.. |Coverage Status| image:: https://img.shields.io/coveralls/github/msiemens/PyGitUp/master.svg?style=flat-square
   :target: https://coveralls.io/r/msiemens/PyGitUp
 
-.. |Version| image:: http://img.shields.io/pypi/v/git-up.svg?style=flat-square
-  :target: https://pypi.python.org/pypi/git-up
+.. |Version| image:: https://img.shields.io/pypi/v/git-up.svg?style=flat-square
+  :target: https://pypi.org/project/git-up/
