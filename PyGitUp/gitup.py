@@ -131,9 +131,11 @@ class GitUp:
         'push.auto': False,
         'push.tags': False,
         'push.all': False,
+        'branch.sort': None,
     }
 
-    def __init__(self, testing=False, sparse=False, quiet=False):
+    def __init__(self, testing=False, sparse=False, quiet=False,
+                 branch_sort=None):
         self.quiet = quiet
 
         # Sparse init: config only
@@ -182,6 +184,13 @@ class GitUp:
 
         self.git = GitWrapper(self.repo)
 
+        # Load configuration before building the branch list, because its
+        # order can be configured.
+        self.settings = self.default_settings.copy()
+        self.load_config()
+        if branch_sort is not None:
+            self.settings['branch.sort'] = branch_sort
+
         # target_map: map local branch names to remote tracking branches
         #: :type: dict[str, git.refs.remote.RemoteReference]
         self.target_map = dict()
@@ -201,7 +210,7 @@ class GitUp:
         # branches: all local branches with tracking information
         #: :type: list[git.refs.head.Head]
         self.branches = [b for b in self.repo.branches if b.tracking_branch()]
-        self.branches.sort(key=lambda br: br.name)
+        self._sort_branches()
 
         # remotes: all remotes that are associated with local branches
         #: :type: list[git.refs.remote.RemoteReference]
@@ -218,10 +227,6 @@ class GitUp:
 
         # Build worktree map: branch name -> worktree path
         self.worktree_map, self.in_progress_branches = self._build_worktree_map()
-
-        # Load configuration
-        self.settings = self.default_settings.copy()
-        self.load_config()
 
     def run(self):
         """ Run all the git-up stuff. """
@@ -735,6 +740,21 @@ class GitUp:
     # Helpers
     ###########################################################################
 
+    def _sort_branches(self):
+        """Sort branches using the same keys as ``git branch --sort``."""
+        sort_key = self.settings['branch.sort']
+        if not sort_key:
+            # Preserve the historical behavior exactly unless sorting was
+            # explicitly configured.
+            self.branches.sort(key=lambda branch: branch.name)
+            return
+
+        names = self.git.for_each_ref(
+            f'--sort={sort_key}', '--format=%(refname:short)', 'refs/heads'
+        ).splitlines()
+        positions = {name: position for position, name in enumerate(names)}
+        self.branches.sort(key=lambda branch: positions[branch.name])
+
     def load_config(self):
         """
         Load the configuration from git config.
@@ -835,6 +855,9 @@ def run():  # pragma: no cover
                         help='Don\'t try to fetch from origin.')
     parser.add_argument('-p', '--push', action='store_true',
                         help='Push the changes after pulling successfully.')
+    parser.add_argument('--branch-sort', metavar='KEY',
+                        help='Sort branches by a git-for-each-ref field, e.g. '
+                             "'-committerdate'.")
 
     args = parser.parse_args()
 
@@ -850,7 +873,7 @@ def run():  # pragma: no cover
         sys.stdout = StringIO()
 
     try:
-        gitup = GitUp(quiet=args.quiet)
+        gitup = GitUp(quiet=args.quiet, branch_sort=args.branch_sort)
         # Only turn pushing on, never off: not passing `--push` must leave
         # git-up.push.auto from the git config alone.
         if args.push:

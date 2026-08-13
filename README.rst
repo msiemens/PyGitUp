@@ -99,6 +99,11 @@ Command Line Arguments
 - ``git up -p``/``git up --push`` pushes the changes after pulling
   successfully, like ``git-up.push.auto`` does.
 
+- ``git up --branch-sort <key>`` sorts branches by a
+  ``git for-each-ref --sort`` field. For example, use
+  ``--branch-sort=-committerdate`` to process the most recently committed
+  branches first.
+
 - ``git up -V``/``git up --version`` shows the current version and optionally
   checks for updates (see ``git-up.updates.check`` below).
 
@@ -108,6 +113,13 @@ Configuration
 To configure ``PyGitUp``, you can set options in your git config. Run
 ``git config [--global] git-up.[name] [value]`` to set one of these
 options:
+
+-  ``git-up.branch.sort [key]``: Sort branches by a
+   ``git for-each-ref --sort`` field, for example ``-committerdate`` for the
+   most recently committed branches first. If unset, branches retain their
+   historical alphabetical order. Git's native ``branch.sort`` setting is
+   deliberately not applied, so upgrading PyGitUp cannot implicitly change
+   the processing order.
 
 -  ``git-up.fetch.prune [*true*|false]``: If set to ``true``,
    ``PyGitUp`` will append the ``--prune``\ option to ``git fetch`` and
