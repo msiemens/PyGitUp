@@ -464,8 +464,10 @@ class GitUp:
         directly in the worktree directory where the branch is already
         checked out.
         """
-        worktree_repo = Repo(worktree_path, odbt=GitCmdObjectDB)
-        worktree_git = GitWrapper(worktree_repo)
+        # Don't open the worktree as a GitPython Repo: MSYS2 git writes
+        # POSIX-style paths into the worktree's .git file, which GitPython
+        # >= 3.1.60 rejects when used from a native Windows Python.
+        worktree_git = GitWrapper(None, worktree_path)
 
         if fast_forward:
             worktree_git._run('merge', '--ff-only', target.name)
