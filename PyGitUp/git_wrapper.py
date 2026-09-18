@@ -47,7 +47,7 @@ class GitWrapper:
     handling (it provides stdout messages inside the exception, too).
     """
 
-    def __init__(self, repo):
+    def __init__(self, repo, working_dir=None):
         if repo:
             #: :type: git.Repo
             self.repo = repo
@@ -55,7 +55,7 @@ class GitWrapper:
             self.git = self.repo.git
         else:
             #: :type: git.Git
-            self.git = Git()
+            self.git = Git(working_dir)
 
     def __del__(self):
         # Is the following true?
@@ -124,7 +124,7 @@ class GitWrapper:
         clean = [False]
 
         def stash():
-            if clean[0] or not self.repo.is_dirty(submodules=False):
+            if clean[0] or not self.is_dirty:
                 clean[0] = True
                 return
             if stashed[0]:
@@ -272,6 +272,15 @@ class GitWrapper:
             return self.git.config(key)
         except GitCommandError:
             return None
+
+    @property
+    def is_dirty(self):
+        """ Whether tracked files have changes, ignoring submodules. """
+        # Ask git instead of GitPython: for linked worktrees created by MSYS2
+        # git, GitPython can't open the repo (see GitUp._rebase_in_worktree).
+        return bool(self.git.status(
+            porcelain=True, untracked_files='no', ignore_submodules=True
+        ).strip())
 
     @property
     def change_count(self):
