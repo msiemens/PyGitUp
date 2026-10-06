@@ -751,9 +751,15 @@ class GitUp:
             self.branches.sort(key=lambda branch: branch.name)
             return
 
-        names = self.git.for_each_ref(
-            f'--sort={sort_key}', '--format=%(refname:short)', 'refs/heads'
-        ).splitlines()
+        try:
+            names = self.git.for_each_ref(
+                f'--sort={sort_key}', '--format=%(refname:lstrip=2)',
+                'refs/heads'
+            ).splitlines()
+        except GitError as error:
+            error.message = f"Failed to sort branches by '{sort_key}'."
+            self.print_error(error)
+            raise
         positions = {name: position for position, name in enumerate(names)}
         self.branches.sort(key=lambda branch: positions[branch.name])
 

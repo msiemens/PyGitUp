@@ -2,6 +2,8 @@ import os
 import sys
 from os.path import join
 
+import pytest
+
 from git import GitCmdObjectDB, Repo
 
 from PyGitUp.tests import basepath, init_master, update_file
@@ -82,10 +84,10 @@ def test_native_branch_sort_does_not_change_default():
 def test_git_up_branch_sort_overrides_native_config():
     repo = Repo(repo_path)
     unset_sort_config(repo)
-    repo.git.config('branch.sort', '-committerdate')
-    repo.git.config('git-up.branch.sort', 'refname')
+    repo.git.config('branch.sort', 'refname')
+    repo.git.config('git-up.branch.sort', '-committerdate')
 
-    assert branch_names() == ['a-old', 'm-middle', 'z-new']
+    assert branch_names() == ['z-new', 'm-middle', 'a-old']
 
 
 def test_cli_branch_sort_overrides_config(monkeypatch):
@@ -109,3 +111,46 @@ def test_cli_branch_sort_overrides_config(monkeypatch):
     gitup.run()
 
     assert recorded == ['z-new', 'm-middle', 'a-old']
+
+
+def test_branch_sort_with_matching_tag():
+    repo = Repo(repo_path)
+    unset_sort_config(repo)
+    repo.git.branch('--track', 'v1', 'origin/a-old')
+    repo.git.tag('v1', 'refs/heads/v1')
+    try:
+        assert branch_names('refname') == [
+            'a-old', 'm-middle', 'v1', 'z-new'
+        ]
+    finally:
+        repo.git.tag('-d', 'v1')
+        repo.git.branch('-D', 'v1')
+
+
+@pytest.mark.parametrize('source', ['cli', 'config'])
+@pytest.mark.parametrize('quiet', [False, True])
+def test_invalid_branch_sort_prints_error(source, quiet, monkeypatch, capsys):
+    from PyGitUp import gitup
+
+    repo = Repo(repo_path)
+    unset_sort_config(repo)
+    monkeypatch.chdir(repo_path)
+    args = ['git-up']
+    if source == 'cli':
+        args.append('--branch-sort=bogus')
+    else:
+        repo.git.config('git-up.branch.sort', 'bogus')
+    if quiet:
+        args.append('--quiet')
+    monkeypatch.setattr(sys, 'argv', args)
+    # run() redirects stdout in quiet mode; restore it after the test.
+    monkeypatch.setattr(sys, 'stdout', sys.stdout)
+
+    with pytest.raises(SystemExit) as error:
+        gitup.run()
+
+    assert error.value.code == 1
+    captured = capsys.readouterr()
+    assert captured.out == ''
+    assert "Failed to sort branches by 'bogus'" in captured.err
+    assert 'unknown field name: bogus' in captured.err
