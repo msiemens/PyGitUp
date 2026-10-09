@@ -216,6 +216,22 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v2.6.0 (*2026-10-09*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Add ``--branch-sort``/``git-up.branch.sort`` to sort branches by a
+  ``git for-each-ref --sort`` field, e.g. ``-committerdate`` to process the
+  most recently committed branches first. Branches retain their historical
+  alphabetical order by default, and Git's native ``branch.sort`` setting is
+  deliberately not applied. Thanks `@agido-malter
+  <https://github.com/agido-malter>`_ for `Pull Request #153
+  <https://github.com/msiemens/PyGitUp/pull/153>`_.
+- Fix ``git up`` (without ``--push``) always turning off
+  ``git-up.push.auto`` instead of leaving the config setting alone.
+- Fix a crash opening linked worktrees created by MSYS2 git as GitPython
+  repos.
+- Update dependencies.
+
 v2.5.0 (*2026-08-10*)
 ~~~~~~~~~~~~~~~~~~~~~
 
