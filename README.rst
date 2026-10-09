@@ -99,10 +99,11 @@ Command Line Arguments
 - ``git up -p``/``git up --push`` pushes the changes after pulling
   successfully, like ``git-up.push.auto`` does.
 
-- ``git up --branch-sort <key>`` sorts branches by a
+- ``git up --branch-sort=<key>`` sorts branches by a
   ``git for-each-ref --sort`` field. For example, use
   ``--branch-sort=-committerdate`` to process the most recently committed
-  branches first.
+  branches first. Use the ``=`` form, since a key starting with ``-`` (like
+  ``-committerdate``) is otherwise parsed as another option.
 
 - ``git up -V``/``git up --version`` shows the current version and optionally
   checks for updates (see ``git-up.updates.check`` below).
