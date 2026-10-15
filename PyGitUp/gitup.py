@@ -474,11 +474,11 @@ class GitUp:
         # >= 3.1.60 rejects when used from a native Windows Python.
         worktree_git = GitWrapper(None, worktree_path)
 
-        if fast_forward:
-            worktree_git._run('merge', '--ff-only', target.name)
-        else:
-            with worktree_git.stasher() as stash:
-                stash()
+        with worktree_git.stasher() as stash:
+            stash()
+            if fast_forward:
+                worktree_git._run('merge', '--ff-only', target.name)
+            else:
                 try:
                     worktree_git.rebase(target)
                 except RebaseError:
