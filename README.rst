@@ -216,6 +216,15 @@ The original ``git-up`` has been written by aanand:
 Changelog
 ---------
 
+v2.6.1 (*2026-10-15*)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Fix fast-forwarding a branch checked out in a linked worktree failing when
+  the worktree has uncommitted changes touching a file changed upstream. The
+  changes are now stashed around the fast-forward, like for a rebase. Thanks
+  `@EclipseTech <https://github.com/EclipseTech>`_ for `Pull Request #156
+  <https://github.com/msiemens/PyGitUp/pull/156>`_.
+
 v2.6.0 (*2026-10-09*)
 ~~~~~~~~~~~~~~~~~~~~~
 
