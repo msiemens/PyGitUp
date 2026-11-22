@@ -226,7 +226,8 @@ class GitUp:
         )
 
         # Build worktree map: branch name -> worktree path
-        self.worktree_map, self.in_progress_branches = self._build_worktree_map()
+        (self.worktree_map, self.in_progress_branches,
+         self.prunable_branches) = self._build_worktree_map()
 
     def run(self):
         """ Run all the git-up stuff. """
@@ -284,6 +285,12 @@ class GitUp:
                     print(colored('error: remote branch doesn\'t exist', 'red'))
                     self.states.append('remote branch doesn\'t exist')
 
+                    continue
+
+                if branch.name in self.prunable_branches:
+                    print(colored("worktree is prunable; run 'git worktree prune'",
+                                  'yellow'))
+                    self.states.append('prunable worktree')
                     continue
 
                 # Skip branches whose worktree has an in-progress operation
@@ -372,10 +379,11 @@ class GitUp:
         """
         worktree_map = {}
         in_progress_branches = set()
+        prunable_branches = set()
         try:
             output = self.git.worktree('list', '--porcelain')
         except GitError:
-            return worktree_map, in_progress_branches
+            return worktree_map, in_progress_branches, prunable_branches
 
         # The branch checked out in the current worktree is handled via the
         # regular checkout path. Exclude it by name instead of comparing
@@ -386,26 +394,33 @@ class GitUp:
         if not self.repo.head.is_detached:
             active_branch = self.repo.active_branch.name
 
-        current_path = None
-        for line in output.split('\n'):
-            line = line.rstrip('\r')
-            if line.startswith('worktree '):
-                current_path = self._normalize_git_path(
-                    line[len('worktree '):]
-                )
-            elif line.startswith('branch refs/heads/'):
-                branch_name = line[len('branch refs/heads/'):]
-                if current_path and branch_name != active_branch:
+        # Read complete records: the prunable marker follows the branch.
+        for record in output.replace('\r\n', '\n').split('\n\n'):
+            fields = {}
+            for line in record.split('\n'):
+                key, _, value = line.partition(' ')
+                fields[key] = value
+
+            current_path = fields.get('worktree')
+            if not current_path:
+                continue
+            current_path = self._normalize_git_path(current_path)
+            branch_ref = fields.get('branch', '')
+            if branch_ref.startswith('refs/heads/'):
+                branch_name = branch_ref[len('refs/heads/'):]
+                if branch_name != active_branch:
                     worktree_map[branch_name] = current_path
-                    if self._worktree_has_in_progress_op(current_path):
+                    if 'prunable' in fields:
+                        prunable_branches.add(branch_name)
+                    elif self._worktree_has_in_progress_op(current_path):
                         in_progress_branches.add(branch_name)
-            elif line == 'detached' and current_path:
+            elif 'detached' in fields and 'prunable' not in fields:
                 branch_name = self._get_rebase_branch(current_path)
                 if branch_name and branch_name != active_branch:
                     worktree_map[branch_name] = current_path
                     in_progress_branches.add(branch_name)
 
-        return worktree_map, in_progress_branches
+        return worktree_map, in_progress_branches, prunable_branches
 
     @staticmethod
     def _normalize_git_path(path):
