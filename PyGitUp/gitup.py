@@ -511,9 +511,9 @@ class GitUp:
         well as for linked worktrees.
         """
         result = subprocess.run(
-            ['git', 'rev-parse',
+            ['git', '-C', repo_path, 'rev-parse',
              '--git-path', 'rebase-merge', '--git-path', 'rebase-apply'],
-            cwd=repo_path, capture_output=True, text=True
+            capture_output=True, text=True
         )
         if result.returncode != 0:
             return False
@@ -536,8 +536,8 @@ class GitUp:
         Returns True if the resolver ran and the rebase completed.
         Returns False if no resolver is configured, or if the rebase
         failed without leaving a conflict for the resolver to fix.
-        Raises UnresolvedConflictError if the resolver ran but the rebase
-        did not complete.
+        Raises UnresolvedConflictError if the resolver could not be started
+        or the rebase did not complete.
         """
         resolver_command = self.settings['rebase.conflict-resolver']
         if not resolver_command:
@@ -557,9 +557,15 @@ class GitUp:
         env['GITUP_TARGET'] = target.name
         env['GITUP_REPO_PATH'] = repo_path
 
-        result = subprocess.run(
-            resolver_command, shell=True, cwd=repo_path, env=env
-        )
+        try:
+            result = subprocess.run(
+                resolver_command, shell=True, cwd=repo_path, env=env
+            )
+        except OSError as error:
+            raise UnresolvedConflictError(
+                branch.name, target.name, repo_path,
+                reason=f'The resolver could not be started: {error}'
+            ) from error
 
         if result.returncode != 0:
             raise UnresolvedConflictError(

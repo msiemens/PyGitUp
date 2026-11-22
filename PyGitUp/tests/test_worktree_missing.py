@@ -1,9 +1,9 @@
 import shutil
 
 import pytest
-from git import Repo
+from git import Git, Repo
 
-from PyGitUp.git_wrapper import GitError, GitWrapper
+from PyGitUp.git_wrapper import GitError, GitWrapper, RebaseError
 from PyGitUp.gitup import GitUp
 
 
@@ -69,6 +69,52 @@ def test_worktree_removed_after_discovery(worktree_repo, capsys):
     assert repo.head.commit == initial_commit
     assert repo.branches['side'].commit == initial_commit
     assert 'returned exit status 128' in capsys.readouterr().err
+
+
+@pytest.mark.parametrize('removal_point', ['before_preflight', 'after_preflight'])
+def test_worktree_removed_during_conflict_resolution(
+        worktree_repo, monkeypatch, capsys, removal_point):
+    repo, worktree_path = worktree_repo
+    (worktree_path / 'file.txt').write_text('side change\n')
+    Git(str(worktree_path)).commit('-am', 'side change')
+    initial_commit = repo.head.commit
+    side_commit = repo.branches['side'].commit
+    repo.git.config('git-up.rebase.conflict-resolver', 'exit 0')
+    gitup = GitUp()
+    gitup.should_fetch = False
+
+    if removal_point == 'before_preflight':
+        rebase = GitWrapper.rebase
+
+        def remove_after_rebase(self, target):
+            try:
+                return rebase(self, target)
+            except RebaseError:
+                shutil.rmtree(worktree_path)
+                raise
+
+        monkeypatch.setattr(GitWrapper, 'rebase', remove_after_rebase)
+        expected_error = 'Failed to rebase'
+    else:
+        rebase_in_progress = GitUp._rebase_in_progress
+
+        def remove_after_preflight(repo_path):
+            assert rebase_in_progress(repo_path)
+            shutil.rmtree(worktree_path)
+            return True
+
+        monkeypatch.setattr(GitUp, '_rebase_in_progress',
+                            staticmethod(remove_after_preflight))
+        expected_error = 'The resolver could not be started'
+
+    with pytest.raises(SystemExit) as error:
+        gitup.run()
+
+    assert error.value.code == 1
+    assert not worktree_path.exists()
+    assert repo.head.commit == initial_commit
+    assert repo.branches['side'].commit == side_commit
+    assert expected_error in capsys.readouterr().err
 
 
 @pytest.mark.parametrize('attribute', ['is_dirty', 'change_count'])
