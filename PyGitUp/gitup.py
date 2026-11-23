@@ -489,6 +489,13 @@ class GitUp:
         # >= 3.1.60 rejects when used from a native Windows Python.
         worktree_git = GitWrapper(None, worktree_path)
 
+        # The worktree may have changed branches since discovery.
+        if worktree_git.symbolic_ref('HEAD') != branch.path:
+            raise GitError(
+                f"Worktree '{worktree_path}' is no longer on "
+                f"branch '{branch.name}'."
+            )
+
         with worktree_git.stasher() as stash:
             stash()
             if fast_forward:

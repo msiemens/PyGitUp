@@ -15,7 +15,8 @@ def worktree_repo(tmp_path, monkeypatch):
     repo.git.config('user.email', 'user@example.com')
     tracked_file = tmp_path / 'repo' / 'file.txt'
     tracked_file.write_text('initial\n')
-    repo.git.add('file.txt')
+    (tmp_path / 'repo' / 'local.txt').write_text('local\n')
+    repo.git.add('file.txt', 'local.txt')
     repo.git.commit(m='initial')
 
     repo.git.branch('upstream')
@@ -83,6 +84,43 @@ def test_worktree_removed_after_discovery(worktree_repo, capsys):
     assert repo.head.commit == initial_commit
     assert repo.branches['side'].commit == initial_commit
     assert 'returned exit status 128' in capsys.readouterr().err
+
+
+@pytest.mark.parametrize('diverged', [False, True],
+                         ids=['fast_forward', 'rebase'])
+@pytest.mark.parametrize('checkout', ['replacement', '--detach'],
+                         ids=['branch', 'detached'])
+def test_worktree_checkout_changed_after_discovery(
+        worktree_repo, diverged, checkout):
+    repo, worktree_path = worktree_repo
+    worktree_git = Git(str(worktree_path))
+    if diverged:
+        (worktree_path / 'side.txt').write_text('side change\n')
+        worktree_git.add('side.txt')
+        worktree_git.commit(m='side change')
+    repo.git.branch('replacement', 'side')
+    initial_commit = repo.head.commit
+    side_commit = repo.branches['side'].commit
+    gitup = GitUp(testing=True)
+    gitup.should_fetch = False
+
+    worktree_git.checkout(checkout)
+    (worktree_path / 'local.txt').write_text('uncommitted change\n')
+    status = worktree_git.status('--porcelain')
+
+    with pytest.raises(GitError):
+        gitup.run()
+
+    assert repo.active_branch.name == 'main'
+    assert repo.head.commit == initial_commit
+    assert repo.branches['side'].commit == side_commit
+    assert repo.branches['replacement'].commit == side_commit
+    assert worktree_git.rev_parse('HEAD') == side_commit.hexsha
+    assert worktree_git.rev_parse('--abbrev-ref', 'HEAD') == (
+        'HEAD' if checkout == '--detach' else 'replacement')
+    assert (worktree_path / 'local.txt').read_text() == 'uncommitted change\n'
+    assert worktree_git.status('--porcelain') == status
+    assert worktree_git.stash('list') == ''
 
 
 @pytest.mark.parametrize('removal_point', ['before_preflight', 'after_preflight'])
