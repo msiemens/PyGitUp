@@ -34,12 +34,26 @@ def worktree_repo(tmp_path, monkeypatch):
         repo.close()
 
 
-def test_prunable_worktree_is_skipped(worktree_repo, capsys):
+@pytest.mark.parametrize(
+    'upstream', ['existing', 'deleted_local', 'deleted_remote'])
+def test_prunable_worktree_is_skipped(worktree_repo, capsys, upstream):
     repo, worktree_path = worktree_repo
     initial_commit = repo.head.commit
     repo.git.branch('--track', 'z-live', 'upstream')
     repo.branches['z-live'].commit = initial_commit
     repo.git.worktree('add', str(worktree_path.parent / 'live'), 'z-live')
+
+    if upstream == 'deleted_local':
+        repo.git.branch('deleted-upstream', 'upstream')
+        repo.git.branch('--set-upstream-to', 'deleted-upstream', 'side')
+        repo.git.branch('-D', 'deleted-upstream')
+    elif upstream == 'deleted_remote':
+        ref = 'refs/remotes/origin/deleted-upstream'
+        repo.git.remote('add', 'origin', repo.working_dir)
+        repo.git.update_ref(ref, repo.branches['upstream'].commit.hexsha)
+        repo.git.branch('--set-upstream-to', 'origin/deleted-upstream', 'side')
+        repo.git.update_ref('-d', ref)
+
     shutil.rmtree(worktree_path)
     assert 'prunable' in repo.git.worktree('list', '--porcelain')
 

@@ -271,6 +271,12 @@ class GitUp:
                 print(colored(branch.name.ljust(col_width), attrs=attrs),
                         end=' ')
 
+                if branch.name in self.prunable_branches:
+                    print(colored("worktree is prunable; run 'git worktree prune'",
+                                  'yellow'))
+                    self.states.append('prunable worktree')
+                    continue
+
                 # Check, if target branch exists
                 try:
                     if target.name.startswith('./'):
@@ -285,12 +291,6 @@ class GitUp:
                     print(colored('error: remote branch doesn\'t exist', 'red'))
                     self.states.append('remote branch doesn\'t exist')
 
-                    continue
-
-                if branch.name in self.prunable_branches:
-                    print(colored("worktree is prunable; run 'git worktree prune'",
-                                  'yellow'))
-                    self.states.append('prunable worktree')
                     continue
 
                 # Skip branches whose worktree has an in-progress operation
