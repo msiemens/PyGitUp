@@ -55,7 +55,11 @@ class GitWrapper:
             self.git = self.repo.git
         else:
             #: :type: git.Git
-            self.git = Git(working_dir)
+            self.git = Git()
+            if working_dir is not None:
+                # GitPython falls back to the caller's cwd if working_dir
+                # disappears. Let git reject the missing directory instead.
+                self.git.set_persistent_git_options(C=working_dir)
 
     def __del__(self):
         # Is the following true?
@@ -278,14 +282,14 @@ class GitWrapper:
         """ Whether tracked files have changes, ignoring submodules. """
         # Ask git instead of GitPython: for linked worktrees created by MSYS2
         # git, GitPython can't open the repo (see GitUp._rebase_in_worktree).
-        return bool(self.git.status(
+        return bool(self.status(
             porcelain=True, untracked_files='no', ignore_submodules=True
-        ).strip())
+        ))
 
     @property
     def change_count(self):
         """ The number of changes in the working directory. """
-        status = self.git.status(porcelain=True, untracked_files='no').strip()
+        status = self.status(porcelain=True, untracked_files='no')
         if not status:
             return 0
         else:
